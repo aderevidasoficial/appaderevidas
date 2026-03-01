@@ -16,41 +16,6 @@
     
     <!-- iOS Icons -->
     <link rel="apple-touch-icon" href="https://i.ibb.co/1G3ctD9b/logo-igreja.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="https://i.ibb.co/1G3ctD9b/logo-igreja.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="https://i.ibb.co/1G3ctD9b/logo-igreja.png">
-    <link rel="apple-touch-icon" sizes="167x167" href="https://i.ibb.co/1G3ctD9b/logo-igreja.png">
-    <!-- Ícones para iOS (Apple Touch Icons) -->
-    <link rel="apple-touch-icon" sizes="16x16" href="/ios/16.png">
-    <link rel="apple-touch-icon" sizes="20x20" href="/ios/20.png">
-    <link rel="apple-touch-icon" sizes="29x29" href="/ios/29.png">
-    <link rel="apple-touch-icon" sizes="32x32" href="/ios/32.png">
-    <link rel="apple-touch-icon" sizes="40x40" href="/ios/40.png">
-    <link rel="apple-touch-icon" sizes="50x50" href="/ios/50.png">
-    <link rel="apple-touch-icon" sizes="57x57" href="/ios/57.png">
-    <link rel="apple-touch-icon" sizes="58x58" href="/ios/58.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="/ios/60.png">
-    <link rel="apple-touch-icon" sizes="64x64" href="/ios/64.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="/ios/72.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="/ios/76.png">
-    <link rel="apple-touch-icon" sizes="80x80" href="/ios/80.png">
-    <link rel="apple-touch-icon" sizes="87x87" href="/ios/87.png">
-    <link rel="apple-touch-icon" sizes="100x100" href="/ios/100.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="/ios/114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="/ios/120.png">
-    <link rel="apple-touch-icon" sizes="128x128" href="/ios/128.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="/ios/144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="/ios/152.png">
-    <link rel="apple-touch-icon" sizes="167x167" href="/ios/167.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/ios/180.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="/ios/192.png">
-    <link rel="apple-touch-icon" sizes="256x256" href="/ios/256.png">
-    <link rel="apple-touch-icon" sizes="512x512" href="/ios/512.png">
-    <link rel="apple-touch-icon" sizes="1024x1024" href="/ios/1024.png">
-
-    <!-- Para iOS, também é bom adicionar: -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="AdereVidas">
     
     <!-- Firebase SDK -->
     <script type="module">
@@ -79,51 +44,25 @@
     </script>
 
     <script>
-        // REGISTRO DO SERVICE WORKER - VERSÃO CORRIGIDA
+        // REGISTRO DO SERVICE WORKER
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/service-worker.js')
                     .then(function(registration) {
-                        console.log('✅ Service Worker registrado com sucesso!', registration.scope);
-                        
-                        registration.addEventListener('updatefound', function() {
-                            console.log('🔄 Nova versão encontrada!');
-                        });
-                        
-                        if (window.matchMedia('(display-mode: standalone)').matches) {
-                            console.log('✅ App rodando em modo standalone!');
-                            document.body.classList.add('installed');
-                        }
+                        console.log('✅ Service Worker registrado!');
                     })
                     .catch(function(error) {
                         console.log('❌ Erro ao registrar Service Worker:', error);
                     });
             });
-            
-            // Verificar atualizações periodicamente
-            setInterval(function() {
-                navigator.serviceWorker.ready.then(function(registration) {
-                    registration.update();
-                });
-            }, 60 * 60 * 1000); // A cada hora
         }
         
-        // Capturar evento de instalação
+        // Detectar instalação
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', function(e) {
-            console.log('📱 Pode ser instalado!');
             e.preventDefault();
             deferredPrompt = e;
-            
-            // Mostrar botão de instalação se não estiver instalado
             setTimeout(showInstallButton, 2000);
-        });
-        
-        // Detectar quando instalado
-        window.addEventListener('appinstalled', function(e) {
-            console.log('✅ App instalado com sucesso!');
-            deferredPrompt = null;
-            document.getElementById('installPrompt')?.remove();
         });
         
         function showInstallButton() {
@@ -171,13 +110,6 @@
             50% { transform: translateX(-50%) scale(1.05); }
             100% { transform: translateX(-50%) scale(1); }
         }
-        
-        /* Diagnóstico visual */
-        .installed {
-            border-left: 5px solid #2ecc71;
-        }
-
-    
 
         * {
             margin: 0;
@@ -338,123 +270,107 @@
             gap: 10px;
         }
 
-        /* ========== CALENDÁRIO ========== */
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
+        /* Modal de Permissão de Notificações */
+        .notification-permission-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            display: none;
             align-items: center;
-            margin-bottom: 20px;
-            padding: 15px;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .permission-card {
             background: white;
-            border-radius: 10px;
+            border-radius: 30px;
+            padding: 30px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            animation: slideUp 0.4s;
         }
 
-        .calendar-nav {
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .permission-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
         }
 
-        .calendar-nav button {
-            padding: 8px 12px;
-            background: var(--light);
-            border: 1px solid var(--border);
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .calendar-title {
-            font-size: 16px;
+        .permission-title {
+            font-size: 22px;
             font-weight: 600;
             color: var(--text);
+            margin-bottom: 10px;
         }
 
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 2px;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 20px;
+        .permission-text {
+            color: var(--text-light);
+            margin-bottom: 25px;
+            line-height: 1.5;
+            font-size: 15px;
         }
 
-        .calendar-day-header {
-            background: var(--primary);
-            color: white;
-            padding: 10px;
-            text-align: center;
-            font-size: 12px;
+        .permission-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .permission-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
             font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
-        .calendar-day {
-            background: white;
-            padding: 8px;
-            min-height: 70px;
+        .btn-allow {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: white;
+        }
+
+        .btn-allow:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52,152,219,0.3);
+        }
+
+        .btn-deny {
+            background: var(--light);
+            color: var(--text-light);
             border: 1px solid var(--border);
         }
 
-        .calendar-day.today {
-            background: #e3f2fd;
-            border: 2px solid var(--secondary);
+        .btn-deny:hover {
+            background: #eee;
         }
-
-        .calendar-day.other-month {
-            background: #f8f9fa;
-            color: #999;
-        }
-
-        .day-number {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-
-        .event-item {
-            padding: 3px 5px;
-            border-radius: 3px;
-            margin-top: 3px;
-            font-size: 10px;
-            color: white;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            cursor: pointer;
-        }
-
-        .event-item.culto { background: var(--secondary); }
-        .event-item.escola-dominical { background: var(--success); }
-        .event-item.celula { background: var(--purple); }
-        .event-item.evento-especial { background: var(--accent); }
-        .event-item.reuniao { background: var(--warning); }
-        .event-item.outro { background: var(--gray); }
 
         /* Lista de Eventos */
-        .view-toggle {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .view-btn {
-            flex: 1;
-            padding: 12px;
-            background: white;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .view-btn.active {
-            background: var(--secondary);
-            color: white;
-            border-color: var(--secondary);
-        }
-
         .event-card {
             background: white;
             border-radius: 10px;
@@ -498,25 +414,11 @@
             gap: 5px;
         }
 
-        .event-description {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid var(--border);
-            font-size: 13px;
-            color: var(--text);
-        }
-
         .filter-container {
             background: white;
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 15px;
-        }
-
-        .filter-row {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
         }
 
         .filter-select {
@@ -532,12 +434,6 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
         }
 
         .action-btn {
@@ -632,11 +528,6 @@
             color: var(--text);
         }
 
-        .birthday-info p {
-            font-size: 12px;
-            color: var(--text-light);
-        }
-
         /* Bíblia */
         .bible-verse {
             background: white;
@@ -677,21 +568,10 @@
             font-size: 14px;
         }
 
-        .chapter-nav-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .current-chapter {
-            font-weight: 600;
-            color: var(--text);
-        }
-
         .book-selector {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 8px;
-            margin-bottom: 20px;
             max-height: 400px;
             overflow-y: auto;
             padding: 5px;
@@ -705,11 +585,6 @@
             font-size: 12px;
             cursor: pointer;
             text-align: center;
-        }
-
-        .book-btn:hover {
-            background: var(--secondary);
-            color: white;
         }
 
         .search-box {
@@ -743,151 +618,6 @@
             background: var(--secondary);
             color: white;
             border-color: var(--secondary);
-        }
-
-        /* Notificações */
-        .notification-permission {
-            background: linear-gradient(135deg, var(--warning), #f39c12);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            animation: pulse 2s infinite;
-        }
-
-        .notification-permission button {
-            background: white;
-            color: var(--warning);
-            border: none;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .notification-permission button:hover {
-            transform: scale(1.05);
-        }
-
-        .notification-status {
-            background: var(--light);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-left: 4px solid var(--success);
-        }
-
-        .notification-status.active {
-            border-left-color: var(--success);
-        }
-
-        .notification-status.inactive {
-            border-left-color: var(--warning);
-        }
-
-        .notification-icon {
-            font-size: 24px;
-        }
-
-        .notification-info {
-            flex: 1;
-        }
-
-        .notification-info h4 {
-            font-size: 16px;
-            color: var(--text);
-            margin-bottom: 4px;
-        }
-
-        .notification-info p {
-            font-size: 12px;
-            color: var(--text-light);
-        }
-
-        .notification-switch {
-            width: 50px;
-            height: 30px;
-            background: var(--gray);
-            border-radius: 15px;
-            position: relative;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .notification-switch.active {
-            background: var(--success);
-        }
-
-        .notification-switch::after {
-            content: '';
-            width: 26px;
-            height: 26px;
-            background: white;
-            border-radius: 50%;
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            transition: 0.3s;
-        }
-
-        .notification-switch.active::after {
-            left: 22px;
-        }
-
-        .notification-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 12px;
-            background: white;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            border: 1px solid var(--border);
-        }
-
-        .notification-item-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--light);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-
-        .notification-item-content {
-            flex: 1;
-        }
-
-        .notification-item-title {
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 2px;
-        }
-
-        .notification-item-desc {
-            font-size: 12px;
-            color: var(--text-light);
-        }
-
-        .notification-item-time {
-            font-size: 11px;
-            color: var(--secondary);
-            font-weight: 500;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
         }
 
         /* Menu lateral */
@@ -967,32 +697,7 @@
             background: var(--light);
         }
 
-        .loading {
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--border);
-            border-top-color: var(--secondary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .text-center { text-align: center; }
-        .text-light { color: var(--text-light); }
-        .mt-20 { margin-top: 20px; }
-        .mb-10 { margin-bottom: 10px; }
-        .hidden { display: none; }
-
-                /* Modal */
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -1015,6 +720,22 @@
 </head>
 <body>
     <div id="app">
+        <!-- Modal de Permissão de Notificações -->
+        <div id="notificationPermissionModal" class="notification-permission-modal">
+            <div class="permission-card">
+                <div class="permission-icon">🔔</div>
+                <div class="permission-title">Ativar Notificações?</div>
+                <div class="permission-text">
+                    Para receber lembretes de eventos, aniversários e versículos do dia, 
+                    permita que o AdereVidas envie notificações.
+                </div>
+                <div class="permission-buttons">
+                    <button class="permission-btn btn-deny" onclick="negarNotificacoes()">Agora não</button>
+                    <button class="permission-btn btn-allow" onclick="solicitarNotificacoes()">Permitir</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Overlay do menu -->
         <div id="menuOverlay" class="menu-overlay" onclick="fecharMenu()"></div>
 
@@ -1026,20 +747,16 @@
                 <p id="menuEmail"></p>
             </div>
             <div class="menu-item-list">
-    <button onclick="verMeusDados(); fecharMenu()">
-        <span>👤</span> Meus Dados
-    </button>
-    <!-- NOVO: Lançar Dízimos/Ofertas -->
-    <button onclick="abrirModalContribuicao(); fecharMenu()">
-        <span>➕</span> Lançar Contribuição
-    </button>
-    <button onclick="abrirConfigNotificacoes(); fecharMenu()">
-        <span>🔔</span> Configurar Notificações
-    </button>
-    <button onclick="sair()" style="color: var(--accent); margin-top: 20px;">
-        <span>🚪</span> Sair do App
-    </button>
-</div>
+                <button onclick="verMeusDados(); fecharMenu()">
+                    <span>👤</span> Meus Dados
+                </button>
+                <button onclick="abrirModalContribuicao(); fecharMenu()">
+                    <span>➕</span> Lançar Contribuição
+                </button>
+                <button onclick="sair()" style="color: var(--accent); margin-top: 20px;">
+                    <span>🚪</span> Sair do App
+                </button>
+            </div>
         </div>
 
         <!-- Tela Início -->
@@ -1051,16 +768,6 @@
             </div>
             
             <div class="content">
-                <!-- Status das notificações -->
-                <div id="notificationStatus" class="notification-status inactive">
-                    <div class="notification-icon">🔕</div>
-                    <div class="notification-info">
-                        <h4>Notificações desativadas</h4>
-                        <p>Ative para receber lembretes importantes</p>
-                    </div>
-                    <div class="notification-switch" onclick="toggleNotificacoes()"></div>
-                </div>
-
                 <div class="card">
                     <div class="card-title">📅 Hoje é</div>
                     <p style="font-size: 18px; font-weight: 600;" id="dataHoje"></p>
@@ -1101,58 +808,6 @@
             </div>
         </div>
 
-        <!-- Tela Configurações de Notificação -->
-        <div id="notificacoesScreen" class="screen">
-            <div class="app-header">
-                <button onclick="voltarHome()">←</button>
-                <h1>🔔 Notificações</h1>
-                <button onclick="salvarConfigNotificacoes()">💾</button>
-            </div>
-            <div class="content">
-                <div class="card">
-                    <div class="card-title">⚙️ Configurações</div>
-                    
-                    <div class="notification-item">
-                        <div class="notification-item-icon">📅</div>
-                        <div class="notification-item-content">
-                            <div class="notification-item-title">Eventos</div>
-                            <div class="notification-item-desc">Receber lembretes 6h e 2h antes</div>
-                        </div>
-                        <div class="notification-switch" id="switchEventos" onclick="toggleSwitch('eventos')"></div>
-                    </div>
-
-                    <div class="notification-item">
-                        <div class="notification-item-icon">🎂</div>
-                        <div class="notification-item-content">
-                            <div class="notification-item-title">Aniversariantes</div>
-                            <div class="notification-item-desc">Receber às 7h da manhã</div>
-                        </div>
-                        <div class="notification-switch" id="switchAniversarios" onclick="toggleSwitch('aniversarios')"></div>
-                    </div>
-
-                    <div class="notification-item">
-                        <div class="notification-item-icon">📖</div>
-                        <div class="notification-item-content">
-                            <div class="notification-item-title">Versículo do Dia</div>
-                            <div class="notification-item-desc">Receber às 7h da manhã</div>
-                        </div>
-                        <div class="notification-switch" id="switchVersiculo" onclick="toggleSwitch('versiculo')"></div>
-                    </div>
-
-                    <div style="margin-top: 20px; padding: 15px; background: var(--light); border-radius: 10px;">
-                        <h4 style="margin-bottom: 10px;">📅 Horários das notificações:</h4>
-                        <p class="text-light">• Eventos: 6h e 2h antes do evento</p>
-                        <p class="text-light">• Aniversários: 07:00 da manhã</p>
-                        <p class="text-light">• Versículo: 07:00 da manhã</p>
-                    </div>
-                </div>
-
-                <button class="action-btn" onclick="testarNotificacao()" style="margin-top: 10px;">
-                    <span>🔔</span> <small>Testar Notificação</small>
-                </button>
-            </div>
-        </div>
-
         <!-- Tela Bíblia -->
         <div id="bibliaScreen" class="screen">
             <div class="app-header">
@@ -1164,69 +819,57 @@
         </div>
 
         <!-- Tela Eventos -->
-<div id="eventosScreen" class="screen">
-    <div class="app-header">
-        <button onclick="voltarHome()">←</button>
-        <h1>📅 Eventos</h1>
-        <button onclick="carregarEventos()">↻</button>
-    </div>
-    
-    <div class="content">
-        <div class="filter-container">
-            <div class="filter-row">
-                <select id="filtroTipo" class="filter-select" onchange="filtrarEventos()">
-                    <option value="">Todos os tipos</option>
-                    <option value="culto">Cultos</option>
-                    <option value="escola-dominical">Escola Dominical</option>
-                    <option value="celula">Células</option>
-                    <option value="evento-especial">Eventos Especiais</option>
-                    <option value="reuniao">Reuniões</option>
-                </select>
+        <div id="eventosScreen" class="screen">
+            <div class="app-header">
+                <button onclick="voltarHome()">←</button>
+                <h1>📅 Eventos</h1>
+                <button onclick="carregarEventos()">↻</button>
+            </div>
+            
+            <div class="content">
+                <div class="filter-container">
+                    <select id="filtroTipo" class="filter-select" onchange="filtrarEventos()">
+                        <option value="">Todos os tipos</option>
+                        <option value="culto">Cultos</option>
+                        <option value="escola-dominical">Escola Dominical</option>
+                        <option value="celula">Células</option>
+                        <option value="evento-especial">Eventos Especiais</option>
+                        <option value="reuniao">Reuniões</option>
+                    </select>
+                </div>
+                <div id="listaEventos"></div>
             </div>
         </div>
-        
-        <div id="listaEventos"></div>
-    </div>
-</div>
+
         <!-- Tela Aniversariantes -->
         <div id="aniversariantesScreen" class="screen">
-    <div class="app-header">
-        <button onclick="voltarHome()">←</button>
-        <h1>🎂 Aniversariantes</h1>
-        <button onclick="carregarAniversariantes()">↻</button>
-    </div>
-    
-    <div class="content">
-        <div class="filter-container">
-            <div class="filter-row">
-                <select id="filtroMesAniversario" class="filter-select" onchange="filtrarAniversariantesPorMes()">
-                    <option value="">Todos os meses</option>
-                    <option value="0">Janeiro</option>
-                    <option value="1">Fevereiro</option>
-                    <option value="2">Março</option>
-                    <option value="3">Abril</option>
-                    <option value="4">Maio</option>
-                    <option value="5">Junho</option>
-                    <option value="6">Julho</option>
-                    <option value="7">Agosto</option>
-                    <option value="8">Setembro</option>
-                    <option value="9">Outubro</option>
-                    <option value="10">Novembro</option>
-                    <option value="11">Dezembro</option>
-                </select>
+            <div class="app-header">
+                <button onclick="voltarHome()">←</button>
+                <h1>🎂 Aniversariantes</h1>
+                <button onclick="carregarAniversariantes()">↻</button>
             </div>
-            <div class="filter-row" style="margin-top: 10px;">
-                <select id="filtroOrdenacao" class="filter-select" onchange="filtrarAniversariantesPorMes()">
-                    <option value="proximos">Próximos aniversários</option>
-                    <option value="nome">Ordem alfabética</option>
-                    <option value="idade">Idade</option>
-                </select>
+            
+            <div class="content">
+                <div class="filter-container">
+                    <select id="filtroMesAniversario" class="filter-select" onchange="filtrarAniversariantesPorMes()">
+                        <option value="">Todos os meses</option>
+                        <option value="0">Janeiro</option>
+                        <option value="1">Fevereiro</option>
+                        <option value="2">Março</option>
+                        <option value="3">Abril</option>
+                        <option value="4">Maio</option>
+                        <option value="5">Junho</option>
+                        <option value="6">Julho</option>
+                        <option value="7">Agosto</option>
+                        <option value="8">Setembro</option>
+                        <option value="9">Outubro</option>
+                        <option value="10">Novembro</option>
+                        <option value="11">Dezembro</option>
+                    </select>
+                </div>
+                <div id="listaAniversariantes"></div>
             </div>
         </div>
-        
-        <div id="listaAniversariantes"></div>
-    </div>
-</div>
 
         <!-- Tela Pedidos de Oração -->
         <div id="oracaoScreen" class="screen">
@@ -1272,61 +915,46 @@
         </div>
     </div>
 
-    <!-- NOVO MODAL: Lançar Contribuição -->
-    <div id="contribuicaoModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+    <!-- Modal de Contribuição -->
+    <div id="contribuicaoModal" class="modal">
         <div style="background: white; width: 90%; max-width: 400px; border-radius: 20px; padding: 25px; max-height: 90vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="color: var(--text); font-size: 20px;">➕ Lançar Contribuição</h3>
-                <button onclick="fecharModalContribuicao()" style="background: none; border: none; font-size: 28px; color: var(--text-light); cursor: pointer;">×</button>
+                <h3 style="color: var(--text);">➕ Lançar Contribuição</h3>
+                <button onclick="fecharModalContribuicao()" style="background: none; border: none; font-size: 28px; cursor: pointer;">×</button>
             </div>
 
             <form id="formContribuicao" onsubmit="salvarContribuicao(event)">
                 <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; color: var(--text); font-weight: 500;">Tipo *</label>
-                    <select id="tipoContribuicao" required style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px; font-size: 16px;" onchange="toggleCampoMembro()">
+                    <label style="display: block; margin-bottom: 8px;">Tipo *</label>
+                    <select id="tipoContribuicao" required style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px;">
                         <option value="">Selecione...</option>
                         <option value="dizimo">💰 Dízimo</option>
                         <option value="oferta">💵 Oferta</option>
                     </select>
                 </div>
 
-                <!-- Campo Membro (aparece apenas para Dízimo) -->
-                <div id="campoMembroContainer" style="margin-bottom: 20px; display: none;">
-                    <label style="display: block; margin-bottom: 8px; color: var(--text); font-weight: 500;">Membro *</label>
-                    <select id="membroContribuicao" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px; font-size: 16px;">
-                        <option value="">Selecione um membro...</option>
-                    </select>
-                    <small style="color: var(--text-light); display: block; margin-top: 5px;">Selecione o membro que está dizimando</small>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px;">Data *</label>
+                    <input type="date" id="dataContribuicao" required style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px;">
                 </div>
 
                 <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; color: var(--text); font-weight: 500;">Data *</label>
-                    <input type="date" id="dataContribuicao" required style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px; font-size: 16px;">
+                    <label style="display: block; margin-bottom: 8px;">Valor (R$) *</label>
+                    <input type="number" id="valorContribuicao" step="0.01" min="0.01" required placeholder="0,00" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px;">
                 </div>
 
                 <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; color: var(--text); font-weight: 500;">Valor (R$) *</label>
-                    <input type="number" id="valorContribuicao" step="0.01" min="0.01" required placeholder="0,00" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px; font-size: 16px;">
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; color: var(--text); font-weight: 500;">Forma de Pagamento</label>
-                    <select id="formaPagamento" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px; font-size: 16px;">
+                    <label style="display: block; margin-bottom: 8px;">Forma de Pagamento</label>
+                    <select id="formaPagamento" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px;">
                         <option value="dinheiro">Dinheiro</option>
                         <option value="pix">PIX</option>
                         <option value="cartao">Cartão</option>
-                        <option value="transferencia">Transferência</option>
                     </select>
                 </div>
 
-                <div style="margin-bottom: 25px;">
-                    <label style="display: block; margin-bottom: 8px; color: var(--text); font-weight: 500;">Observações</label>
-                    <textarea id="observacoesContribuicao" rows="3" placeholder="Observações (opcional)" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px; font-size: 16px;"></textarea>
-                </div>
-
                 <div style="display: flex; gap: 10px;">
-                    <button type="button" onclick="fecharModalContribuicao()" style="flex: 1; padding: 14px; background: var(--light); border: none; border-radius: 10px; color: var(--text); font-size: 16px; font-weight: 500; cursor: pointer;">Cancelar</button>
-                    <button type="submit" style="flex: 1; padding: 14px; background: var(--secondary); border: none; border-radius: 10px; color: white; font-size: 16px; font-weight: 500; cursor: pointer;">Salvar</button>
+                    <button type="button" onclick="fecharModalContribuicao()" style="flex: 1; padding: 14px; background: var(--light); border: none; border-radius: 10px; cursor: pointer;">Cancelar</button>
+                    <button type="submit" style="flex: 1; padding: 14px; background: var(--secondary); border: none; border-radius: 10px; color: white; cursor: pointer;">Salvar</button>
                 </div>
             </form>
         </div>
@@ -1352,316 +980,220 @@
         let eventos = [];
         let membros = [];
         let aniversariantes = [];
-    
+        let notificacoesAtivas = false; // true se o usuário permitiu
         
-        // ========== SISTEMA DE NOTIFICAÇÕES ==========
-        let notificacoesAtivas = {
-            eventos: false,
-            aniversarios: false,
-            versiculo: false
-        };
-
-        // ========== FUNÇÃO DE CORREÇÃO DE FUSO HORÁRIO ==========
-        function criarDataSemFuso(dataString) {
-            if (!dataString) return null;
+        // ========== SISTEMA DE NOTIFICAÇÕES SIMPLIFICADO ==========
+        
+        // Verificar se já pediu permissão antes
+        function verificarPrimeiroAcesso() {
+            const jaPediuNotificacao = localStorage.getItem('jaPediuNotificacao');
             
-            // Se for string ISO (YYYY-MM-DD)
-            if (typeof dataString === 'string' && dataString.includes('-')) {
-                const partes = dataString.split('T')[0].split('-');
-                if (partes.length === 3) {
-                    // Criar data com horário meio-dia para evitar problemas de fuso
-                    const data = new Date(partes[0], partes[1] - 1, partes[2], 12, 0, 0);
-                    return data;
-                }
-            }
-            
-            // Fallback
-            return new Date(dataString);
-        }
-
-        // Carregar configurações salvas
-        function carregarConfigNotificacoes() {
-            const config = localStorage.getItem('notificacoesConfig');
-            if (config) {
-                try {
-                    notificacoesAtivas = JSON.parse(config);
-                } catch (e) {}
-            }
-            
-            // Atualizar interface
-            atualizarStatusNotificacoes();
-            atualizarSwitches();
-        }
-
-        // Salvar configurações
-        function salvarConfigNotificacoes() {
-            localStorage.setItem('notificacoesConfig', JSON.stringify(notificacoesAtivas));
-            mostrarMensagem('✅ Configurações salvas!');
-            
-            // Se alguma notificação estiver ativa, pedir permissão
-            if (notificacoesAtivas.eventos || notificacoesAtivas.aniversarios || notificacoesAtivas.versiculo) {
-                solicitarPermissao();
+            if (!jaPediuNotificacao && Notification.permission === 'default') {
+                // Mostrar modal após 2 segundos
+                setTimeout(() => {
+                    document.getElementById('notificationPermissionModal').style.display = 'flex';
+                }, 2000);
+            } else if (Notification.permission === 'granted') {
+                notificacoesAtivas = true;
+                iniciarNotificacoes();
             }
         }
 
         // Solicitar permissão
-        function solicitarPermissao() {
-            if (Notification.permission === 'default') {
-                Notification.requestPermission().then(perm => {
-                    if (perm === 'granted') {
-                        atualizarStatusNotificacoes();
-                        testarNotificacao();
-                    }
-                });
-            }
-        }
-
-        // Atualizar status na tela inicial
-        function atualizarStatusNotificacoes() {
-            const statusDiv = document.getElementById('notificationStatus');
-            const icon = statusDiv.querySelector('.notification-icon');
-            const title = statusDiv.querySelector('h4');
-            const desc = statusDiv.querySelector('p');
-            const switch_ = statusDiv.querySelector('.notification-switch');
+        window.solicitarNotificacoes = function() {
+            document.getElementById('notificationPermissionModal').style.display = 'none';
             
-            const algumaAtiva = notificacoesAtivas.eventos || notificacoesAtivas.aniversarios || notificacoesAtivas.versiculo;
-            
-            if (algumaAtiva && Notification.permission === 'granted') {
-                statusDiv.className = 'notification-status active';
-                icon.textContent = '🔔';
-                title.textContent = 'Notificações ativas';
-                desc.textContent = 'Você receberá lembretes importantes';
-                switch_.classList.add('active');
-            } else {
-                statusDiv.className = 'notification-status inactive';
-                icon.textContent = '🔕';
-                title.textContent = 'Notificações desativadas';
-                desc.textContent = 'Ative para receber lembretes importantes';
-                switch_.classList.remove('active');
-            }
-        }
-
-        // Atualizar switches
-        function atualizarSwitches() {
-            document.getElementById('switchEventos').className = 'notification-switch' + (notificacoesAtivas.eventos ? ' active' : '');
-            document.getElementById('switchAniversarios').className = 'notification-switch' + (notificacoesAtivas.aniversarios ? ' active' : '');
-            document.getElementById('switchVersiculo').className = 'notification-switch' + (notificacoesAtivas.versiculo ? ' active' : '');
-        }
-
-        // Toggle switch
-        window.toggleSwitch = function(tipo) {
-            notificacoesAtivas[tipo] = !notificacoesAtivas[tipo];
-            atualizarSwitches();
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    notificacoesAtivas = true;
+                    localStorage.setItem('jaPediuNotificacao', 'true');
+                    
+                    // Testar notificação
+                    testarNotificacao();
+                    
+                    // Iniciar sistema de notificações
+                    iniciarNotificacoes();
+                    
+                    mostrarMensagem('✅ Notificações ativadas com sucesso!');
+                } else {
+                    localStorage.setItem('jaPediuNotificacao', 'true');
+                    mostrarMensagem('❌ Você não receberá notificações do app');
+                }
+            });
         };
 
-        // Toggle notificações geral
-        window.toggleNotificacoes = function() {
-            if (Notification.permission !== 'granted') {
-                solicitarPermissao();
-            } else {
-                const algumaAtiva = notificacoesAtivas.eventos || notificacoesAtivas.aniversarios || notificacoesAtivas.versiculo;
-                
-                if (algumaAtiva) {
-                    // Desativar todas
-                    notificacoesAtivas.eventos = false;
-                    notificacoesAtivas.aniversarios = false;
-                    notificacoesAtivas.versiculo = false;
-                } else {
-                    // Ativar todas
-                    notificacoesAtivas.eventos = true;
-                    notificacoesAtivas.aniversarios = true;
-                    notificacoesAtivas.versiculo = true;
-                }
-                
-                salvarConfigNotificacoes();
-                atualizarSwitches();
-                atualizarStatusNotificacoes();
-            }
+        // Negar permissão
+        window.negarNotificacoes = function() {
+            document.getElementById('notificationPermissionModal').style.display = 'none';
+            localStorage.setItem('jaPediuNotificacao', 'true');
+            mostrarMensagem('Você pode ativar as notificações depois nas configurações do navegador');
         };
 
         // Testar notificação
-        window.testarNotificacao = function() {
+        function testarNotificacao() {
             if (Notification.permission === 'granted') {
                 const notification = new Notification('🔔 AdereVidas', {
-                    body: 'Esta é uma notificação de teste!',
+                    body: 'Notificações ativadas! Você receberá lembretes de eventos e aniversários.',
                     icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
                     badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
-                    vibrate: [200, 100, 200],
-                    requireInteraction: true
+                    vibrate: [200, 100, 200]
                 });
                 
-                notification.onclick = function() {
-                    window.focus();
-                    this.close();
-                };
-                
                 setTimeout(() => notification.close(), 5000);
-            } else {
-                solicitarPermissao();
             }
-        };
+        }
 
-        // Enviar notificação de evento
-        function notificarEvento(evento, horas) {
-            if (!notificacoesAtivas.eventos || Notification.permission !== 'granted') return;
+        // Iniciar verificações de notificações
+        function iniciarNotificacoes() {
+            console.log('🔔 Sistema de notificações iniciado');
             
-            const titulo = horas === 6 ? '⏰ Faltam 6 horas!' : '⚠️ Faltam 2 horas!';
-            const notification = new Notification(titulo, {
+            // Verificar eventos a cada minuto
+            setInterval(() => {
+                if (!notificacoesAtivas) return;
+                verificarEventos();
+                verificarAniversarios();
+            }, 60000); // 1 minuto
+            
+            // Versículo do dia às 7h
+            agendarVersiculo();
+        }
+
+        // Verificar eventos próximos
+        function verificarEventos() {
+            const agora = new Date();
+            
+            eventos.forEach(evento => {
+                if (evento.status === 'cancelado' || !evento.horaInicio) return;
+                
+                const dataEvento = new Date(evento.data);
+                const [hora, minuto] = evento.horaInicio.split(':').map(Number);
+                dataEvento.setHours(hora, minuto, 0);
+                
+                const diffMs = dataEvento - agora;
+                const diffHoras = Math.round(diffMs / (1000 * 60 * 60));
+                
+                // Notificar 6h e 2h antes
+                if (diffHoras === 6 || diffHoras === 2) {
+                    const jaNotificou = localStorage.getItem(`notif-evento-${evento.id}-${diffHoras}h`);
+                    if (!jaNotificou) {
+                        notificarEvento(evento, diffHoras);
+                        localStorage.setItem(`notif-evento-${evento.id}-${diffHoras}h`, 'true');
+                    }
+                }
+            });
+        }
+
+        // Notificar evento
+        function notificarEvento(evento, horasAntes) {
+            if (!notificacoesAtivas) return;
+            
+            const titulo = horasAntes === 6 ? '⏰ Faltam 6 horas!' : '⚠️ Faltam 2 horas!';
+            
+            new Notification(titulo, {
                 body: `${evento.titulo} - Hoje às ${evento.horaInicio}`,
                 icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
                 badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
                 vibrate: [200, 100, 200],
                 requireInteraction: true,
-                tag: `evento-${evento.id}-${horas}`
+                tag: `evento-${evento.id}`
             });
-            
-            notification.onclick = function() {
-                window.focus();
-                mudarTela('eventos');
-                this.close();
-            };
         }
 
-        // Enviar notificação de aniversário
+        // Verificar aniversários
+        function verificarAniversarios() {
+            const agora = new Date();
+            const hora = agora.getHours();
+            
+            // Só verificar entre 7h e 8h da manhã
+            if (hora === 7 && agora.getMinutes() < 5) {
+                const hoje = new Date();
+                const dia = hoje.getDate();
+                const mes = hoje.getMonth();
+                
+                aniversariantes.forEach(m => {
+                    if (!m.dataNascimento) return;
+                    
+                    const dataNasc = new Date(m.dataNascimento);
+                    if (dataNasc.getDate() === dia && dataNasc.getMonth() === mes) {
+                        const jaNotificou = localStorage.getItem(`notif-aniversario-${m.id}-${hoje.toDateString()}`);
+                        if (!jaNotificou) {
+                            notificarAniversario(m);
+                            localStorage.setItem(`notif-aniversario-${m.id}-${hoje.toDateString()}`, 'true');
+                        }
+                    }
+                });
+            }
+        }
+
+        // Notificar aniversário
         function notificarAniversario(membro) {
-            if (!notificacoesAtivas.aniversarios || Notification.permission !== 'granted') return;
+            if (!notificacoesAtivas) return;
             
-            const notification = new Notification('🎂 Feliz Aniversário!', {
+            new Notification('🎂 Feliz Aniversário!', {
                 body: `${membro.nome} está fazendo aniversário hoje! 🎉`,
-                icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
-                badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
-                vibrate: [200, 100, 200, 100, 200],
-                requireInteraction: true,
-                tag: `aniversario-${membro.id}`
-            });
-            
-            notification.onclick = function() {
-                window.focus();
-                mudarTela('aniversariantes');
-                this.close();
-            };
-        }
-
-        // Enviar versículo do dia
-        function notificarVersiculo() {
-            if (!notificacoesAtivas.versiculo || Notification.permission !== 'granted') return;
-            
-            const versiculos = [
-                { texto: 'Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito...', ref: 'João 3:16' },
-                { texto: 'O Senhor é o meu pastor; nada me faltará.', ref: 'Salmos 23:1' },
-                { texto: 'Tudo posso naquele que me fortalece.', ref: 'Filipenses 4:13' }
-            ];
-            
-            const escolhido = versiculos[new Date().getDate() % versiculos.length];
-            
-            const notification = new Notification('📖 Versículo do Dia', {
-                body: `${escolhido.texto} — ${escolhido.ref}`,
                 icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
                 badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
                 vibrate: [200, 100, 200],
                 requireInteraction: true,
-                tag: 'versiculo-diario'
+                tag: `aniversario-${membro.id}`
             });
-            
-            notification.onclick = function() {
-                window.focus();
-                mudarTela('biblia');
-                this.close();
-            };
         }
 
-        // Verificar eventos a cada minuto
-        function iniciarVerificacoes() {
-            // Verificar eventos a cada minuto
-            setInterval(() => {
-                if (!notificacoesAtivas.eventos) return;
-                
-                const agora = new Date();
-                
-                eventos.forEach(evento => {
-                    if (evento.status === 'cancelado' || !evento.horaInicio) return;
-                    
-                    const dataEvento = new Date(evento.data);
-                    const [hora, minuto] = evento.horaInicio.split(':').map(Number);
-                    dataEvento.setHours(hora, minuto, 0);
-                    
-                    const diffMs = dataEvento - agora;
-                    const diffHoras = diffMs / (1000 * 60 * 60);
-                    
-                    // Arredondar para evitar múltiplas notificações
-                    const horasArredondadas = Math.round(diffHoras * 2) / 2;
-                    
-                    if (horasArredondadas === 6) {
-                        const jaNotificou = localStorage.getItem(`notif-evento-${evento.id}-6`);
-                        if (!jaNotificou) {
-                            notificarEvento(evento, 6);
-                            localStorage.setItem(`notif-evento-${evento.id}-6`, 'true');
-                        }
-                    }
-                    
-                    if (horasArredondadas === 2) {
-                        const jaNotificou = localStorage.getItem(`notif-evento-${evento.id}-2`);
-                        if (!jaNotificou) {
-                            notificarEvento(evento, 2);
-                            localStorage.setItem(`notif-evento-${evento.id}-2`, 'true');
-                        }
-                    }
-                });
-            }, 60000); // 1 minuto
+        // Agendar versículo do dia
+        function agendarVersiculo() {
+            const agora = new Date();
+            const hora = agora.getHours();
             
-            // Verificar aniversários a cada minuto (entre 7:00 e 7:05)
-            setInterval(() => {
-                if (!notificacoesAtivas.aniversarios) return;
-                
-                const agora = new Date();
-                if (agora.getHours() === 7 && agora.getMinutes() < 5) {
-                    const hoje = new Date();
-                    const dia = hoje.getDate();
-                    const mes = hoje.getMonth();
-                    
-                    aniversariantes.forEach(m => {
-                        if (!m.dataNascimento) return;
-                        const dataNasc = criarDataSemFuso(m.dataNascimento);
-                        
-                        if (dataNasc.getDate() === dia && dataNasc.getMonth() === mes) {
-                            const jaNotificou = localStorage.getItem(`notif-aniversario-${m.id}-${hoje.toDateString()}`);
-                            if (!jaNotificou) {
-                                notificarAniversario(m);
-                                localStorage.setItem(`notif-aniversario-${m.id}-${hoje.toDateString()}`, 'true');
-                            }
-                        }
-                    });
-                }
-            }, 60000);
+            const versiculos = [
+                { texto: 'Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito...', ref: 'João 3:16' },
+                { texto: 'O Senhor é o meu pastor; nada me faltará.', ref: 'Salmos 23:1' },
+                { texto: 'Tudo posso naquele que me fortalece.', ref: 'Filipenses 4:13' },
+                { texto: 'Alegrai-vos sempre no Senhor; outra vez digo: alegrai-vos.', ref: 'Filipenses 4:4' },
+                { texto: 'Em paz me deito e logo adormeço, porque só tu, Senhor, me fazes viver em segurança.', ref: 'Salmos 4:8' }
+            ];
             
-            // Agendar versículo do dia (primeira execução)
-            setTimeout(() => {
-                const agora = new Date();
-                const hora = agora.getHours();
+            if (hora >= 7) {
+                // Se já passou das 7, agenda para amanhã
+                const amanha = new Date(agora);
+                amanha.setDate(amanha.getDate() + 1);
+                amanha.setHours(7, 0, 0, 0);
                 
-                if (hora >= 7) {
-                    // Se já passou das 7, agenda para amanhã
-                    const amanha = new Date(agora);
-                    amanha.setDate(amanha.getDate() + 1);
-                    amanha.setHours(7, 0, 0, 0);
-                    
-                    const tempoAteAmanha = amanha - agora;
-                    setTimeout(() => {
-                        setInterval(notificarVersiculo, 24 * 60 * 60 * 1000);
-                        notificarVersiculo();
-                    }, tempoAteAmanha);
-                } else {
-                    // Ainda hoje
-                    const hoje7h = new Date(agora);
-                    hoje7h.setHours(7, 0, 0, 0);
-                    
-                    const tempoAte7h = hoje7h - agora;
-                    setTimeout(() => {
-                        setInterval(notificarVersiculo, 24 * 60 * 60 * 1000);
-                        notificarVersiculo();
-                    }, tempoAte7h);
-                }
-            }, 1000);
+                const tempoAteAmanha = amanha - agora;
+                setTimeout(() => {
+                    setInterval(() => {
+                        if (notificacoesAtivas) {
+                            const escolhido = versiculos[new Date().getDate() % versiculos.length];
+                            new Notification('📖 Versículo do Dia', {
+                                body: `${escolhido.texto} — ${escolhido.ref}`,
+                                icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                                badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                                vibrate: [200, 100, 200],
+                                tag: 'versiculo-diario'
+                            });
+                        }
+                    }, 24 * 60 * 60 * 1000);
+                }, tempoAteAmanha);
+            } else {
+                // Ainda hoje
+                const hoje7h = new Date(agora);
+                hoje7h.setHours(7, 0, 0, 0);
+                
+                const tempoAte7h = hoje7h - agora;
+                setTimeout(() => {
+                    setInterval(() => {
+                        if (notificacoesAtivas) {
+                            const escolhido = versiculos[new Date().getDate() % versiculos.length];
+                            new Notification('📖 Versículo do Dia', {
+                                body: `${escolhido.texto} — ${escolhido.ref}`,
+                                icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                                badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                                vibrate: [200, 100, 200],
+                                tag: 'versiculo-diario'
+                            });
+                        }
+                    }, 24 * 60 * 60 * 1000);
+                }, tempoAte7h);
+            }
         }
 
         // Mostrar mensagem temporária
@@ -1685,11 +1217,6 @@
             
             setTimeout(() => msgDiv.remove(), 2000);
         }
-
-        // ========== FUNÇÕES DE TELA ==========
-        window.abrirConfigNotificacoes = function() {
-            mudarTela('notificacoes');
-        };
 
         // ========== BÍBLIA ==========
         const livrosBiblia = [
@@ -1760,8 +1287,6 @@
             { id: 'jd', nome: 'Judas', testamento: 'NT', capitulos: 1 },
             { id: 'ap', nome: 'Apocalipse', testamento: 'NT', capitulos: 22 }
         ];
-
-        let capitulosCache = {};
 
         function mostrarLivros() {
             const conteudo = document.getElementById('bibliaConteudo');
@@ -1869,7 +1394,6 @@
             
             const conteudo = document.getElementById('bibliaConteudo');
             
-            // Dados de exemplo (em produção, você usaria uma API)
             const versiculosExemplo = [
                 "No princípio, Deus criou os céus e a terra.",
                 "E a terra era sem forma e vazia; e havia trevas sobre a face do abismo; e o Espírito de Deus se movia sobre a face das águas.",
@@ -1939,11 +1463,8 @@
             carregarAniversariantes();
             carregarPedidos();
             
-            // Carregar configurações de notificação
-            carregarConfigNotificacoes();
-            
-            // Iniciar verificações
-            iniciarVerificacoes();
+            // Verificar permissão de notificações
+            verificarPrimeiroAcesso();
         });
 
         function atualizarInterfaceUsuario() {
@@ -1972,7 +1493,6 @@
                 });
                 
                 atualizarListaHomeEventos();
-                renderizarCalendarioEventos();
                 renderizarListaEventos();
                 
             } catch (error) {
@@ -2022,66 +1542,6 @@
             listaHome.innerHTML = html;
         }
 
-        function renderizarCalendarioEventos() {
-            const calendarioElement = document.getElementById('calendario');
-            const mesAtualElement = document.getElementById('mesAtual');
-            
-            const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-                          'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-            mesAtualElement.textContent = `${meses[dataAtualEventos.getMonth()]} ${dataAtualEventos.getFullYear()}`;
-            
-            while (calendarioElement.children.length > 7) {
-                calendarioElement.removeChild(calendarioElement.lastChild);
-            }
-            
-            const primeiroDia = new Date(dataAtualEventos.getFullYear(), dataAtualEventos.getMonth(), 1);
-            const ultimoDia = new Date(dataAtualEventos.getFullYear(), dataAtualEventos.getMonth() + 1, 0);
-            const diaInicio = primeiroDia.getDay();
-            const totalDias = ultimoDia.getDate();
-            
-            const hoje = new Date();
-            hoje.setHours(0, 0, 0, 0);
-            
-            for (let i = 0; i < diaInicio; i++) {
-                const diaElement = document.createElement('div');
-                diaElement.className = 'calendar-day other-month';
-                calendarioElement.appendChild(diaElement);
-            }
-            
-            for (let dia = 1; dia <= totalDias; dia++) {
-                const dataDia = new Date(dataAtualEventos.getFullYear(), dataAtualEventos.getMonth(), dia);
-                const diaElement = document.createElement('div');
-                
-                diaElement.className = 'calendar-day';
-                if (dataDia.getTime() === hoje.getTime()) {
-                    diaElement.classList.add('today');
-                }
-                
-                diaElement.innerHTML = `<div class="day-number">${dia}</div>`;
-                
-                const eventosDia = eventos.filter(evento => {
-                    if (evento.status === 'cancelado') return false;
-                    const dataEvento = new Date(evento.data);
-                    return dataEvento.getDate() === dia &&
-                           dataEvento.getMonth() === dataAtualEventos.getMonth() &&
-                           dataEvento.getFullYear() === dataAtualEventos.getFullYear();
-                });
-                
-                eventosDia.forEach(evento => {
-                    const eventoElement = document.createElement('div');
-                    eventoElement.className = `event-item ${evento.tipo}`;
-                    eventoElement.textContent = evento.titulo.substring(0, 15) + (evento.titulo.length > 15 ? '...' : '');
-                    eventoElement.onclick = (e) => {
-                        e.stopPropagation();
-                        verDetalhesEvento(evento.id);
-                    };
-                    diaElement.appendChild(eventoElement);
-                });
-                
-                calendarioElement.appendChild(diaElement);
-            }
-        }
-
         function renderizarListaEventos() {
             const listaElement = document.getElementById('listaEventos');
             const tipoFiltro = document.getElementById('filtroTipo')?.value;
@@ -2118,86 +1578,74 @@
                 'outro': '#95a5a6'
             };
             
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            
+            eventosFiltrados = eventosFiltrados
+                .filter(e => {
+                    const dataEvento = new Date(e.data);
+                    dataEvento.setHours(0, 0, 0, 0);
+                    return dataEvento >= hoje && e.status !== 'cancelado';
+                })
+                .sort((a, b) => new Date(a.data) - new Date(b.data));
+            
+            if (eventosFiltrados.length === 0) {
+                listaElement.innerHTML = `
+                    <div class="card">
+                        <p class="text-center text-light">Nenhum evento futuro encontrado</p>
+                    </div>
+                `;
+                return;
+            }
+            
             let html = '';
             
-            eventosFiltrados
-                .sort((a, b) => new Date(a.data) - new Date(b.data))
-                .forEach(evento => {
-                    const data = new Date(evento.data);
-                    const dataFormatada = data.toLocaleDateString('pt-BR');
-                    
-                    html += `
-                        <div class="event-card" style="border-left-color: ${tipoCores[evento.tipo] || '#3498db'}">
-                            <div class="event-header">
-                                <div class="event-title">${evento.titulo}</div>
-                                <span class="event-type-badge" style="background: ${tipoCores[evento.tipo] || '#3498db'}">
-                                    ${tiposTraduzidos[evento.tipo] || 'Evento'}
-                                </span>
-                            </div>
-                            
-                            <div class="event-details">
-                                <div class="detail-item">
-                                    <span>📅</span> ${dataFormatada}
-                                </div>
-                                <div class="detail-item">
-                                    <span>⏰</span> ${evento.horaInicio || '--:--'}h
-                                </div>
-                                <div class="detail-item">
-                                    <span>📍</span> ${evento.local || 'Igreja'}
-                                </div>
-                                <div class="detail-item">
-                                    <span>👤</span> ${evento.responsavel || 'Igreja'}
-                                </div>
-                            </div>
-                            
-                            ${evento.descricao ? `
-                                <div class="event-description">
-                                    ${evento.descricao}
-                                </div>
-                            ` : ''}
-                            
-                            <button class="action-btn" style="margin-top: 10px;" onclick="verDetalhesEvento('${evento.id}')">
-                                Ver detalhes
-                            </button>
-                        </div>
-                    `;
+            eventosFiltrados.forEach(evento => {
+                const data = new Date(evento.data);
+                const dataFormatada = data.toLocaleDateString('pt-BR', { 
+                    day: '2-digit', 
+                    month: 'long',
+                    year: 'numeric'
                 });
+                
+                html += `
+                    <div class="event-card" style="border-left-color: ${tipoCores[evento.tipo] || '#3498db'}" onclick="verDetalhesEvento('${evento.id}')">
+                        <div class="event-header">
+                            <div class="event-title">${evento.titulo}</div>
+                            <span class="event-type-badge" style="background: ${tipoCores[evento.tipo] || '#3498db'}">
+                                ${tiposTraduzidos[evento.tipo] || 'Evento'}
+                            </span>
+                        </div>
+                        
+                        <div class="event-details">
+                            <div class="detail-item">
+                                <span>📅</span> ${dataFormatada}
+                            </div>
+                            <div class="detail-item">
+                                <span>⏰</span> ${evento.horaInicio || '--:--'}h
+                            </div>
+                            <div class="detail-item">
+                                <span>📍</span> ${evento.local || 'Igreja'}
+                            </div>
+                            <div class="detail-item">
+                                <span>👤</span> ${evento.responsavel || 'Igreja'}
+                            </div>
+                        </div>
+                        
+                        ${evento.descricao ? `
+                            <div class="event-description">
+                                ${evento.descricao}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
             
             listaElement.innerHTML = html;
         }
 
         function filtrarEventos() {
             renderizarListaEventos();
-        }
-
-        function mudarMes(delta) {
-            dataAtualEventos.setMonth(dataAtualEventos.getMonth() + delta);
-            renderizarCalendarioEventos();
-        }
-
-        function irParaHoje() {
-            dataAtualEventos = new Date();
-            renderizarCalendarioEventos();
-        }
-
-        function mudarVisualizacaoEventos(visualizacao) {
-            visualizacaoEventos = visualizacao;
-            
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            if (visualizacao === 'calendario') {
-                document.getElementById('calendarioView').style.display = 'block';
-                document.getElementById('listaView').style.display = 'none';
-                document.querySelector('.view-btn[onclick*="calendario"]').classList.add('active');
-                renderizarCalendarioEventos();
-            } else {
-                document.getElementById('calendarioView').style.display = 'none';
-                document.getElementById('listaView').style.display = 'block';
-                document.querySelector('.view-btn[onclick*="lista"]').classList.add('active');
-                renderizarListaEventos();
-            }
         }
 
         function verDetalhesEvento(id) {
@@ -2240,10 +1688,7 @@
                     }
                 });
                 
-                console.log('Total de aniversariantes carregados:', aniversariantes.length);
-                
                 atualizarListaHomeAniversariantes();
-                renderizarCalendarioAniversariantes();
                 renderizarListaAniversariantes();
                 
             } catch (error) {
@@ -2256,10 +1701,9 @@
             const hoje = new Date();
             const mesAtual = hoje.getMonth();
             
-            // Filtrar aniversariantes do mês atual usando a função criarDataSemFuso
             const aniversariantesMes = aniversariantes.filter(m => {
                 if (!m.dataNascimento) return false;
-                const dataNasc = criarDataSemFuso(m.dataNascimento);
+                const dataNasc = new Date(m.dataNascimento);
                 return dataNasc.getMonth() === mesAtual;
             }).slice(0, 3);
             
@@ -2288,7 +1732,7 @@
             if (!dataNascimento) return 0;
             
             const hoje = new Date();
-            const nascimento = criarDataSemFuso(dataNascimento);
+            const nascimento = new Date(dataNascimento);
             let idade = hoje.getFullYear() - nascimento.getFullYear();
             
             const mesAtual = hoje.getMonth();
@@ -2307,7 +1751,7 @@
             if (!dataNascimento) return 365;
             
             const hoje = new Date();
-            const nascimento = criarDataSemFuso(dataNascimento);
+            const nascimento = new Date(dataNascimento);
             const anoAtual = hoje.getFullYear();
             
             let proximoAniversario = new Date(anoAtual, nascimento.getMonth(), nascimento.getDate(), 12, 0, 0);
@@ -2318,66 +1762,6 @@
             
             const diff = proximoAniversario - hoje;
             return Math.ceil(diff / (1000 * 60 * 60 * 24));
-        }
-
-        function renderizarCalendarioAniversariantes() {
-            const calendarioElement = document.getElementById('aniversariantesCalendario');
-            const mesAtualElement = document.getElementById('mesAtualAniversario');
-            
-            const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-                          'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-            mesAtualElement.textContent = `${meses[dataAtualAniversarios.getMonth()]} ${dataAtualAniversarios.getFullYear()}`;
-            
-            while (calendarioElement.children.length > 7) {
-                calendarioElement.removeChild(calendarioElement.lastChild);
-            }
-            
-            const primeiroDia = new Date(dataAtualAniversarios.getFullYear(), dataAtualAniversarios.getMonth(), 1);
-            const ultimoDia = new Date(dataAtualAniversarios.getFullYear(), dataAtualAniversarios.getMonth() + 1, 0);
-            const diaInicio = primeiroDia.getDay();
-            const totalDias = ultimoDia.getDate();
-            
-            const hoje = new Date();
-            hoje.setHours(0, 0, 0, 0);
-            
-            for (let i = 0; i < diaInicio; i++) {
-                const diaElement = document.createElement('div');
-                diaElement.className = 'calendar-day other-month';
-                calendarioElement.appendChild(diaElement);
-            }
-            
-            for (let dia = 1; dia <= totalDias; dia++) {
-                const dataDia = new Date(dataAtualAniversarios.getFullYear(), dataAtualAniversarios.getMonth(), dia);
-                const diaElement = document.createElement('div');
-                
-                diaElement.className = 'calendar-day';
-                if (dataDia.getTime() === hoje.getTime()) {
-                    diaElement.classList.add('today');
-                }
-                
-                // Filtrar aniversariantes do dia usando a função criarDataSemFuso
-                const aniversariantesDia = aniversariantes.filter(m => {
-                    if (!m.dataNascimento) return false;
-                    const dataNasc = criarDataSemFuso(m.dataNascimento);
-                    return dataNasc.getDate() === dia &&
-                           dataNasc.getMonth() === dataAtualAniversarios.getMonth();
-                });
-                
-                diaElement.innerHTML = `<div class="day-number">${dia} ${aniversariantesDia.length > 0 ? '🎂' : ''}</div>`;
-                
-                aniversariantesDia.forEach(m => {
-                    const itemElement = document.createElement('div');
-                    itemElement.className = 'event-item culto';
-                    itemElement.textContent = m.nome.split(' ')[0];
-                    itemElement.onclick = (e) => {
-                        e.stopPropagation();
-                        verDetalhesAniversariante(m.id);
-                    };
-                    diaElement.appendChild(itemElement);
-                });
-                
-                calendarioElement.appendChild(diaElement);
-            }
         }
 
         function renderizarListaAniversariantes() {
@@ -2392,12 +1776,21 @@
                 return;
             }
             
+            const mesFiltro = document.getElementById('filtroMesAniversario')?.value;
             const hoje = new Date();
             const diaHoje = hoje.getDate();
             const mesHoje = hoje.getMonth();
             
-            // Ordenar aniversariantes por data (próximos primeiro)
-            const aniversariantesOrdenados = [...aniversariantes].sort((a, b) => {
+            let aniversariantesFiltrados = aniversariantes;
+            if (mesFiltro !== '') {
+                const mesSelecionado = parseInt(mesFiltro);
+                aniversariantesFiltrados = aniversariantesFiltrados.filter(m => {
+                    const dataNasc = new Date(m.dataNascimento);
+                    return dataNasc.getMonth() === mesSelecionado;
+                });
+            }
+            
+            aniversariantesFiltrados.sort((a, b) => {
                 const diasA = calcularDiasRestantes(a.dataNascimento);
                 const diasB = calcularDiasRestantes(b.dataNascimento);
                 return diasA - diasB;
@@ -2405,30 +1798,37 @@
             
             let html = '';
             
-            aniversariantesOrdenados.forEach(m => {
-                const dataNasc = criarDataSemFuso(m.dataNascimento);
+            aniversariantesFiltrados.forEach(m => {
+                const dataNasc = new Date(m.dataNascimento);
                 const idade = calcularIdade(m.dataNascimento);
                 const diasRestantes = calcularDiasRestantes(m.dataNascimento);
                 const isHoje = dataNasc.getDate() === diaHoje && dataNasc.getMonth() === mesHoje;
                 
-                // Formatar a data de nascimento
                 const dataFormatada = dataNasc.toLocaleDateString('pt-BR', {day: '2-digit', month: 'long'});
                 
+                let badgeColor = '#3498db';
+                let badgeText = 'Próximo';
+                
+                if (isHoje) {
+                    badgeColor = '#ff4081';
+                    badgeText = 'HOJE!';
+                } else if (diasRestantes <= 7) {
+                    badgeColor = '#ff9800';
+                    badgeText = `${diasRestantes} dias`;
+                }
+                
                 html += `
-                    <div class="event-card" style="border-left-color: #ff4081; ${isHoje ? 'background: #fff0f5;' : ''}" onclick="verDetalhesAniversariante('${m.id}')">
+                    <div class="event-card" style="border-left-color: ${badgeColor}; ${isHoje ? 'background: #fff0f5;' : ''}" onclick="verDetalhesAniversariante('${m.id}')">
                         <div class="event-header">
                             <div class="event-title">${m.nome}</div>
-                            <span class="event-type-badge" style="background: #ff4081">
-                                ${idade} anos
+                            <span class="event-type-badge" style="background: ${badgeColor}">
+                                ${badgeText}
                             </span>
                         </div>
                         
                         <div class="event-details">
                             <div class="detail-item">
-                                <span>🎂</span> ${dataFormatada}
-                            </div>
-                            <div class="detail-item">
-                                <span>⏰</span> ${isHoje ? 'HOJE!' : `Em ${diasRestantes} dias`}
+                                <span>🎂</span> ${dataFormatada} • ${idade} anos
                             </div>
                             <div class="detail-item">
                                 <span>📱</span> ${m.telefone || 'Não informado'}
@@ -2444,11 +1844,15 @@
             listaElement.innerHTML = html;
         }
 
+        window.filtrarAniversariantesPorMes = function() {
+            renderizarListaAniversariantes();
+        };
+
         function verDetalhesAniversariante(id) {
             const membro = aniversariantes.find(m => m.id === id);
             if (!membro) return;
             
-            const dataNasc = criarDataSemFuso(membro.dataNascimento);
+            const dataNasc = new Date(membro.dataNascimento);
             const idade = calcularIdade(membro.dataNascimento);
             const hoje = new Date();
             const isHoje = dataNasc.getDate() === hoje.getDate() && dataNasc.getMonth() === hoje.getMonth();
@@ -2464,36 +1868,6 @@
                   `${isHoje ? '🎉 FELIZ ANIVERSÁRIO! 🎉\n' : ''}` +
                   `📱 Telefone: ${membro.telefone || 'Não informado'}\n` +
                   `📧 Email: ${membro.email || 'Não informado'}`);
-        }
-
-        function mudarMesAniversario(delta) {
-            dataAtualAniversarios.setMonth(dataAtualAniversarios.getMonth() + delta);
-            renderizarCalendarioAniversariantes();
-        }
-
-        function irParaMesAtualAniversario() {
-            dataAtualAniversarios = new Date();
-            renderizarCalendarioAniversariantes();
-        }
-
-        function mudarVisualizacaoAniversarios(visualizacao) {
-            visualizacaoAniversarios = visualizacao;
-            
-            document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            if (visualizacao === 'calendario') {
-                document.getElementById('aniversariantesCalendarioView').style.display = 'block';
-                document.getElementById('aniversariantesListView').style.display = 'none';
-                document.querySelector('.view-btn[onclick*="calendario"]').classList.add('active');
-                renderizarCalendarioAniversariantes();
-            } else {
-                document.getElementById('aniversariantesCalendarioView').style.display = 'none';
-                document.getElementById('aniversariantesListView').style.display = 'block';
-                document.querySelector('.view-btn[onclick*="lista"]').classList.add('active');
-                renderizarListaAniversariantes();
-            }
         }
 
         // ========== FUNÇÕES AUXILIARES ==========
@@ -2570,11 +1944,7 @@
         function mudarTela(tela) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             
-            if (tela === 'notificacoes') {
-                document.getElementById('notificacoesScreen').classList.add('active');
-            } else {
-                document.getElementById(tela + 'Screen').classList.add('active');
-            }
+            document.getElementById(tela + 'Screen').classList.add('active');
             
             document.querySelectorAll('.menu-item').forEach(item => {
                 item.classList.remove('active');
@@ -2586,315 +1956,11 @@
             if (tela === 'biblia') {
                 mostrarLivros();
             } else if (tela === 'eventos') {
-                renderizarCalendarioEventos();
+                renderizarListaEventos();
             } else if (tela === 'aniversariantes') {
-                renderizarCalendarioAniversariantes();
-            } else if (tela === 'notificacoes') {
-                atualizarSwitches();
+                renderizarListaAniversariantes();
             }
         }
-
-        window.filtrarAniversariantesPorMes = function() {
-    renderizarListaAniversariantes();
-};
-
-async function carregarAniversariantes() {
-    try {
-        const membrosRef = collection(window.db, "membros");
-        const querySnapshot = await getDocs(membrosRef);
-        
-        membros = [];
-        aniversariantes = [];
-        
-        querySnapshot.forEach((doc) => {
-            const membro = { id: doc.id, ...doc.data() };
-            membros.push(membro);
-            
-            if (membro.dataNascimento) {
-                aniversariantes.push(membro);
-            }
-        });
-        
-        console.log('Total de aniversariantes carregados:', aniversariantes.length);
-        
-        atualizarListaHomeAniversariantes();
-        renderizarListaAniversariantes();
-        
-    } catch (error) {
-        console.error('Erro ao carregar aniversariantes:', error);
-    }
-}
-
-function renderizarListaAniversariantes() {
-    const listaElement = document.getElementById('listaAniversariantes');
-    
-    if (aniversariantes.length === 0) {
-        listaElement.innerHTML = `
-            <div class="card">
-                <p class="text-center text-light">Nenhum aniversariante encontrado</p>
-            </div>
-        `;
-        return;
-    }
-    
-    const mesFiltro = document.getElementById('filtroMesAniversario')?.value;
-    const ordenacao = document.getElementById('filtroOrdenacao')?.value || 'proximos';
-    const hoje = new Date();
-    const diaHoje = hoje.getDate();
-    const mesHoje = hoje.getMonth();
-    
-    // Filtrar por mês se selecionado
-    let aniversariantesFiltrados = aniversariantes;
-    if (mesFiltro !== '') {
-        const mesSelecionado = parseInt(mesFiltro);
-        aniversariantesFiltrados = aniversariantesFiltrados.filter(m => {
-            const dataNasc = criarDataSemFuso(m.dataNascimento);
-            return dataNasc.getMonth() === mesSelecionado;
-        });
-    }
-    
-    // Ordenar conforme seleção
-    if (ordenacao === 'proximos') {
-        aniversariantesFiltrados.sort((a, b) => {
-            const diasA = calcularDiasRestantes(a.dataNascimento);
-            const diasB = calcularDiasRestantes(b.dataNascimento);
-            return diasA - diasB;
-        });
-    } else if (ordenacao === 'nome') {
-        aniversariantesFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
-    } else if (ordenacao === 'idade') {
-        aniversariantesFiltrados.sort((a, b) => {
-            const idadeA = calcularIdade(a.dataNascimento);
-            const idadeB = calcularIdade(b.dataNascimento);
-            return idadeB - idadeA; // Maior idade primeiro
-        });
-    }
-    
-    let html = '';
-    
-    aniversariantesFiltrados.forEach(m => {
-        const dataNasc = criarDataSemFuso(m.dataNascimento);
-        const idade = calcularIdade(m.dataNascimento);
-        const diasRestantes = calcularDiasRestantes(m.dataNascimento);
-        const isHoje = dataNasc.getDate() === diaHoje && dataNasc.getMonth() === mesHoje;
-        
-        // Formatar a data de nascimento
-        const dataFormatada = dataNasc.toLocaleDateString('pt-BR', {day: '2-digit', month: 'long'});
-        
-        // Cor do badge baseado nos dias restantes
-        let badgeColor = '#3498db';
-        let badgeText = 'Próximo';
-        
-        if (isHoje) {
-            badgeColor = '#ff4081';
-            badgeText = 'HOJE!';
-        } else if (diasRestantes <= 7) {
-            badgeColor = '#ff9800';
-            badgeText = `${diasRestantes} dias`;
-        }
-        
-        html += `
-            <div class="event-card" style="border-left-color: ${badgeColor}; ${isHoje ? 'background: #fff0f5;' : ''}" onclick="verDetalhesAniversariante('${m.id}')">
-                <div class="event-header">
-                    <div class="event-title">${m.nome}</div>
-                    <span class="event-type-badge" style="background: ${badgeColor}">
-                        ${badgeText}
-                    </span>
-                </div>
-                
-                <div class="event-details">
-                    <div class="detail-item">
-                        <span>🎂</span> ${dataFormatada} • ${idade} anos
-                    </div>
-                    <div class="detail-item">
-                        <span>📱</span> ${m.telefone || 'Não informado'}
-                    </div>
-                    <div class="detail-item">
-                        <span>📧</span> ${m.email || 'Não informado'}
-                    </div>
-                    ${m.cidade ? `<div class="detail-item"><span>📍</span> ${m.cidade}</div>` : ''}
-                </div>
-            </div>
-        `;
-    });
-    
-    listaElement.innerHTML = html;
-}
-
-function verDetalhesAniversariante(id) {
-    const membro = aniversariantes.find(m => m.id === id);
-    if (!membro) return;
-    
-    const dataNasc = criarDataSemFuso(membro.dataNascimento);
-    const idade = calcularIdade(membro.dataNascimento);
-    const hoje = new Date();
-    const isHoje = dataNasc.getDate() === hoje.getDate() && dataNasc.getMonth() === hoje.getMonth();
-    
-    const mensagem = isHoje ? 
-        `🎂 HOJE É O GRANDE DIA! 🎂\n\n` :
-        `🎂 Aniversariante\n\n`;
-    
-    alert(mensagem +
-          `Nome: ${membro.nome}\n` +
-          `📅 Nascimento: ${dataNasc.toLocaleDateString('pt-BR')}\n` +
-          `🎂 Idade: ${idade} anos\n` +
-          `${isHoje ? '🎉 FELIZ ANIVERSÁRIO! 🎉\n' : ''}` +
-          `📱 Telefone: ${membro.telefone || 'Não informado'}\n` +
-          `📧 Email: ${membro.email || 'Não informado'}`);
-}
-
-// ========== FUNÇÕES DE EVENTOS (APENAS LISTA) ==========
-async function carregarEventos() {
-    try {
-        const eventosRef = collection(window.db, "eventos");
-        const q = query(eventosRef, orderBy("data"));
-        const querySnapshot = await getDocs(q);
-        
-        eventos = [];
-        querySnapshot.forEach((doc) => {
-            eventos.push({
-                id: doc.id,
-                ...doc.data()
-            });
-        });
-        
-        atualizarListaHomeEventos();
-        renderizarListaEventos();
-        
-    } catch (error) {
-        console.error('Erro ao carregar eventos:', error);
-        eventos = [];
-    }
-}
-
-function renderizarListaEventos() {
-    const listaElement = document.getElementById('listaEventos');
-    const tipoFiltro = document.getElementById('filtroTipo')?.value;
-    
-    let eventosFiltrados = eventos;
-    if (tipoFiltro) {
-        eventosFiltrados = eventos.filter(e => e.tipo === tipoFiltro);
-    }
-    
-    if (eventosFiltrados.length === 0) {
-        listaElement.innerHTML = `
-            <div class="card">
-                <p class="text-center text-light">Nenhum evento encontrado</p>
-            </div>
-        `;
-        return;
-    }
-    
-    const tiposTraduzidos = {
-        'culto': 'Culto',
-        'escola-dominical': 'Escola Dominical',
-        'celula': 'Célula',
-        'evento-especial': 'Evento Especial',
-        'reuniao': 'Reunião',
-        'outro': 'Outro'
-    };
-    
-    const tipoCores = {
-        'culto': '#3498db',
-        'escola-dominical': '#2ecc71',
-        'celula': '#9b59b6',
-        'evento-especial': '#e74c3c',
-        'reuniao': '#f39c12',
-        'outro': '#95a5a6'
-    };
-    
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-    
-    // Filtrar apenas eventos futuros
-    eventosFiltrados = eventosFiltrados
-        .filter(e => {
-            const dataEvento = new Date(e.data);
-            dataEvento.setHours(0, 0, 0, 0);
-            return dataEvento >= hoje && e.status !== 'cancelado';
-        })
-        .sort((a, b) => new Date(a.data) - new Date(b.data));
-    
-    if (eventosFiltrados.length === 0) {
-        listaElement.innerHTML = `
-            <div class="card">
-                <p class="text-center text-light">Nenhum evento futuro encontrado</p>
-            </div>
-        `;
-        return;
-    }
-    
-    let html = '';
-    
-    eventosFiltrados.forEach(evento => {
-        const data = new Date(evento.data);
-        const dataFormatada = data.toLocaleDateString('pt-BR', { 
-            day: '2-digit', 
-            month: 'long',
-            year: 'numeric'
-        });
-        
-        html += `
-            <div class="event-card" style="border-left-color: ${tipoCores[evento.tipo] || '#3498db'}" onclick="verDetalhesEvento('${evento.id}')">
-                <div class="event-header">
-                    <div class="event-title">${evento.titulo}</div>
-                    <span class="event-type-badge" style="background: ${tipoCores[evento.tipo] || '#3498db'}">
-                        ${tiposTraduzidos[evento.tipo] || 'Evento'}
-                    </span>
-                </div>
-                
-                <div class="event-details">
-                    <div class="detail-item">
-                        <span>📅</span> ${dataFormatada}
-                    </div>
-                    <div class="detail-item">
-                        <span>⏰</span> ${evento.horaInicio || '--:--'}h
-                    </div>
-                    <div class="detail-item">
-                        <span>📍</span> ${evento.local || 'Igreja'}
-                    </div>
-                    <div class="detail-item">
-                        <span>👤</span> ${evento.responsavel || 'Igreja'}
-                    </div>
-                </div>
-                
-                ${evento.descricao ? `
-                    <div class="event-description">
-                        ${evento.descricao}
-                    </div>
-                ` : ''}
-            </div>
-        `;
-    });
-    
-    listaElement.innerHTML = html;
-}
-
-function filtrarEventos() {
-    renderizarListaEventos();
-}
-
-function verDetalhesEvento(id) {
-    const evento = eventos.find(e => e.id === id);
-    if (!evento) return;
-    
-    const data = new Date(evento.data);
-    const tipos = {
-        'culto': 'Culto',
-        'escola-dominical': 'Escola Dominical',
-        'celula': 'Célula',
-        'evento-especial': 'Evento Especial',
-        'reuniao': 'Reunião',
-        'outro': 'Outro'
-    };
-    
-    alert(`📅 ${evento.titulo}\n\n` +
-          `Tipo: ${tipos[evento.tipo] || 'Evento'}\n` +
-          `Data: ${data.toLocaleDateString('pt-BR')}\n` +
-          `Horário: ${evento.horaInicio || '--:--'}\n` +
-          `Local: ${evento.local || 'Igreja'}\n` +
-          `Responsável: ${evento.responsavel || 'Igreja'}`);
-}
 
         function voltarHome() {
             mudarTela('home');
@@ -2916,75 +1982,23 @@ function verDetalhesEvento(id) {
             }
         }
 
-        // ========== EXPOR FUNÇÕES ==========
-        window.mudarTela = mudarTela;
-        window.voltarHome = voltarHome;
-        window.abrirMenu = abrirMenu;
-        window.fecharMenu = fecharMenu;
-        window.verMeusDados = verMeusDados;
-        window.sair = sair;
-        
-        // Notificações
-        window.toggleNotificacoes = toggleNotificacoes;
-        window.toggleSwitch = toggleSwitch;
-        window.salvarConfigNotificacoes = salvarConfigNotificacoes;
-        window.testarNotificacao = testarNotificacao;
-        
-        // Bíblia
-        window.mostrarLivros = mostrarLivros;
-        window.mostrarTestamento = mostrarTestamento;
-        window.mostrarCapitulos = mostrarCapitulos;
-        window.carregarCapitulo = carregarCapitulo;
-        window.mostrarBusca = mostrarBusca;
-        window.buscarLivros = buscarLivros;
-        window.buscarReferencia = buscarReferencia;
-        
-        // Eventos
-        window.carregarEventos = carregarEventos;
-        window.mudarMes = mudarMes;
-        window.irParaHoje = irParaHoje;
-        window.mudarVisualizacaoEventos = mudarVisualizacaoEventos;
-        window.filtrarEventos = filtrarEventos;
-        window.verDetalhesEvento = verDetalhesEvento;
-        
-        // Aniversariantes
-        window.carregarAniversariantes = carregarAniversariantes;
-        window.mudarMesAniversario = mudarMesAniversario;
-        window.irParaMesAtualAniversario = irParaMesAtualAniversario;
-        window.mudarVisualizacaoAniversarios = mudarVisualizacaoAniversarios;
-        window.verDetalhesAniversariante = verDetalhesAniversariante;
-        
-        // Pedidos
-        window.enviarPedido = enviarPedido;
-        window.abrirNovoPedido = abrirNovoPedido;
-        window.orar = orar;
-        window.carregarPedidos = carregarPedidos;
-
-                // ========== LANÇAR CONTRIBUIÇÕES ==========
-        
-        // Abrir modal de contribuição
+        // ========== CONTRIBUIÇÕES ==========
         window.abrirModalContribuicao = function() {
-            // Preencher data atual
             const hoje = new Date();
             const dataFormatada = hoje.toISOString().split('T')[0];
             document.getElementById('dataContribuicao').value = dataFormatada;
             
-            // Limpar campos
             document.getElementById('tipoContribuicao').value = '';
             document.getElementById('valorContribuicao').value = '';
             document.getElementById('formaPagamento').value = 'dinheiro';
-            document.getElementById('observacoesContribuicao').value = '';
             
-            // Mostrar modal
             document.getElementById('contribuicaoModal').style.display = 'flex';
         };
 
-        // Fechar modal
         window.fecharModalContribuicao = function() {
             document.getElementById('contribuicaoModal').style.display = 'none';
         };
 
-        // Salvar contribuição - VERSÃO CORRIGIDA
         window.salvarContribuicao = async function(event) {
             event.preventDefault();
             
@@ -2997,63 +2011,41 @@ function verDetalhesEvento(id) {
             const data = document.getElementById('dataContribuicao').value;
             const valor = parseFloat(document.getElementById('valorContribuicao').value);
             const formaPagamento = document.getElementById('formaPagamento').value;
-            const observacoes = document.getElementById('observacoesContribuicao').value;
 
-            // Validações
-            if (!tipo) {
-                alert('Selecione o tipo de contribuição.');
-                return;
-            }
-
-            if (!data) {
-                alert('Selecione a data.');
-                return;
-            }
-
-            if (!valor || valor <= 0) {
-                alert('Digite um valor válido (maior que zero).');
+            if (!tipo || !data || !valor || valor <= 0) {
+                alert('Preencha todos os campos obrigatórios corretamente.');
                 return;
             }
 
             try {
-                // Mostrar loading no botão
                 const submitBtn = event.target.querySelector('button[type="submit"]');
-                const originalText = submitBtn.textContent;
                 submitBtn.textContent = 'Salvando...';
                 submitBtn.disabled = true;
 
-                // Converter data string para objeto Date
                 const dataObj = new Date(data);
-                dataObj.setHours(12, 0, 0, 0); // Meio-dia para evitar problemas de fuso
+                dataObj.setHours(12, 0, 0, 0);
 
-                // Dados da contribuição (SEM Timestamp)
                 const contribuicaoData = {
                     tipo: tipo,
-                    data: dataObj.toISOString(), // Salvar como string ISO
+                    data: dataObj.toISOString(),
                     membroId: window.membroAtual.id,
                     membroNome: window.membroAtual.nome,
                     valor: valor,
                     formaPagamento: formaPagamento,
-                    observacoes: observacoes || '',
                     status: 'confirmado',
                     criadoEm: new Date().toISOString(),
                     origem: 'app_membro'
                 };
 
-                console.log('Salvando contribuição:', contribuicaoData);
-
-                // Salvar no Firebase
-                const docRef = await window.addDoc(window.collection(window.db, "contribuicoes"), contribuicaoData);
+                await window.addDoc(window.collection(window.db, "contribuicoes"), contribuicaoData);
                 
-                console.log('Contribuição salva com ID:', docRef.id);
                 alert('✅ Contribuição registrada com sucesso!');
                 fecharModalContribuicao();
 
             } catch (error) {
-                console.error('Erro detalhado ao salvar:', error);
-                alert('Erro ao registrar contribuição. Verifique o console para mais detalhes.');
+                console.error('Erro ao salvar:', error);
+                alert('Erro ao registrar contribuição.');
             } finally {
-                // Restaurar botão
                 const submitBtn = event.target.querySelector('button[type="submit"]');
                 submitBtn.textContent = 'Salvar';
                 submitBtn.disabled = false;
@@ -3068,207 +2060,38 @@ function verDetalhesEvento(id) {
             }
         });
 
-                // ========== LANÇAR CONTRIBUIÇÕES ==========
+        // ========== EXPOR FUNÇÕES ==========
+        window.mudarTela = mudarTela;
+        window.voltarHome = voltarHome;
+        window.abrirMenu = abrirMenu;
+        window.fecharMenu = fecharMenu;
+        window.verMeusDados = verMeusDados;
+        window.sair = sair;
         
-        // Carregar lista de membros para o select
-        async function carregarMembrosParaSelect() {
-            try {
-                console.log('Carregando membros para o select...');
-                
-                const membrosRef = window.collection(window.db, "membros");
-                const querySnapshot = await window.getDocs(membrosRef);
-                
-                const selectMembro = document.getElementById('membroContribuicao');
-                selectMembro.innerHTML = '<option value="">Selecione um membro...</option>';
-                
-                querySnapshot.forEach((doc) => {
-                    const membro = doc.data();
-                    const option = document.createElement('option');
-                    option.value = doc.id;
-                    option.textContent = membro.nome || 'Membro sem nome';
-                    selectMembro.appendChild(option);
-                });
-                
-                console.log('Membros carregados com sucesso');
-            } catch (error) {
-                console.error('Erro ao carregar membros:', error);
-            }
-        }
-
-        // Mostrar/esconder campo de membro baseado no tipo
-        window.toggleCampoMembro = function() {
-            const tipo = document.getElementById('tipoContribuicao').value;
-            const campoMembro = document.getElementById('campoMembroContainer');
-            const membroSelect = document.getElementById('membroContribuicao');
-            
-            if (tipo === 'dizimo') {
-                campoMembro.style.display = 'block';
-                membroSelect.required = true;
-            } else {
-                campoMembro.style.display = 'none';
-                membroSelect.required = false;
-                membroSelect.value = ''; // Limpar seleção
-            }
-        };
-
-        // Abrir modal de contribuição
-        window.abrirModalContribuicao = function() {
-            console.log('Abrindo modal de contribuição');
-            
-            // Verificar se membro está logado
-            if (!window.membroAtual) {
-                console.error('Membro não está logado');
-                alert('Erro: Membro não identificado. Faça login novamente.');
-                window.location.href = 'index.html';
-                return;
-            }
-            
-            // Carregar membros para o select
-            carregarMembrosParaSelect();
-            
-            // Preencher data atual
-            const hoje = new Date();
-            const dataFormatada = hoje.toISOString().split('T')[0];
-            document.getElementById('dataContribuicao').value = dataFormatada;
-            
-            // Limpar campos
-            document.getElementById('tipoContribuicao').value = '';
-            document.getElementById('campoMembroContainer').style.display = 'none';
-            document.getElementById('membroContribuicao').value = '';
-            document.getElementById('valorContribuicao').value = '';
-            document.getElementById('formaPagamento').value = 'dinheiro';
-            document.getElementById('observacoesContribuicao').value = '';
-            
-            // Mostrar modal
-            document.getElementById('contribuicaoModal').style.display = 'flex';
-        };
-
-        // Fechar modal
-        window.fecharModalContribuicao = function() {
-            document.getElementById('contribuicaoModal').style.display = 'none';
-        };
-
-        // Salvar contribuição
-        window.salvarContribuicao = async function(event) {
-            event.preventDefault();
-            
-            console.log('=== INICIANDO SALVAMENTO DE CONTRIBUIÇÃO ===');
-            
-            // 1. Verificar membro
-            if (!window.membroAtual) {
-                console.error('ERRO: window.membroAtual não existe');
-                alert('Erro: Membro não identificado. Faça login novamente.');
-                return;
-            }
-            
-            console.log('Membro atual:', window.membroAtual);
-
-            // 2. Pegar valores do formulário
-            const tipo = document.getElementById('tipoContribuicao').value;
-            const data = document.getElementById('dataContribuicao').value;
-            const valor = document.getElementById('valorContribuicao').value;
-            const formaPagamento = document.getElementById('formaPagamento').value;
-            const observacoes = document.getElementById('observacoesContribuicao').value;
-            
-            // Para dízimo, pegar o membro selecionado
-            let membroId = window.membroAtual.id; // padrão: próprio membro
-            let membroNome = window.membroAtual.nome;
-            
-            if (tipo === 'dizimo') {
-                membroId = document.getElementById('membroContribuicao').value;
-                if (!membroId) {
-                    alert('Para dízimos, selecione o membro que está dizimando.');
-                    return;
-                }
-                
-                // Buscar nome do membro selecionado
-                const selectMembro = document.getElementById('membroContribuicao');
-                const selectedOption = selectMembro.options[selectMembro.selectedIndex];
-                membroNome = selectedOption ? selectedOption.textContent : 'Membro';
-            }
-            
-            console.log('Dados do formulário:', {
-                tipo,
-                membroId,
-                membroNome,
-                data,
-                valor,
-                formaPagamento,
-                observacoes
-            });
-
-            // 3. Validações
-            if (!tipo) {
-                alert('Selecione o tipo de contribuição.');
-                return;
-            }
-
-            if (!data) {
-                alert('Selecione a data.');
-                return;
-            }
-
-            if (!valor) {
-                alert('Digite o valor.');
-                return;
-            }
-
-            const valorNumerico = parseFloat(valor);
-            if (isNaN(valorNumerico) || valorNumerico <= 0) {
-                alert('Digite um valor válido (maior que zero).');
-                return;
-            }
-
-            try {
-                // Mostrar loading no botão
-                const submitBtn = event.target.querySelector('button[type="submit"]');
-                submitBtn.textContent = 'Salvando...';
-                submitBtn.disabled = true;
-
-                // Preparar dados
-                const dataObj = new Date(data);
-                dataObj.setHours(12, 0, 0, 0);
-                
-                const contribuicaoData = {
-                    tipo: tipo,
-                    data: dataObj.toISOString(),
-                    membroId: membroId,
-                    membroNome: membroNome,
-                    valor: valorNumerico,
-                    formaPagamento: formaPagamento,
-                    observacoes: observacoes || '',
-                    status: 'confirmado',
-                    criadoEm: new Date().toISOString(),
-                    origem: 'app_membro',
-                    lancadoPor: window.membroAtual.id,
-                    lancadoPorNome: window.membroAtual.nome
-                };
-                
-                console.log('Dados a serem salvos:', contribuicaoData);
-                
-                // Salvar no Firebase
-                const collectionRef = window.collection(window.db, "contribuicoes");
-                const docRef = await window.addDoc(collectionRef, contribuicaoData);
-                
-                console.log('SUCESSO! Documento salvo com ID:', docRef.id);
-                alert('✅ Contribuição registrada com sucesso!');
-                fecharModalContribuicao();
-
-            } catch (error) {
-                console.error('=== ERRO DETALHADO ===');
-                console.error('Mensagem:', error.message);
-                alert(`Erro ao registrar: ${error.message || 'Erro desconhecido'}`);
-            } finally {
-                // Restaurar botão
-                const submitBtn = event.target.querySelector('button[type="submit"]');
-                if (submitBtn) {
-                    submitBtn.textContent = 'Salvar';
-                    submitBtn.disabled = false;
-                }
-            }
-        };
-
+        // Bíblia
+        window.mostrarLivros = mostrarLivros;
+        window.mostrarTestamento = mostrarTestamento;
+        window.mostrarCapitulos = mostrarCapitulos;
+        window.carregarCapitulo = carregarCapitulo;
+        window.mostrarBusca = mostrarBusca;
+        window.buscarLivros = buscarLivros;
+        window.buscarReferencia = buscarReferencia;
         
+        // Eventos
+        window.carregarEventos = carregarEventos;
+        window.filtrarEventos = filtrarEventos;
+        window.verDetalhesEvento = verDetalhesEvento;
+        
+        // Aniversariantes
+        window.carregarAniversariantes = carregarAniversariantes;
+        window.filtrarAniversariantesPorMes = filtrarAniversariantesPorMes;
+        window.verDetalhesAniversariante = verDetalhesAniversariante;
+        
+        // Pedidos
+        window.enviarPedido = enviarPedido;
+        window.abrirNovoPedido = abrirNovoPedido;
+        window.orar = orar;
+        window.carregarPedidos = carregarPedidos;
     </script>
 </body>
 </html>
