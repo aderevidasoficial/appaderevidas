@@ -1,4 +1,4 @@
-<!-- File: app/app.html -->
+<!-- File: temp/app.html (MODIFICADO) -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -697,6 +697,97 @@
             background: var(--light);
         }
 
+        /* Estilos para Meus Dízimos */
+        .dizimo-resumo {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .dizimo-resumo .total-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .dizimo-resumo .total-valor {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .dizimo-resumo .total-contribuicoes {
+            margin-top: 10px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .dizimo-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .dizimo-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .dizimo-item-data {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .dizimo-item-valor {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--success);
+        }
+
+        .dizimo-item-detalhes {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        .dizimo-item-status {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-confirmado {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .dizimo-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+
+        .dizimo-empty span {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
         /* Modal */
         .modal {
             display: none;
@@ -749,6 +840,10 @@
             <div class="menu-item-list">
                 <button onclick="verMeusDados(); fecharMenu()">
                     <span>👤</span> Meus Dados
+                </button>
+                <!-- NOVA OPÇÃO: Meus Dízimos -->
+                <button onclick="abrirMeusDizimos(); fecharMenu()">
+                    <span>💰</span> Meus Dízimos
                 </button>
                 <button onclick="abrirModalContribuicao(); fecharMenu()">
                     <span>➕</span> Lançar Contribuição
@@ -895,6 +990,37 @@
             </div>
         </div>
 
+        <!-- NOVA TELA: Meus Dízimos -->
+        <div id="dizimosScreen" class="screen">
+            <div class="app-header">
+                <button onclick="voltarHome()">←</button>
+                <h1>💰 Meus Dízimos</h1>
+                <button onclick="carregarMeusDizimos()">↻</button>
+            </div>
+            
+            <div class="content">
+                <!-- Resumo dos dízimos -->
+                <div class="dizimo-resumo" id="dizimoResumo">
+                    <div class="total-label">Total de Dízimos</div>
+                    <div class="total-valor" id="totalDizimos">R$ 0,00</div>
+                    <div class="total-contribuicoes" id="totalContribuicoes">0 contribuições</div>
+                </div>
+
+                <!-- Filtro de período -->
+                <div class="filter-container">
+                    <select id="filtroPeriodoDizimos" class="filter-select" onchange="filtrarDizimos()">
+                        <option value="todos">Todos os períodos</option>
+                        <option value="ano">Último ano</option>
+                        <option value="mes">Último mês</option>
+                        <option value="trimestre">Último trimestre</option>
+                    </select>
+                </div>
+
+                <!-- Lista de dízimos -->
+                <div id="listaDizimos"></div>
+            </div>
+        </div>
+
         <!-- Menu Inferior -->
         <div class="bottom-menu">
             <button class="menu-item active" onclick="mudarTela('home')" data-screen="home">
@@ -981,213 +1107,432 @@
         let membros = [];
         let aniversariantes = [];
         let notificacoesAtivas = false;
+        let meusDizimos = []; // Array para armazenar os dízimos do membro logado
 
-// Verificar primeiro acesso
-function verificarPrimeiroAcesso() {
-    const jaPediu = localStorage.getItem('jaPediuNotificacao');
-    
-    if (!jaPediu && ('Notification' in window)) {
-        setTimeout(() => {
-            document.getElementById('notificationPermissionModal').style.display = 'flex';
-        }, 3000);
-    } else if (Notification.permission === 'granted') {
-        console.log('✅ Notificações já permitidas');
-        notificacoesAtivas = true;
-        iniciarVerificacoes();
-    }
-}
-
-// Solicitar permissão
-window.solicitarNotificacoes = async function() {
-    document.getElementById('notificationPermissionModal').style.display = 'none';
-    
-    try {
-        const registration = await navigator.serviceWorker.ready;
-        const permission = await Notification.requestPermission();
-        
-        if (permission === 'granted') {
-            notificacoesAtivas = true;
-            localStorage.setItem('jaPediuNotificacao', 'true');
+        // Verificar primeiro acesso
+        function verificarPrimeiroAcesso() {
+            const jaPediu = localStorage.getItem('jaPediuNotificacao');
             
-            mostrarMensagem('✅ Notificações ativadas!');
-            
-            // TESTE: Enviar notificação via Service Worker
-            registration.showNotification('🔔 AdereVidas', {
-                body: 'Notificações ativadas com sucesso!',
-                icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
-                badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
-                vibrate: [200, 100, 200],
-                tag: 'teste',
-                requireInteraction: false
-            });
-            
-            iniciarVerificacoes();
-            
-        } else {
-            localStorage.setItem('jaPediuNotificacao', 'true');
-            mostrarMensagem('❌ Notificações desativadas');
-        }
-    } catch (error) {
-        console.error('Erro:', error);
-        mostrarMensagem('Erro ao ativar notificações');
-    }
-};
-
-// Negar permissão
-window.negarNotificacoes = function() {
-    document.getElementById('notificationPermissionModal').style.display = 'none';
-    localStorage.setItem('jaPediuNotificacao', 'true');
-    mostrarMensagem('Você pode ativar depois');
-};
-
-// Iniciar verificações
-function iniciarVerificacoes() {
-    console.log('🔔 Sistema de notificações iniciado');
-    
-    setInterval(() => {
-        if (notificacoesAtivas) {
-            verificarEventos();
-            verificarAniversarios();
-        }
-    }, 30000);
-    
-    agendarVersiculo();
-}
-
-// Verificar eventos
-async function verificarEventos() {
-    if (!notificacoesAtivas || typeof eventos === 'undefined' || eventos.length === 0) return;
-    
-    const agora = new Date();
-    const registration = await navigator.serviceWorker.ready;
-    
-    eventos.forEach(evento => {
-        if (evento.status === 'cancelado' || !evento.horaInicio) return;
-        
-        const dataEvento = new Date(evento.data);
-        const [hora, minuto] = evento.horaInicio.split(':').map(Number);
-        dataEvento.setHours(hora, minuto, 0);
-        
-        const diffMs = dataEvento - agora;
-        const diffHoras = Math.round(diffMs / (1000 * 60 * 60));
-        
-        if (diffHoras === 6 || diffHoras === 2 || diffHoras === 0.5) {
-            const horasTexto = diffHoras === 0.5 ? '30 minutos' : `${diffHoras} horas`;
-            const jaNotificou = localStorage.getItem(`notif-evento-${evento.id}-${diffHoras}`);
-            
-            if (!jaNotificou) {
-                registration.showNotification(`⏰ Faltam ${horasTexto}!`, {
-                    body: `${evento.titulo} - Hoje às ${evento.horaInicio}`,
-                    icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
-                    badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
-                    vibrate: [200, 100, 200],
-                    tag: `evento-${evento.id}`,
-                    data: { screen: 'eventos' },
-                    requireInteraction: true
-                });
-                
-                localStorage.setItem(`notif-evento-${evento.id}-${diffHoras}`, 'true');
+            if (!jaPediu && ('Notification' in window)) {
+                setTimeout(() => {
+                    document.getElementById('notificationPermissionModal').style.display = 'flex';
+                }, 3000);
+            } else if (Notification.permission === 'granted') {
+                console.log('✅ Notificações já permitidas');
+                notificacoesAtivas = true;
+                iniciarVerificacoes();
             }
         }
-    });
-}
 
-// Verificar aniversários
-async function verificarAniversarios() {
-    if (!notificacoesAtivas || typeof aniversariantes === 'undefined' || aniversariantes.length === 0) return;
-    
-    const agora = new Date();
-    if (agora.getHours() === 7 && agora.getMinutes() < 5) {
-        const hoje = new Date();
-        const dia = hoje.getDate();
-        const mes = hoje.getMonth();
-        const registration = await navigator.serviceWorker.ready;
-        
-        aniversariantes.forEach(m => {
-            if (!m.dataNascimento) return;
+        // Solicitar permissão
+        window.solicitarNotificacoes = async function() {
+            document.getElementById('notificationPermissionModal').style.display = 'none';
             
-            const dataNasc = new Date(m.dataNascimento);
-            if (dataNasc.getDate() === dia && dataNasc.getMonth() === mes) {
-                const jaNotificou = localStorage.getItem(`notif-aniversario-${m.id}-${hoje.toDateString()}`);
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                const permission = await Notification.requestPermission();
                 
-                if (!jaNotificou) {
-                    registration.showNotification('🎂 Feliz Aniversário!', {
-                        body: `${m.nome} está fazendo aniversário hoje! 🎉`,
+                if (permission === 'granted') {
+                    notificacoesAtivas = true;
+                    localStorage.setItem('jaPediuNotificacao', 'true');
+                    
+                    mostrarMensagem('✅ Notificações ativadas!');
+                    
+                    // TESTE: Enviar notificação via Service Worker
+                    registration.showNotification('🔔 AdereVidas', {
+                        body: 'Notificações ativadas com sucesso!',
                         icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
                         badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
-                        vibrate: [200, 100, 200, 100, 200],
-                        tag: `aniversario-${m.id}`,
-                        data: { screen: 'aniversariantes' },
-                        requireInteraction: true
+                        vibrate: [200, 100, 200],
+                        tag: 'teste',
+                        requireInteraction: false
                     });
                     
-                    localStorage.setItem(`notif-aniversario-${m.id}-${hoje.toDateString()}`, 'true');
+                    iniciarVerificacoes();
+                    
+                } else {
+                    localStorage.setItem('jaPediuNotificacao', 'true');
+                    mostrarMensagem('❌ Notificações desativadas');
                 }
+            } catch (error) {
+                console.error('Erro:', error);
+                mostrarMensagem('Erro ao ativar notificações');
             }
-        });
-    }
-}
+        };
 
-// Agendar versículo
-function agendarVersiculo() {
-    const versiculos = [
-        { texto: 'Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito...', ref: 'João 3:16' },
-        { texto: 'O Senhor é o meu pastor; nada me faltará.', ref: 'Salmos 23:1' },
-        { texto: 'Tudo posso naquele que me fortalece.', ref: 'Filipenses 4:13' }
-    ];
-    
-    setInterval(async () => {
-        if (!notificacoesAtivas) return;
-        
-        const agora = new Date();
-        if (agora.getHours() === 7 && agora.getMinutes() < 5) {
-            const escolhido = versiculos[new Date().getDate() % versiculos.length];
+        // Negar permissão
+        window.negarNotificacoes = function() {
+            document.getElementById('notificationPermissionModal').style.display = 'none';
+            localStorage.setItem('jaPediuNotificacao', 'true');
+            mostrarMensagem('Você pode ativar depois');
+        };
+
+        // Iniciar verificações
+        function iniciarVerificacoes() {
+            console.log('🔔 Sistema de notificações iniciado');
+            
+            setInterval(() => {
+                if (notificacoesAtivas) {
+                    verificarEventos();
+                    verificarAniversarios();
+                }
+            }, 30000);
+            
+            agendarVersiculo();
+        }
+
+        // Verificar eventos
+        async function verificarEventos() {
+            if (!notificacoesAtivas || typeof eventos === 'undefined' || eventos.length === 0) return;
+            
+            const agora = new Date();
             const registration = await navigator.serviceWorker.ready;
             
-            registration.showNotification('📖 Versículo do Dia', {
-                body: `${escolhido.texto} — ${escolhido.ref}`,
-                icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
-                badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
-                vibrate: [200, 100, 200],
-                tag: 'versiculo-diario',
-                data: { screen: 'biblia' }
+            eventos.forEach(evento => {
+                if (evento.status === 'cancelado' || !evento.horaInicio) return;
+                
+                const dataEvento = new Date(evento.data);
+                const [hora, minuto] = evento.horaInicio.split(':').map(Number);
+                dataEvento.setHours(hora, minuto, 0);
+                
+                const diffMs = dataEvento - agora;
+                const diffHoras = Math.round(diffMs / (1000 * 60 * 60));
+                
+                if (diffHoras === 6 || diffHoras === 2 || diffHoras === 0.5) {
+                    const horasTexto = diffHoras === 0.5 ? '30 minutos' : `${diffHoras} horas`;
+                    const jaNotificou = localStorage.getItem(`notif-evento-${evento.id}-${diffHoras}`);
+                    
+                    if (!jaNotificou) {
+                        registration.showNotification(`⏰ Faltam ${horasTexto}!`, {
+                            body: `${evento.titulo} - Hoje às ${evento.horaInicio}`,
+                            icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                            badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                            vibrate: [200, 100, 200],
+                            tag: `evento-${evento.id}`,
+                            data: { screen: 'eventos' },
+                            requireInteraction: true
+                        });
+                        
+                        localStorage.setItem(`notif-evento-${evento.id}-${diffHoras}`, 'true');
+                    }
+                }
             });
         }
-    }, 60000);
-}
 
-// Mostrar mensagem
-function mostrarMensagem(texto) {
-    const msgDiv = document.createElement('div');
-    msgDiv.style.cssText = `
-        position: fixed;
-        bottom: 100px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #2ecc71;
-        color: white;
-        padding: 12px 24px;
-        border-radius: 30px;
-        font-size: 14px;
-        z-index: 10000;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-        animation: slideUp 0.3s;
-    `;
-    msgDiv.textContent = texto;
-    document.body.appendChild(msgDiv);
-    
-    setTimeout(() => msgDiv.remove(), 3000);
-}
+        // Verificar aniversários
+        async function verificarAniversarios() {
+            if (!notificacoesAtivas || typeof aniversariantes === 'undefined' || aniversariantes.length === 0) return;
+            
+            const agora = new Date();
+            if (agora.getHours() === 7 && agora.getMinutes() < 5) {
+                const hoje = new Date();
+                const dia = hoje.getDate();
+                const mes = hoje.getMonth();
+                const registration = await navigator.serviceWorker.ready;
+                
+                aniversariantes.forEach(m => {
+                    if (!m.dataNascimento) return;
+                    
+                    const dataNasc = new Date(m.dataNascimento);
+                    if (dataNasc.getDate() === dia && dataNasc.getMonth() === mes) {
+                        const jaNotificou = localStorage.getItem(`notif-aniversario-${m.id}-${hoje.toDateString()}`);
+                        
+                        if (!jaNotificou) {
+                            registration.showNotification('🎂 Feliz Aniversário!', {
+                                body: `${m.nome} está fazendo aniversário hoje! 🎉`,
+                                icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                                badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                                vibrate: [200, 100, 200, 100, 200],
+                                tag: `aniversario-${m.id}`,
+                                data: { screen: 'aniversariantes' },
+                                requireInteraction: true
+                            });
+                            
+                            localStorage.setItem(`notif-aniversario-${m.id}-${hoje.toDateString()}`, 'true');
+                        }
+                    }
+                });
+            }
+        }
 
-// Adicionar CSS da animação
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideUp {
-        from { transform: translateX(-50%) translateY(20px); opacity: 0; }
-        to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        // Agendar versículo
+        function agendarVersiculo() {
+            const versiculos = [
+                { texto: 'Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito...', ref: 'João 3:16' },
+                { texto: 'O Senhor é o meu pastor; nada me faltará.', ref: 'Salmos 23:1' },
+                { texto: 'Tudo posso naquele que me fortalece.', ref: 'Filipenses 4:13' }
+            ];
+            
+            setInterval(async () => {
+                if (!notificacoesAtivas) return;
+                
+                const agora = new Date();
+                if (agora.getHours() === 7 && agora.getMinutes() < 5) {
+                    const escolhido = versiculos[new Date().getDate() % versiculos.length];
+                    const registration = await navigator.serviceWorker.ready;
+                    
+                    registration.showNotification('📖 Versículo do Dia', {
+                        body: `${escolhido.texto} — ${escolhido.ref}`,
+                        icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                        badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                        vibrate: [200, 100, 200],
+                        tag: 'versiculo-diario',
+                        data: { screen: 'biblia' }
+                    });
+                }
+            }, 60000);
+        }
+
+        // Mostrar mensagem
+        function mostrarMensagem(texto) {
+            const msgDiv = document.createElement('div');
+            msgDiv.style.cssText = `
+                position: fixed;
+                bottom: 100px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #2ecc71;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 30px;
+                font-size: 14px;
+                z-index: 10000;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+                animation: slideUp 0.3s;
+            `;
+            msgDiv.textContent = texto;
+            document.body.appendChild(msgDiv);
+            
+            setTimeout(() => msgDiv.remove(), 3000);
+        }
+
+        // Adicionar CSS da animação
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideUp {
+                from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+                to { transform: translateX(-50%) translateY(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // ========== FUNÇÕES PARA MEUS DÍZIMOS ==========
+        
+        // Abrir tela de Meus Dízimos
+window.abrirMeusDizimos = function() {
+    mudarTela('dizimos');
+    carregarMeusDizimos();
+};
+
+// Carregar dízimos do membro logado
+async function carregarMeusDizimos() {
+    if (!window.membroAtual || !window.membroAtual.id) {
+        mostrarMensagem('Erro: Membro não identificado');
+        return;
     }
-`;
-document.head.appendChild(style);
+
+    try {
+        // Mostrar loading
+        const listaElement = document.getElementById('listaDizimos');
+        listaElement.innerHTML = '<div class="text-center" style="padding: 40px;">Carregando seus dízimos...</div>';
+        
+        console.log('Carregando dízimos para o membro:', window.membroAtual.id);
+
+        const contribuicoesRef = collection(window.db, "contribuicoes");
+        
+        // Buscar apenas dízimos do membro logado
+        // Primeiro, buscar todos os dízimos do membro sem orderBy para evitar índice composto
+        const q = query(
+            contribuicoesRef, 
+            where("tipo", "==", "dizimo"),
+            where("membroId", "==", window.membroAtual.id)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        
+        meusDizimos = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            console.log('Dízimo encontrado:', data);
+            meusDizimos.push({
+                id: doc.id,
+                ...data
+            });
+        });
+
+        // Ordenar por data manualmente (mais recente primeiro)
+        meusDizimos.sort((a, b) => {
+            const dataA = a.data ? (a.data.toDate ? a.data.toDate() : new Date(a.data)) : new Date(0);
+            const dataB = b.data ? (b.data.toDate ? b.data.toDate() : new Date(b.data)) : new Date(0);
+            return dataB - dataA;
+        });
+
+        console.log('Total de dízimos carregados:', meusDizimos.length);
+
+        // Aplicar filtro padrão (todos)
+        filtrarDizimos();
+
+    } catch (error) {
+        console.error('Erro detalhado ao carregar dízimos:', error);
+        mostrarMensagem('Erro ao carregar seus dízimos: ' + error.message);
+        
+        const listaElement = document.getElementById('listaDizimos');
+        listaElement.innerHTML = `
+            <div class="dizimo-empty">
+                <span>❌</span>
+                <p>Erro ao carregar seus dízimos</p>
+                <button class="action-btn" style="margin-top: 15px;" onclick="carregarMeusDizimos()">
+                    Tentar novamente
+                </button>
+            </div>
+        `;
+    }
+}
+
+// Filtrar dízimos por período
+window.filtrarDizimos = function() {
+    const filtro = document.getElementById('filtroPeriodoDizimos').value;
+    const hoje = new Date();
+    let dataLimite = null;
+
+    // Definir data limite baseada no filtro
+    if (filtro === 'ano') {
+        dataLimite = new Date(hoje.getFullYear() - 1, hoje.getMonth(), hoje.getDate());
+    } else if (filtro === 'mes') {
+        dataLimite = new Date(hoje.getFullYear(), hoje.getMonth() - 1, hoje.getDate());
+    } else if (filtro === 'trimestre') {
+        dataLimite = new Date(hoje.getFullYear(), hoje.getMonth() - 3, hoje.getDate());
+    }
+
+    // Filtrar os dízimos
+    let dizimosFiltrados = meusDizimos;
+    if (dataLimite) {
+        dizimosFiltrados = meusDizimos.filter(d => {
+            if (!d.data) return false;
+            
+            // Converter data para comparação
+            let dataDizimo;
+            if (d.data && typeof d.data.toDate === 'function') {
+                // É um Timestamp do Firebase
+                dataDizimo = d.data.toDate();
+            } else if (d.data) {
+                // É uma string ou Date
+                dataDizimo = new Date(d.data);
+            } else {
+                return false;
+            }
+            
+            return dataDizimo >= dataLimite;
+        });
+    }
+
+    // Calcular total
+    const total = dizimosFiltrados.reduce((acc, d) => {
+        const valor = parseFloat(d.valor) || 0;
+        return acc + valor;
+    }, 0);
+    
+    // Atualizar resumo
+    document.getElementById('totalDizimos').textContent = formatarMoeda(total);
+    document.getElementById('totalContribuicoes').textContent = 
+        `${dizimosFiltrados.length} contribuição${dizimosFiltrados.length !== 1 ? 'ões' : ''}`;
+
+    // Renderizar lista
+    renderizarListaDizimos(dizimosFiltrados);
+};
+
+// Renderizar lista de dízimos
+function renderizarListaDizimos(dizimos) {
+    const listaElement = document.getElementById('listaDizimos');
+
+    if (!dizimos || dizimos.length === 0) {
+        listaElement.innerHTML = `
+            <div class="dizimo-empty">
+                <span>💰</span>
+                <p>Você ainda não tem dízimos registrados</p>
+                <button class="action-btn" style="margin-top: 15px;" onclick="abrirModalContribuicao()">
+                    Registrar meu primeiro dízimo
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+
+    dizimos.forEach(d => {
+        // Tratar data de forma segura
+        let data;
+        if (d.data && typeof d.data.toDate === 'function') {
+            data = d.data.toDate();
+        } else if (d.data) {
+            data = new Date(d.data);
+        } else {
+            data = new Date(); // fallback
+        }
+        
+        // Verificar se a data é válida
+        if (isNaN(data.getTime())) {
+            data = new Date(); // fallback
+        }
+        
+        const dataFormatada = data.toLocaleDateString('pt-BR', { 
+            day: '2-digit', 
+            month: 'long',
+            year: 'numeric'
+        });
+
+        const statusClass = d.status === 'confirmado' ? 'status-confirmado' : 
+                           d.status === 'pendente' ? 'status-pendente' : 'status-cancelado';
+        
+        const statusTexto = d.status === 'confirmado' ? 'Confirmado' :
+                           d.status === 'pendente' ? 'Pendente' : 'Cancelado';
+
+        // Formatar valor de forma segura
+        const valor = parseFloat(d.valor) || 0;
+
+        html += `
+            <div class="dizimo-item">
+                <div class="dizimo-item-header">
+                    <span class="dizimo-item-data">${dataFormatada}</span>
+                    <span class="dizimo-item-valor">${formatarMoeda(valor)}</span>
+                </div>
+                <div class="dizimo-item-detalhes">
+                    <span>💳 ${formatarFormaPagamento(d.formaPagamento)}</span>
+                    <span class="dizimo-item-status ${statusClass}">${statusTexto}</span>
+                </div>
+                ${d.observacoes ? `
+                    <div style="margin-top: 8px; font-size: 12px; color: var(--text-light);">
+                        📝 ${d.observacoes}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    });
+
+    listaElement.innerHTML = html;
+}
+
+// Formatar forma de pagamento
+function formatarFormaPagamento(forma) {
+    const formas = {
+        'dinheiro': 'Dinheiro',
+        'pix': 'PIX',
+        'cartao': 'Cartão',
+        'transferencia': 'Transferência',
+        'cheque': 'Cheque'
+    };
+    return formas[forma] || forma || 'Não informado';
+}
+
+// Formatar moeda
+function formatarMoeda(valor) {
+    if (isNaN(valor)) valor = 0;
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(valor);
+}
 
         // ========== BÍBLIA ==========
         const livrosBiblia = [
@@ -2012,6 +2357,11 @@ document.head.appendChild(style);
                 
                 alert('✅ Contribuição registrada com sucesso!');
                 fecharModalContribuicao();
+
+                // Se estiver na tela de dízimos, recarregar
+                if (document.getElementById('dizimosScreen').classList.contains('active')) {
+                    carregarMeusDizimos();
+                }
 
             } catch (error) {
                 console.error('Erro ao salvar:', error);
