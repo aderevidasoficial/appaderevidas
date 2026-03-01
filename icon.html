@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gerador de Ícones</title>
+</head>
+<body>
+    <canvas id="canvas" style="display: none;"></canvas>
+    
+    <div style="padding: 20px;">
+        <h2>Gerador de Ícones para PWA</h2>
+        
+        <input type="file" id="upload" accept="image/*">
+        <br><br>
+        
+        <div id="preview"></div>
+        <br>
+        
+        <button onclick="generateIcons()">Gerar Ícones</button>
+        
+        <div id="results" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        document.getElementById('upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.maxWidth = '200px';
+                    img.style.maxHeight = '200px';
+                    
+                    const preview = document.getElementById('preview');
+                    preview.innerHTML = '';
+                    preview.appendChild(img);
+                    
+                    window.originalImage = img;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function generateIcons() {
+            if (!window.originalImage) {
+                alert('Selecione uma imagem primeiro');
+                return;
+            }
+
+            const sizes = [72, 96, 128, 144, 152, 167, 180, 192, 384, 512];
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            let results = '<h3>Ícones gerados:</h3><div style="display: flex; flex-wrap: wrap; gap: 10px;">';
+            
+            sizes.forEach(size => {
+                canvas.width = size;
+                canvas.height = size;
+                
+                // Limpar canvas
+                ctx.clearRect(0, 0, size, size);
+                
+                // Desenhar fundo (opcional)
+                ctx.fillStyle = '#2c3e50';
+                ctx.fillRect(0, 0, size, size);
+                
+                // Desenhar imagem redimensionada
+                ctx.drawImage(window.originalImage, 0, 0, size, size);
+                
+                // Criar link para download
+                const dataUrl = canvas.toDataURL('image/png');
+                
+                results += `
+                    <div style="text-align: center;">
+                        <img src="${dataUrl}" width="${size}" height="${size}" style="border: 1px solid #ccc;"><br>
+                        <strong>${size}x${size}</strong><br>
+                        <a href="${dataUrl}" download="icon-${size}x${size}.png">Download</a>
+                    </div>
+                `;
+            });
+            
+            results += '</div>';
+            document.getElementById('results').innerHTML = results;
+        }
+    </script>
+</body>
+</html>

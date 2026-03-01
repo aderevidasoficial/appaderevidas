@@ -1,0 +1,672 @@
+<!-- File: temp\externo\consultar-cadastro.html -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar Status do Cadastro - Sistema Igreja</title>
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AdereVidas">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" href="https://i.ibb.co/1G3ctD9b/logo-igreja.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="https://i.ibb.co/1G3ctD9b/logo-igreja.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://i.ibb.co/1G3ctD9b/logo-igreja.png">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 600px;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+
+        .consultar-form {
+            margin-bottom: 30px;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .info-box strong {
+            color: #2980b9;
+        }
+
+        /* Estilos para resultado */
+        .resultado-container {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .status-card {
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .status-pendente {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .status-aprovado {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .status-rejeitado {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .status-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .status-titulo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .status-mensagem {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .status-detalhes {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .detalhe-item {
+            margin-bottom: 8px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .detalhe-label {
+            font-weight: 600;
+        }
+
+        .instrucoes-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #3498db;
+        }
+
+        .instrucoes-box h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .instrucoes-box ul {
+            padding-left: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .instrucoes-box li {
+            margin-bottom: 8px;
+        }
+
+        .data-header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .data-nascimento-info {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .mensagem-importante {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        .motivo-rejeicao {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .acoes-aprovacao {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+        }
+
+        .link-voltar {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Consultar Status do Cadastro</h1>
+            <p>Informe seu CPF e data de nascimento para consultar</p>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <div class="info-box">
+            <strong>🆕 Nova forma de consulta!</strong><br>
+            Agora você pode consultar seu cadastro usando apenas seu <strong>CPF</strong> e <strong>Data de Nascimento</strong>.
+            Não é mais necessário guardar o número do protocolo.
+        </div>
+
+        <div class="consultar-form" id="formConsulta">
+            <div class="form-group required">
+                <label for="cpfConsulta">CPF</label>
+                <input type="text" id="cpfConsulta" placeholder="000.000.000-00" required oninput="formatarCPFConsulta(this)">
+                <div class="help-text">Digite o CPF usado no cadastro</div>
+            </div>
+            
+            <div class="form-group required">
+                <label for="dataNascimentoConsulta">Data de Nascimento</label>
+                <input type="date" id="dataNascimentoConsulta" required>
+                <div class="help-text">Informe a mesma data de nascimento usada no cadastro</div>
+            </div>
+            
+            <div class="form-actions" style="justify-content: center;">
+                <button class="btn btn-success" id="consultarBtn" onclick="consultarStatus()">
+                    Consultar Status
+                </button>
+                <a href="index.html" class="btn btn-secondary" style="margin-left: 10px;">
+                    Novo Cadastro
+                </a>
+            </div>
+        </div>
+
+        <div class="resultado-container" id="resultadoConsulta">
+            <!-- Data Header -->
+            <div class="data-header">
+                <div>Consulta realizada para</div>
+                <div class="data-nascimento-info" id="dataNascimentoExibida"></div>
+                <div id="cpfExibido" style="font-size: 14px; opacity: 0.9;"></div>
+            </div>
+
+            <!-- Card de Status -->
+            <div id="statusCard" class="status-card">
+                <!-- Conteúdo será preenchido dinamicamente -->
+            </div>
+
+            <!-- Detalhes da Solicitação -->
+            <div class="status-detalhes" id="detalhesSolicitacao">
+                <!-- Conteúdo será preenchido dinamicamente -->
+            </div>
+
+            <!-- Motivo da Rejeição -->
+            <div id="motivoRejeicaoContainer" class="motivo-rejeicao" style="display: none;">
+                <h4>📋 Motivo da Rejeição:</h4>
+                <p id="motivoRejeicaoTexto"></p>
+                <p id="observacoesRejeicaoTexto" style="margin-top: 10px; font-style: italic;"></p>
+            </div>
+
+            <!-- Instruções por Status -->
+            <div id="instrucoesPendente" class="instrucoes-box" style="display: none;">
+                <h4>⏳ Status: Pendente de Análise</h4>
+                <ul>
+                    <li>Sua solicitação está na fila para análise pela administração</li>
+                    <li>O prazo médio de análise é de 3 a 7 dias úteis</li>
+                    <li>Você receberá um email quando houver atualização</li>
+                    <li>Para dúvidas, entre em contato com a secretaria da igreja</li>
+                </ul>
+            </div>
+
+            <div id="instrucoesAprovado" class="instrucoes-box" style="display: none;">
+                <h4>✅ Status: Cadastro Aprovado!</h4>
+                <ul>
+                    <li>Seu cadastro foi aprovado e você agora é membro oficial</li>
+                    <li>Seus dados foram incluídos no sistema da igreja</li>
+                    <li>Você terá acesso aos eventos e atividades da igreja</li>
+                    <li>Em breve você receberá as credenciais de acesso ao sistema</li>
+                </ul>
+                
+                <div class="mensagem-importante" style="margin-top: 15px;">
+                    <strong>📞 Contato Importante:</strong><br>
+                    Entre em contato com a secretaria para obter suas credenciais de acesso e informações sobre as próximas atividades.
+                </div>
+
+                <div class="acoes-aprovacao">
+                    <a href="login.html" class="btn btn-login">
+                        🔐 Acessar Sistema
+                    </a>
+                    <button class="btn btn-whatsapp" onclick="abrirWhatsApp()">
+                        📱 Contatar Igreja
+                    </button>
+                </div>
+            </div>
+
+            <div id="instrucoesRejeitado" class="instrucoes-box" style="display: none;">
+                <h4>❌ Status: Cadastro Não Aprovado</h4>
+                <ul>
+                    <li>Sua solicitação não foi aprovada pela administração</li>
+                    <li>Verifique abaixo o motivo da rejeição</li>
+                    <li>Para mais informações, entre em contato com a secretaria</li>
+                    <li>Você pode submeter uma nova solicitação se necessário</li>
+                </ul>
+
+                <div class="acoes-aprovacao">
+                    <a href="index.html" class="btn btn-success">
+                        ✏️ Nova Solicitação
+                    </a>
+                    <button class="btn" onclick="abrirWhatsApp()">
+                        📱 Falar com Secretaria
+                    </button>
+                </div>
+            </div>
+
+            <div class="link-voltar">
+                <a href="#" onclick="voltarConsulta()" style="color: #3498db;">
+                    ← Voltar para nova consulta
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeAppModules } from './firebase-config.js';
+        import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('consultarBtn').addEventListener('click', consultarStatus);
+            
+            // Permitir consulta com Enter
+            document.getElementById('cpfConsulta').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') consultarStatus();
+            });
+            
+            document.getElementById('dataNascimentoConsulta').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') consultarStatus();
+            });
+        });
+        
+        window.formatarCPFConsulta = function(input) {
+            let value = input.value.replace(/\D/g, '');
+            
+            if (value.length > 11) {
+                value = value.substring(0, 11);
+            }
+            
+            if (value.length > 9) {
+                value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+            } else if (value.length > 6) {
+                value = value.replace(/^(\d{3})(\d{3})(\d{0,3})$/, '$1.$2.$3');
+            } else if (value.length > 3) {
+                value = value.replace(/^(\d{3})(\d{0,3})$/, '$1.$2');
+            }
+            
+            input.value = value;
+        };
+        
+        async function consultarStatus() {
+            const cpf = document.getElementById('cpfConsulta').value.replace(/\D/g, '');
+            const dataNascimento = document.getElementById('dataNascimentoConsulta').value;
+            
+            if (!cpf || cpf.length !== 11) {
+                showMessage('CPF inválido. Digite um CPF válido.', 'error');
+                return;
+            }
+            
+            if (!dataNascimento) {
+                showMessage('Data de nascimento é obrigatória.', 'error');
+                return;
+            }
+            
+            // Validar data de nascimento (não pode ser futura)
+            const hoje = new Date();
+            const dataNasc = new Date(dataNascimento);
+            if (dataNasc > hoje) {
+                showMessage('Data de nascimento não pode ser futura.', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                const { db } = await initializeAppModules();
+                
+                // Buscar solicitação por CPF e data de nascimento
+                const solicitacoesRef = collection(db, "solicitacoes_cadastro");
+                const q = query(
+                    solicitacoesRef,
+                    where("cpf", "==", cpf),
+                    where("dataNascimento", "==", dataNascimento)
+                );
+                
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    showMessage('Nenhuma solicitação encontrada com esses dados. Verifique o CPF e data de nascimento.', 'error');
+                    showLoading(false);
+                    return;
+                }
+                
+                // Pode haver múltiplas solicitações (se a pessoa tentou mais de uma vez)
+                // Vamos pegar a mais recente
+                let solicitacoes = [];
+                querySnapshot.forEach((doc) => {
+                    solicitacoes.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                // Ordenar por data (mais recente primeiro)
+                solicitacoes.sort((a, b) => {
+                    return new Date(b.dataSolicitacao) - new Date(a.dataSolicitacao);
+                });
+                
+                // Pegar a mais recente
+                const solicitacao = solicitacoes[0];
+                
+                // Mostrar resultado
+                exibirResultado(solicitacao, cpf, dataNascimento);
+                
+            } catch (error) {
+                console.error('Erro ao consultar:', error);
+                showMessage('Erro ao consultar status: ' + error.message, 'error');
+                showLoading(false);
+            }
+        }
+        
+        function exibirResultado(solicitacao, cpf, dataNascimento) {
+            // Mostrar resultado e esconder formulário
+            document.getElementById('formConsulta').style.display = 'none';
+            document.getElementById('resultadoConsulta').style.display = 'block';
+            
+            // Exibir CPF e data de nascimento
+            document.getElementById('cpfExibido').textContent = `CPF: ${formatarCPFParaExibicao(cpf)}`;
+            
+            const dataNasc = new Date(dataNascimento);
+            document.getElementById('dataNascimentoExibida').innerHTML = `
+                ${dataNasc.toLocaleDateString('pt-BR', {day: '2-digit', month: 'long', year: 'numeric'})}
+            `;
+            
+            const status = solicitacao.status || 'pendente';
+            
+            // Configurar card de status
+            let cardHTML = '';
+            let cardClass = '';
+            
+            switch(status) {
+                case 'pendente':
+                    cardClass = 'status-pendente';
+                    cardHTML = `
+                        <div class="status-icon">⏳</div>
+                        <div class="status-titulo">Solicitação em Análise</div>
+                        <div class="status-mensagem">
+                            Sua solicitação está sendo analisada pela administração da igreja
+                        </div>
+                    `;
+                    break;
+                    
+                case 'aprovado':
+                    cardClass = 'status-aprovado';
+                    cardHTML = `
+                        <div class="status-icon">✅</div>
+                        <div class="status-titulo">Cadastro Aprovado!</div>
+                        <div class="status-mensagem">
+                            Parabéns! Seu cadastro foi aprovado e você agora é membro oficial
+                        </div>
+                    `;
+                    break;
+                    
+                case 'rejeitado':
+                    cardClass = 'status-rejeitado';
+                    cardHTML = `
+                        <div class="status-icon">❌</div>
+                        <div class="status-titulo">Cadastro Não Aprovado</div>
+                        <div class="status-mensagem">
+                            Sua solicitação não foi aprovada pela administração
+                        </div>
+                    `;
+                    break;
+            }
+            
+            const statusCard = document.getElementById('statusCard');
+            statusCard.className = `status-card ${cardClass}`;
+            statusCard.innerHTML = cardHTML;
+            
+            // Preencher detalhes da solicitação
+            const dataSolicitacao = new Date(solicitacao.dataSolicitacao);
+            let detalhesHTML = `
+                <div class="detalhe-item">
+                    <span class="detalhe-label">Nome:</span>
+                    <span>${solicitacao.nome} ${solicitacao.apelido ? `(${solicitacao.apelido})` : ''}</span>
+                </div>
+                <div class="detalhe-item">
+                    <span class="detalhe-label">Data da Solicitação:</span>
+                    <span>${dataSolicitacao.toLocaleDateString('pt-BR')} ${dataSolicitacao.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}</span>
+                </div>
+                <div class="detalhe-item">
+                    <span class="detalhe-label">Email:</span>
+                    <span>${solicitacao.email}</span>
+                </div>
+                <div class="detalhe-item">
+                    <span class="detalhe-label">Telefone:</span>
+                    <span>${solicitacao.telefone}</span>
+                </div>
+            `;
+            
+            if (solicitacao.dataAprovacao) {
+                const dataAprovacao = new Date(solicitacao.dataAprovacao);
+                detalhesHTML += `
+                    <div class="detalhe-item">
+                        <span class="detalhe-label">Data da Aprovação:</span>
+                        <span>${dataAprovacao.toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    ${solicitacao.tipoMembroAprovado ? `
+                        <div class="detalhe-item">
+                            <span class="detalhe-label">Tipo de Membro:</span>
+                            <span>${solicitacao.tipoMembroAprovado === 'membro' ? 'Membro' : 
+                                   solicitacao.tipoMembroAprovado === 'visitante' ? 'Visitante' :
+                                   solicitacao.tipoMembroAprovado === 'lider' ? 'Líder' : 'Diácono'}</span>
+                        </div>
+                    ` : ''}
+                    ${solicitacao.aprovadoPor ? `
+                        <div class="detalhe-item">
+                            <span class="detalhe-label">Aprovado por:</span>
+                            <span>${solicitacao.aprovadoPor}</span>
+                        </div>
+                    ` : ''}
+                `;
+            }
+            
+            if (solicitacao.dataRejeicao) {
+                const dataRejeicao = new Date(solicitacao.dataRejeicao);
+                detalhesHTML += `
+                    <div class="detalhe-item">
+                        <span class="detalhe-label">Data da Rejeição:</span>
+                        <span>${dataRejeicao.toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    ${solicitacao.rejeitadoPor ? `
+                        <div class="detalhe-item">
+                            <span class="detalhe-label">Rejeitado por:</span>
+                            <span>${solicitacao.rejeitadoPor}</span>
+                        </div>
+                    ` : ''}
+                `;
+            }
+            
+            document.getElementById('detalhesSolicitacao').innerHTML = detalhesHTML;
+            
+            // Mostrar/ocultar instruções conforme status
+            document.getElementById('instrucoesPendente').style.display = status === 'pendente' ? 'block' : 'none';
+            document.getElementById('instrucoesAprovado').style.display = status === 'aprovado' ? 'block' : 'none';
+            document.getElementById('instrucoesRejeitado').style.display = status === 'rejeitado' ? 'block' : 'none';
+            
+            // Mostrar motivo da rejeição se houver
+            if (status === 'rejeitado' && solicitacao.motivoRejeicao) {
+                const motivoContainer = document.getElementById('motivoRejeicaoContainer');
+                const motivoTexto = document.getElementById('motivoRejeicaoTexto');
+                const observacoesTexto = document.getElementById('observacoesRejeicaoTexto');
+                
+                motivoContainer.style.display = 'block';
+                
+                // Mapear motivo para texto amigável
+                const motivos = {
+                    'dados_incompletos': 'Dados do formulário incompletos',
+                    'dados_inconsistentes': 'Informações inconsistentes ou inválidas',
+                    'nao_membro': 'Não é membro regular da igreja',
+                    'outro': 'Outro motivo (ver observações)'
+                };
+                
+                motivoTexto.textContent = motivos[solicitacao.motivoRejeicao] || solicitacao.motivoRejeicao;
+                
+                if (solicitacao.observacoesRejeicao) {
+                    observacoesTexto.textContent = `Observações: ${solicitacao.observacoesRejeicao}`;
+                }
+            }
+            
+            showLoading(false);
+        }
+        
+        function formatarCPFParaExibicao(cpf) {
+            if (!cpf) return '';
+            cpf = cpf.replace(/\D/g, '');
+            return cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+        }
+        
+        window.voltarConsulta = function() {
+            document.getElementById('formConsulta').style.display = 'block';
+            document.getElementById('resultadoConsulta').style.display = 'none';
+            document.getElementById('cpfConsulta').value = '';
+            document.getElementById('dataNascimentoConsulta').value = '';
+            document.getElementById('cpfConsulta').focus();
+        };
+        
+        window.abrirWhatsApp = function() {
+            // Número da igreja (substitua pelo número real)
+            const numeroIgreja = '5511999999999';
+            const mensagem = 'Olá! Gostaria de informações sobre meu cadastro na igreja.';
+            window.open(`https://wa.me/${numeroIgreja}?text=${encodeURIComponent(mensagem)}`, '_blank');
+        };
+        
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = message;
+            messageDiv.className = 'message ' + type;
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showLoading(show) {
+            const btn = document.getElementById('consultarBtn');
+            if (show) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="loading-spinner"></span> Consultando...';
+            } else {
+                btn.disabled = false;
+                btn.textContent = 'Consultar Status';
+            }
+        }
+    </script>
+</body>
+</html>

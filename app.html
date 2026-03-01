@@ -1,0 +1,2966 @@
+<!-- File: app/app.html -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>AdereVidas App</title>
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AdereVidas">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- iOS Icons -->
+    <link rel="apple-touch-icon" href="https://i.ibb.co/1G3ctD9b/logo-igreja.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="https://i.ibb.co/1G3ctD9b/logo-igreja.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://i.ibb.co/1G3ctD9b/logo-igreja.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="https://i.ibb.co/1G3ctD9b/logo-igreja.png">
+    <!-- Ícones para iOS (Apple Touch Icons) -->
+    <link rel="apple-touch-icon" sizes="16x16" href="/ios/16.png">
+    <link rel="apple-touch-icon" sizes="20x20" href="/ios/20.png">
+    <link rel="apple-touch-icon" sizes="29x29" href="/ios/29.png">
+    <link rel="apple-touch-icon" sizes="32x32" href="/ios/32.png">
+    <link rel="apple-touch-icon" sizes="40x40" href="/ios/40.png">
+    <link rel="apple-touch-icon" sizes="50x50" href="/ios/50.png">
+    <link rel="apple-touch-icon" sizes="57x57" href="/ios/57.png">
+    <link rel="apple-touch-icon" sizes="58x58" href="/ios/58.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/ios/60.png">
+    <link rel="apple-touch-icon" sizes="64x64" href="/ios/64.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/ios/72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/ios/76.png">
+    <link rel="apple-touch-icon" sizes="80x80" href="/ios/80.png">
+    <link rel="apple-touch-icon" sizes="87x87" href="/ios/87.png">
+    <link rel="apple-touch-icon" sizes="100x100" href="/ios/100.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/ios/114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/ios/120.png">
+    <link rel="apple-touch-icon" sizes="128x128" href="/ios/128.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/ios/144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/ios/152.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="/ios/167.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/ios/180.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/ios/192.png">
+    <link rel="apple-touch-icon" sizes="256x256" href="/ios/256.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/ios/512.png">
+    <link rel="apple-touch-icon" sizes="1024x1024" href="/ios/1024.png">
+
+    <!-- Para iOS, também é bom adicionar: -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AdereVidas">
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy, where, doc, getDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4PNzTUJ1mA3QgrxJDL8vYuzHMBhrhI04",
+            authDomain: "aderevidas-da996.firebaseapp.com",
+            projectId: "aderevidas-da996",
+            storageBucket: "aderevidas-da996.firebasestorage.app",
+            messagingSenderId: "671945975313",
+            appId: "1:671945975313:web:b7d3a1b4e78c5d5a8fb3b0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        window.db = db;
+        window.collection = collection;
+        window.getDocs = getDocs;
+        window.query = query;
+        window.orderBy = orderBy;
+        window.where = where;
+        window.addDoc = addDoc;
+    </script>
+
+    <script>
+        // REGISTRO DO SERVICE WORKER - VERSÃO CORRIGIDA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(function(registration) {
+                        console.log('✅ Service Worker registrado com sucesso!', registration.scope);
+                        
+                        registration.addEventListener('updatefound', function() {
+                            console.log('🔄 Nova versão encontrada!');
+                        });
+                        
+                        if (window.matchMedia('(display-mode: standalone)').matches) {
+                            console.log('✅ App rodando em modo standalone!');
+                            document.body.classList.add('installed');
+                        }
+                    })
+                    .catch(function(error) {
+                        console.log('❌ Erro ao registrar Service Worker:', error);
+                    });
+            });
+            
+            // Verificar atualizações periodicamente
+            setInterval(function() {
+                navigator.serviceWorker.ready.then(function(registration) {
+                    registration.update();
+                });
+            }, 60 * 60 * 1000); // A cada hora
+        }
+        
+        // Capturar evento de instalação
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', function(e) {
+            console.log('📱 Pode ser instalado!');
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Mostrar botão de instalação se não estiver instalado
+            setTimeout(showInstallButton, 2000);
+        });
+        
+        // Detectar quando instalado
+        window.addEventListener('appinstalled', function(e) {
+            console.log('✅ App instalado com sucesso!');
+            deferredPrompt = null;
+            document.getElementById('installPrompt')?.remove();
+        });
+        
+        function showInstallButton() {
+            if (!deferredPrompt || document.getElementById('installPrompt')) return;
+            
+            const btn = document.createElement('div');
+            btn.id = 'installPrompt';
+            btn.style.cssText = `
+                position: fixed;
+                bottom: 100px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #3498db;
+                color: white;
+                padding: 15px 30px;
+                border-radius: 30px;
+                font-size: 16px;
+                font-weight: bold;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                z-index: 10000;
+                cursor: pointer;
+                animation: pulse 2s infinite;
+                border: none;
+            `;
+            btn.innerHTML = '📱 INSTALAR APP';
+            btn.onclick = function() {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then(function(choiceResult) {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('✅ Usuário aceitou instalar');
+                        }
+                        deferredPrompt = null;
+                        btn.remove();
+                    });
+                }
+            };
+            document.body.appendChild(btn);
+        }
+    </script>
+    
+    <style>
+        @keyframes pulse {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+            100% { transform: translateX(-50%) scale(1); }
+        }
+        
+        /* Diagnóstico visual */
+        .installed {
+            border-left: 5px solid #2ecc71;
+        }
+
+    
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --purple: #9b59b6;
+            --orange: #e67e22;
+            --gray: #95a5a6;
+            --light: #f8f9fa;
+            --text: #34495e;
+            --text-light: #7f8c8d;
+            --border: #e0e0e0;
+            --birthday: #ff4081;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            background: var(--primary);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #app {
+            width: 100%;
+            height: 100%;
+            max-width: 450px;
+            background: var(--light);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        /* Telas */
+        .screen {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 80px;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 20px;
+            padding-top: max(15px, var(--safe-top));
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .app-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .app-header button {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            font-size: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Menu inferior */
+        .bottom-menu {
+            display: flex;
+            background: white;
+            border-top: 1px solid var(--border);
+            padding: 8px 0;
+            padding-bottom: max(8px, var(--safe-bottom));
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 450px;
+            margin: 0 auto;
+            z-index: 10;
+        }
+
+        .menu-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-light);
+            font-size: 11px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px 0;
+        }
+
+        .menu-item span {
+            font-size: 22px;
+        }
+
+        .menu-item.active {
+            color: var(--secondary);
+        }
+
+        /* Conteúdo */
+        .content {
+            padding: 15px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ========== CALENDÁRIO ========== */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .calendar-nav button {
+            padding: 8px 12px;
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .calendar-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .calendar-day-header {
+            background: var(--primary);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .calendar-day {
+            background: white;
+            padding: 8px;
+            min-height: 70px;
+            border: 1px solid var(--border);
+        }
+
+        .calendar-day.today {
+            background: #e3f2fd;
+            border: 2px solid var(--secondary);
+        }
+
+        .calendar-day.other-month {
+            background: #f8f9fa;
+            color: #999;
+        }
+
+        .day-number {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .event-item {
+            padding: 3px 5px;
+            border-radius: 3px;
+            margin-top: 3px;
+            font-size: 10px;
+            color: white;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .event-item.culto { background: var(--secondary); }
+        .event-item.escola-dominical { background: var(--success); }
+        .event-item.celula { background: var(--purple); }
+        .event-item.evento-especial { background: var(--accent); }
+        .event-item.reuniao { background: var(--warning); }
+        .event-item.outro { background: var(--gray); }
+
+        /* Lista de Eventos */
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .view-btn {
+            flex: 1;
+            padding: 12px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .view-btn.active {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        .event-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .event-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .event-type-badge {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 10px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .event-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .event-description {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        .filter-container {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        /* Grid */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: var(--light);
+            border: none;
+            border-radius: 12px;
+            padding: 15px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .action-btn span {
+            font-size: 28px;
+        }
+
+        .action-btn small {
+            font-size: 12px;
+            color: var(--text);
+        }
+
+        /* Eventos na Home */
+        .event-item-home {
+            display: flex;
+            gap: 15px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .event-date {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: white;
+            min-width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .event-date .day {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .event-date .month {
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .event-info h4 {
+            font-size: 16px;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .event-info p {
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        /* Aniversariantes */
+        .birthday-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            background: var(--light);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .birthday-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .birthday-info h4 {
+            font-size: 16px;
+            color: var(--text);
+        }
+
+        .birthday-info p {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* Bíblia */
+        .bible-verse {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .bible-verse .reference {
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 8px;
+        }
+
+        .bible-verse .text {
+            line-height: 1.6;
+            font-size: 15px;
+            color: var(--text);
+        }
+
+        .chapter-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            padding: 10px;
+            background: var(--light);
+            border-radius: 10px;
+        }
+
+        .chapter-nav-btn {
+            padding: 8px 15px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .chapter-nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .current-chapter {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .book-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .book-btn {
+            padding: 10px 5px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .book-btn:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        /* Notificações */
+        .notification-permission {
+            background: linear-gradient(135deg, var(--warning), #f39c12);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            animation: pulse 2s infinite;
+        }
+
+        .notification-permission button {
+            background: white;
+            color: var(--warning);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .notification-permission button:hover {
+            transform: scale(1.05);
+        }
+
+        .notification-status {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid var(--success);
+        }
+
+        .notification-status.active {
+            border-left-color: var(--success);
+        }
+
+        .notification-status.inactive {
+            border-left-color: var(--warning);
+        }
+
+        .notification-icon {
+            font-size: 24px;
+        }
+
+        .notification-info {
+            flex: 1;
+        }
+
+        .notification-info h4 {
+            font-size: 16px;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .notification-info p {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .notification-switch {
+            width: 50px;
+            height: 30px;
+            background: var(--gray);
+            border-radius: 15px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .notification-switch.active {
+            background: var(--success);
+        }
+
+        .notification-switch::after {
+            content: '';
+            width: 26px;
+            height: 26px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: 0.3s;
+        }
+
+        .notification-switch.active::after {
+            left: 22px;
+        }
+
+        .notification-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .notification-item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .notification-item-content {
+            flex: 1;
+        }
+
+        .notification-item-title {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+
+        .notification-item-desc {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .notification-item-time {
+            font-size: 11px;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        /* Menu lateral */
+        #menuLateral {
+            position: fixed;
+            left: -100%;
+            top: 0;
+            width: 80%;
+            max-width: 300px;
+            height: 100%;
+            background: white;
+            z-index: 1000;
+            transition: left 0.3s;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #menuLateral.active {
+            left: 0;
+        }
+
+        .menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .menu-overlay.active {
+            display: block;
+        }
+
+        .menu-user-info {
+            padding: 30px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .menu-user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            border: 3px solid white;
+        }
+
+        .menu-item-list {
+            padding: 20px;
+        }
+
+        .menu-item-list button {
+            width: 100%;
+            padding: 15px;
+            text-align: left;
+            background: none;
+            border: none;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        .menu-item-list button:active {
+            background: var(--light);
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top-color: var(--secondary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .text-center { text-align: center; }
+        .text-light { color: var(--text-light); }
+        .mt-20 { margin-top: 20px; }
+        .mb-10 { margin-bottom: 10px; }
+        .hidden { display: none; }
+
+                /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Overlay do menu -->
+        <div id="menuOverlay" class="menu-overlay" onclick="fecharMenu()"></div>
+
+        <!-- Menu Lateral -->
+        <div id="menuLateral">
+            <div class="menu-user-info">
+                <div class="menu-user-avatar" id="menuAvatar">👤</div>
+                <h3 id="menuNome">Carregando...</h3>
+                <p id="menuEmail"></p>
+            </div>
+            <div class="menu-item-list">
+    <button onclick="verMeusDados(); fecharMenu()">
+        <span>👤</span> Meus Dados
+    </button>
+    <!-- NOVO: Lançar Dízimos/Ofertas -->
+    <button onclick="abrirModalContribuicao(); fecharMenu()">
+        <span>➕</span> Lançar Contribuição
+    </button>
+    <button onclick="abrirConfigNotificacoes(); fecharMenu()">
+        <span>🔔</span> Configurar Notificações
+    </button>
+    <button onclick="sair()" style="color: var(--accent); margin-top: 20px;">
+        <span>🚪</span> Sair do App
+    </button>
+</div>
+        </div>
+
+        <!-- Tela Início -->
+        <div id="homeScreen" class="screen active">
+            <div class="app-header">
+                <button onclick="abrirMenu()">☰</button>
+                <h1 id="welcomeMessage">Olá, Membro!</h1>
+                <button onclick="sair()">↺</button>
+            </div>
+            
+            <div class="content">
+                <!-- Status das notificações -->
+                <div id="notificationStatus" class="notification-status inactive">
+                    <div class="notification-icon">🔕</div>
+                    <div class="notification-info">
+                        <h4>Notificações desativadas</h4>
+                        <p>Ative para receber lembretes importantes</p>
+                    </div>
+                    <div class="notification-switch" onclick="toggleNotificacoes()"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📅 Hoje é</div>
+                    <p style="font-size: 18px; font-weight: 600;" id="dataHoje"></p>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">⚡ Ações Rápidas</div>
+                    <div class="grid-2">
+                        <button class="action-btn" onclick="mudarTela('biblia')">
+                            <span>📖</span> <small>Bíblia</small>
+                        </button>
+                        <button class="action-btn" onclick="mudarTela('eventos')">
+                            <span>📅</span> <small>Eventos</small>
+                        </button>
+                        <button class="action-btn" onclick="mudarTela('aniversariantes')">
+                            <span>🎂</span> <small>Aniversários</small>
+                        </button>
+                        <button class="action-btn" onclick="mudarTela('oracao')">
+                            <span>🙏</span> <small>Oração</small>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📅 Próximos Eventos</div>
+                    <div id="eventosLista"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📖 Versículo do Dia</div>
+                    <div id="versiculoDia" class="text-center"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🎂 Aniversariantes do Mês</div>
+                    <div id="aniversariantesLista"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela Configurações de Notificação -->
+        <div id="notificacoesScreen" class="screen">
+            <div class="app-header">
+                <button onclick="voltarHome()">←</button>
+                <h1>🔔 Notificações</h1>
+                <button onclick="salvarConfigNotificacoes()">💾</button>
+            </div>
+            <div class="content">
+                <div class="card">
+                    <div class="card-title">⚙️ Configurações</div>
+                    
+                    <div class="notification-item">
+                        <div class="notification-item-icon">📅</div>
+                        <div class="notification-item-content">
+                            <div class="notification-item-title">Eventos</div>
+                            <div class="notification-item-desc">Receber lembretes 6h e 2h antes</div>
+                        </div>
+                        <div class="notification-switch" id="switchEventos" onclick="toggleSwitch('eventos')"></div>
+                    </div>
+
+                    <div class="notification-item">
+                        <div class="notification-item-icon">🎂</div>
+                        <div class="notification-item-content">
+                            <div class="notification-item-title">Aniversariantes</div>
+                            <div class="notification-item-desc">Receber às 7h da manhã</div>
+                        </div>
+                        <div class="notification-switch" id="switchAniversarios" onclick="toggleSwitch('aniversarios')"></div>
+                    </div>
+
+                    <div class="notification-item">
+                        <div class="notification-item-icon">📖</div>
+                        <div class="notification-item-content">
+                            <div class="notification-item-title">Versículo do Dia</div>
+                            <div class="notification-item-desc">Receber às 7h da manhã</div>
+                        </div>
+                        <div class="notification-switch" id="switchVersiculo" onclick="toggleSwitch('versiculo')"></div>
+                    </div>
+
+                    <div style="margin-top: 20px; padding: 15px; background: var(--light); border-radius: 10px;">
+                        <h4 style="margin-bottom: 10px;">📅 Horários das notificações:</h4>
+                        <p class="text-light">• Eventos: 6h e 2h antes do evento</p>
+                        <p class="text-light">• Aniversários: 07:00 da manhã</p>
+                        <p class="text-light">• Versículo: 07:00 da manhã</p>
+                    </div>
+                </div>
+
+                <button class="action-btn" onclick="testarNotificacao()" style="margin-top: 10px;">
+                    <span>🔔</span> <small>Testar Notificação</small>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tela Bíblia -->
+        <div id="bibliaScreen" class="screen">
+            <div class="app-header">
+                <button onclick="voltarHome()">←</button>
+                <h1>📖 Bíblia ACF</h1>
+                <button onclick="mostrarBusca()">🔍</button>
+            </div>
+            <div class="content" id="bibliaConteudo"></div>
+        </div>
+
+        <!-- Tela Eventos -->
+        <div id="eventosScreen" class="screen">
+            <div class="app-header">
+                <button onclick="voltarHome()">←</button>
+                <h1>📅 Eventos</h1>
+                <button onclick="carregarEventos()">↻</button>
+            </div>
+            
+            <div class="content">
+                <div class="view-toggle">
+                    <button class="view-btn active" onclick="mudarVisualizacaoEventos('calendario')">Calendário</button>
+                    <button class="view-btn" onclick="mudarVisualizacaoEventos('lista')">Lista</button>
+                </div>
+
+                <!-- Visualização Calendário -->
+                <div id="calendarioView">
+                    <div class="calendar-header">
+                        <div class="calendar-nav">
+                            <button onclick="mudarMes(-1)">←</button>
+                            <span class="calendar-title" id="mesAtual">Janeiro 2026</span>
+                            <button onclick="mudarMes(1)">→</button>
+                        </div>
+                        <button class="view-btn" style="padding: 5px 10px;" onclick="irParaHoje()">Hoje</button>
+                    </div>
+                    
+                    <div class="calendar-grid" id="calendario">
+                        <div class="calendar-day-header">DOM</div>
+                        <div class="calendar-day-header">SEG</div>
+                        <div class="calendar-day-header">TER</div>
+                        <div class="calendar-day-header">QUA</div>
+                        <div class="calendar-day-header">QUI</div>
+                        <div class="calendar-day-header">SEX</div>
+                        <div class="calendar-day-header">SÁB</div>
+                    </div>
+                </div>
+
+                <!-- Visualização Lista -->
+                <div id="listaView" style="display: none;">
+                    <div class="filter-container">
+                        <div class="filter-row">
+                            <select id="filtroTipo" class="filter-select" onchange="filtrarEventos()">
+                                <option value="">Todos os tipos</option>
+                                <option value="culto">Cultos</option>
+                                <option value="escola-dominical">Escola Dominical</option>
+                                <option value="celula">Células</option>
+                                <option value="evento-especial">Eventos Especiais</option>
+                                <option value="reuniao">Reuniões</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="listaEventos"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela Aniversariantes -->
+        <div id="aniversariantesScreen" class="screen">
+            <div class="app-header">
+                <button onclick="voltarHome()">←</button>
+                <h1>🎂 Aniversariantes</h1>
+                <button onclick="carregarAniversariantes()">↻</button>
+            </div>
+            
+            <div class="content">
+                <div class="view-toggle">
+                    <button class="view-btn active" onclick="mudarVisualizacaoAniversariantes('calendario')">Calendário</button>
+                    <button class="view-btn" onclick="mudarVisualizacaoAniversariantes('lista')">Lista</button>
+                </div>
+
+                <!-- Visualização Calendário -->
+                <div id="aniversariantesCalendarioView">
+                    <div class="calendar-header">
+                        <div class="calendar-nav">
+                            <button onclick="mudarMesAniversario(-1)">←</button>
+                            <span class="calendar-title" id="mesAtualAniversario">Janeiro 2026</span>
+                            <button onclick="mudarMesAniversario(1)">→</button>
+                        </div>
+                        <button class="view-btn" style="padding: 5px 10px;" onclick="irParaMesAtualAniversario()">Hoje</button>
+                    </div>
+                    
+                    <div class="calendar-grid" id="aniversariantesCalendario">
+                        <div class="calendar-day-header">DOM</div>
+                        <div class="calendar-day-header">SEG</div>
+                        <div class="calendar-day-header">TER</div>
+                        <div class="calendar-day-header">QUA</div>
+                        <div class="calendar-day-header">QUI</div>
+                        <div class="calendar-day-header">SEX</div>
+                        <div class="calendar-day-header">SÁB</div>
+                    </div>
+                </div>
+
+                <!-- Visualização Lista -->
+                <div id="aniversariantesListView" style="display: none;">
+                    <div id="listaAniversariantes"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela Pedidos de Oração -->
+        <div id="oracaoScreen" class="screen">
+            <div class="app-header">
+                <button onclick="voltarHome()">←</button>
+                <h1>🙏 Pedidos</h1>
+                <button onclick="abrirNovoPedido()">✏️</button>
+            </div>
+            <div class="content">
+                <div class="card">
+                    <div class="card-title">➕ Novo Pedido</div>
+                    <textarea id="novoPedido" placeholder="Digite seu pedido de oração..." 
+                              style="width: 100%; padding: 15px; border: 2px solid var(--border); 
+                                     border-radius: 10px; min-height: 100px; margin-bottom: 10px;"></textarea>
+                    <button class="action-btn" style="width: 100%;" onclick="enviarPedido()">
+                        Enviar Pedido
+                    </button>
+                </div>
+                <div class="card">
+                    <div class="card-title">🙏 Pedidos da Comunidade</div>
+                    <div id="pedidosLista"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Inferior -->
+        <div class="bottom-menu">
+            <button class="menu-item active" onclick="mudarTela('home')" data-screen="home">
+                <span>🏠</span> Início
+            </button>
+            <button class="menu-item" onclick="mudarTela('biblia')" data-screen="biblia">
+                <span>📖</span> Bíblia
+            </button>
+            <button class="menu-item" onclick="mudarTela('eventos')" data-screen="eventos">
+                <span>📅</span> Eventos
+            </button>
+            <button class="menu-item" onclick="mudarTela('aniversariantes')" data-screen="aniversariantes">
+                <span>🎂</span> Aniversários
+            </button>
+            <button class="menu-item" onclick="mudarTela('oracao')" data-screen="oracao">
+                <span>🙏</span> Orações
+            </button>
+        </div>
+    </div>
+
+    <!-- NOVO MODAL: Lançar Contribuição -->
+    <div id="contribuicaoModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+        <div style="background: white; width: 90%; max-width: 400px; border-radius: 20px; padding: 25px; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: var(--text); font-size: 20px;">➕ Lançar Contribuição</h3>
+                <button onclick="fecharModalContribuicao()" style="background: none; border: none; font-size: 28px; color: var(--text-light); cursor: pointer;">×</button>
+            </div>
+
+            <form id="formContribuicao" onsubmit="salvarContribuicao(event)">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--text); font-weight: 500;">Tipo *</label>
+                    <select id="tipoContribuicao" required style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px; font-size: 16px;" onchange="toggleCampoMembro()">
+                        <option value="">Selecione...</option>
+                        <option value="dizimo">💰 Dízimo</option>
+                        <option value="oferta">💵 Oferta</option>
+                    </select>
+                </div>
+
+                <!-- Campo Membro (aparece apenas para Dízimo) -->
+                <div id="campoMembroContainer" style="margin-bottom: 20px; display: none;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--text); font-weight: 500;">Membro *</label>
+                    <select id="membroContribuicao" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px; font-size: 16px;">
+                        <option value="">Selecione um membro...</option>
+                    </select>
+                    <small style="color: var(--text-light); display: block; margin-top: 5px;">Selecione o membro que está dizimando</small>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--text); font-weight: 500;">Data *</label>
+                    <input type="date" id="dataContribuicao" required style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px; font-size: 16px;">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--text); font-weight: 500;">Valor (R$) *</label>
+                    <input type="number" id="valorContribuicao" step="0.01" min="0.01" required placeholder="0,00" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px; font-size: 16px;">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--text); font-weight: 500;">Forma de Pagamento</label>
+                    <select id="formaPagamento" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px; font-size: 16px;">
+                        <option value="dinheiro">Dinheiro</option>
+                        <option value="pix">PIX</option>
+                        <option value="cartao">Cartão</option>
+                        <option value="transferencia">Transferência</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--text); font-weight: 500;">Observações</label>
+                    <textarea id="observacoesContribuicao" rows="3" placeholder="Observações (opcional)" style="width: 100%; padding: 14px; border: 2px solid var(--border); border-radius: 10px; font-size: 16px;"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" onclick="fecharModalContribuicao()" style="flex: 1; padding: 14px; background: var(--light); border: none; border-radius: 10px; color: var(--text); font-size: 16px; font-weight: 500; cursor: pointer;">Cancelar</button>
+                    <button type="submit" style="flex: 1; padding: 14px; background: var(--secondary); border: none; border-radius: 10px; color: white; font-size: 16px; font-weight: 500; cursor: pointer;">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ========== VERIFICAR LOGIN ==========
+        (function() {
+            const membroSalvo = localStorage.getItem('membroApp');
+            if (!membroSalvo) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            try {
+                window.membroAtual = JSON.parse(membroSalvo);
+            } catch (e) {
+                window.location.href = 'index.html';
+            }
+        })();
+
+        // ========== VARIÁVEIS GLOBAIS ==========
+        let eventos = [];
+        let membros = [];
+        let aniversariantes = [];
+        let dataAtualEventos = new Date();
+        let dataAtualAniversarios = new Date();
+        let visualizacaoEventos = 'calendario';
+        let visualizacaoAniversarios = 'calendario';
+        
+        // ========== SISTEMA DE NOTIFICAÇÕES ==========
+        let notificacoesAtivas = {
+            eventos: false,
+            aniversarios: false,
+            versiculo: false
+        };
+
+        // Carregar configurações salvas
+        function carregarConfigNotificacoes() {
+            const config = localStorage.getItem('notificacoesConfig');
+            if (config) {
+                try {
+                    notificacoesAtivas = JSON.parse(config);
+                } catch (e) {}
+            }
+            
+            // Atualizar interface
+            atualizarStatusNotificacoes();
+            atualizarSwitches();
+        }
+
+        // Salvar configurações
+        function salvarConfigNotificacoes() {
+            localStorage.setItem('notificacoesConfig', JSON.stringify(notificacoesAtivas));
+            mostrarMensagem('✅ Configurações salvas!');
+            
+            // Se alguma notificação estiver ativa, pedir permissão
+            if (notificacoesAtivas.eventos || notificacoesAtivas.aniversarios || notificacoesAtivas.versiculo) {
+                solicitarPermissao();
+            }
+        }
+
+        // Solicitar permissão
+        function solicitarPermissao() {
+            if (Notification.permission === 'default') {
+                Notification.requestPermission().then(perm => {
+                    if (perm === 'granted') {
+                        atualizarStatusNotificacoes();
+                        testarNotificacao();
+                    }
+                });
+            }
+        }
+
+        // Atualizar status na tela inicial
+        function atualizarStatusNotificacoes() {
+            const statusDiv = document.getElementById('notificationStatus');
+            const icon = statusDiv.querySelector('.notification-icon');
+            const title = statusDiv.querySelector('h4');
+            const desc = statusDiv.querySelector('p');
+            const switch_ = statusDiv.querySelector('.notification-switch');
+            
+            const algumaAtiva = notificacoesAtivas.eventos || notificacoesAtivas.aniversarios || notificacoesAtivas.versiculo;
+            
+            if (algumaAtiva && Notification.permission === 'granted') {
+                statusDiv.className = 'notification-status active';
+                icon.textContent = '🔔';
+                title.textContent = 'Notificações ativas';
+                desc.textContent = 'Você receberá lembretes importantes';
+                switch_.classList.add('active');
+            } else {
+                statusDiv.className = 'notification-status inactive';
+                icon.textContent = '🔕';
+                title.textContent = 'Notificações desativadas';
+                desc.textContent = 'Ative para receber lembretes importantes';
+                switch_.classList.remove('active');
+            }
+        }
+
+        // Atualizar switches
+        function atualizarSwitches() {
+            document.getElementById('switchEventos').className = 'notification-switch' + (notificacoesAtivas.eventos ? ' active' : '');
+            document.getElementById('switchAniversarios').className = 'notification-switch' + (notificacoesAtivas.aniversarios ? ' active' : '');
+            document.getElementById('switchVersiculo').className = 'notification-switch' + (notificacoesAtivas.versiculo ? ' active' : '');
+        }
+
+        // Toggle switch
+        window.toggleSwitch = function(tipo) {
+            notificacoesAtivas[tipo] = !notificacoesAtivas[tipo];
+            atualizarSwitches();
+        };
+
+        // Toggle notificações geral
+        window.toggleNotificacoes = function() {
+            if (Notification.permission !== 'granted') {
+                solicitarPermissao();
+            } else {
+                const algumaAtiva = notificacoesAtivas.eventos || notificacoesAtivas.aniversarios || notificacoesAtivas.versiculo;
+                
+                if (algumaAtiva) {
+                    // Desativar todas
+                    notificacoesAtivas.eventos = false;
+                    notificacoesAtivas.aniversarios = false;
+                    notificacoesAtivas.versiculo = false;
+                } else {
+                    // Ativar todas
+                    notificacoesAtivas.eventos = true;
+                    notificacoesAtivas.aniversarios = true;
+                    notificacoesAtivas.versiculo = true;
+                }
+                
+                salvarConfigNotificacoes();
+                atualizarSwitches();
+                atualizarStatusNotificacoes();
+            }
+        };
+
+        // Testar notificação
+        window.testarNotificacao = function() {
+            if (Notification.permission === 'granted') {
+                const notification = new Notification('🔔 AdereVidas', {
+                    body: 'Esta é uma notificação de teste!',
+                    icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                    badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                    vibrate: [200, 100, 200],
+                    requireInteraction: true
+                });
+                
+                notification.onclick = function() {
+                    window.focus();
+                    this.close();
+                };
+                
+                setTimeout(() => notification.close(), 5000);
+            } else {
+                solicitarPermissao();
+            }
+        };
+
+        // Enviar notificação de evento
+        function notificarEvento(evento, horas) {
+            if (!notificacoesAtivas.eventos || Notification.permission !== 'granted') return;
+            
+            const titulo = horas === 6 ? '⏰ Faltam 6 horas!' : '⚠️ Faltam 2 horas!';
+            const notification = new Notification(titulo, {
+                body: `${evento.titulo} - Hoje às ${evento.horaInicio}`,
+                icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                vibrate: [200, 100, 200],
+                requireInteraction: true,
+                tag: `evento-${evento.id}-${horas}`
+            });
+            
+            notification.onclick = function() {
+                window.focus();
+                mudarTela('eventos');
+                this.close();
+            };
+        }
+
+        // Enviar notificação de aniversário
+        function notificarAniversario(membro) {
+            if (!notificacoesAtivas.aniversarios || Notification.permission !== 'granted') return;
+            
+            const notification = new Notification('🎂 Feliz Aniversário!', {
+                body: `${membro.nome} está fazendo aniversário hoje! 🎉`,
+                icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                vibrate: [200, 100, 200, 100, 200],
+                requireInteraction: true,
+                tag: `aniversario-${membro.id}`
+            });
+            
+            notification.onclick = function() {
+                window.focus();
+                mudarTela('aniversariantes');
+                this.close();
+            };
+        }
+
+        // Enviar versículo do dia
+        function notificarVersiculo() {
+            if (!notificacoesAtivas.versiculo || Notification.permission !== 'granted') return;
+            
+            const versiculos = [
+                { texto: 'Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito...', ref: 'João 3:16' },
+                { texto: 'O Senhor é o meu pastor; nada me faltará.', ref: 'Salmos 23:1' },
+                { texto: 'Tudo posso naquele que me fortalece.', ref: 'Filipenses 4:13' }
+            ];
+            
+            const escolhido = versiculos[new Date().getDate() % versiculos.length];
+            
+            const notification = new Notification('📖 Versículo do Dia', {
+                body: `${escolhido.texto} — ${escolhido.ref}`,
+                icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                vibrate: [200, 100, 200],
+                requireInteraction: true,
+                tag: 'versiculo-diario'
+            });
+            
+            notification.onclick = function() {
+                window.focus();
+                mudarTela('biblia');
+                this.close();
+            };
+        }
+
+        // Verificar eventos a cada minuto
+        function iniciarVerificacoes() {
+            // Verificar eventos a cada minuto
+            setInterval(() => {
+                if (!notificacoesAtivas.eventos) return;
+                
+                const agora = new Date();
+                
+                eventos.forEach(evento => {
+                    if (evento.status === 'cancelado' || !evento.horaInicio) return;
+                    
+                    const dataEvento = new Date(evento.data);
+                    const [hora, minuto] = evento.horaInicio.split(':').map(Number);
+                    dataEvento.setHours(hora, minuto, 0);
+                    
+                    const diffMs = dataEvento - agora;
+                    const diffHoras = diffMs / (1000 * 60 * 60);
+                    
+                    // Arredondar para evitar múltiplas notificações
+                    const horasArredondadas = Math.round(diffHoras * 2) / 2;
+                    
+                    if (horasArredondadas === 6) {
+                        const jaNotificou = localStorage.getItem(`notif-evento-${evento.id}-6`);
+                        if (!jaNotificou) {
+                            notificarEvento(evento, 6);
+                            localStorage.setItem(`notif-evento-${evento.id}-6`, 'true');
+                        }
+                    }
+                    
+                    if (horasArredondadas === 2) {
+                        const jaNotificou = localStorage.getItem(`notif-evento-${evento.id}-2`);
+                        if (!jaNotificou) {
+                            notificarEvento(evento, 2);
+                            localStorage.setItem(`notif-evento-${evento.id}-2`, 'true');
+                        }
+                    }
+                });
+            }, 60000); // 1 minuto
+            
+            // Verificar aniversários a cada minuto (entre 7:00 e 7:05)
+            setInterval(() => {
+                if (!notificacoesAtivas.aniversarios) return;
+                
+                const agora = new Date();
+                if (agora.getHours() === 7 && agora.getMinutes() < 5) {
+                    const hoje = new Date();
+                    const dia = hoje.getDate();
+                    const mes = hoje.getMonth();
+                    
+                    aniversariantes.forEach(m => {
+                        if (!m.dataNascimento) return;
+                        const dataNasc = new Date(m.dataNascimento);
+                        
+                        if (dataNasc.getDate() === dia && dataNasc.getMonth() === mes) {
+                            const jaNotificou = localStorage.getItem(`notif-aniversario-${m.id}-${hoje.toDateString()}`);
+                            if (!jaNotificou) {
+                                notificarAniversario(m);
+                                localStorage.setItem(`notif-aniversario-${m.id}-${hoje.toDateString()}`, 'true');
+                            }
+                        }
+                    });
+                }
+            }, 60000);
+            
+            // Agendar versículo do dia (primeira execução)
+            setTimeout(() => {
+                const agora = new Date();
+                const hora = agora.getHours();
+                
+                if (hora >= 7) {
+                    // Se já passou das 7, agenda para amanhã
+                    const amanha = new Date(agora);
+                    amanha.setDate(amanha.getDate() + 1);
+                    amanha.setHours(7, 0, 0, 0);
+                    
+                    const tempoAteAmanha = amanha - agora;
+                    setTimeout(() => {
+                        setInterval(notificarVersiculo, 24 * 60 * 60 * 1000);
+                        notificarVersiculo();
+                    }, tempoAteAmanha);
+                } else {
+                    // Ainda hoje
+                    const hoje7h = new Date(agora);
+                    hoje7h.setHours(7, 0, 0, 0);
+                    
+                    const tempoAte7h = hoje7h - agora;
+                    setTimeout(() => {
+                        setInterval(notificarVersiculo, 24 * 60 * 60 * 1000);
+                        notificarVersiculo();
+                    }, tempoAte7h);
+                }
+            }, 1000);
+        }
+
+        // Mostrar mensagem temporária
+        function mostrarMensagem(texto) {
+            const msgDiv = document.createElement('div');
+            msgDiv.style.cssText = `
+                position: fixed;
+                bottom: 100px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: var(--success);
+                color: white;
+                padding: 10px 20px;
+                border-radius: 20px;
+                font-size: 14px;
+                z-index: 1000;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            `;
+            msgDiv.textContent = texto;
+            document.body.appendChild(msgDiv);
+            
+            setTimeout(() => msgDiv.remove(), 2000);
+        }
+
+        // ========== FUNÇÕES DE TELA ==========
+        window.abrirConfigNotificacoes = function() {
+            mudarTela('notificacoes');
+        };
+
+        // ========== BÍBLIA ==========
+        const livrosBiblia = [
+            { id: 'gn', nome: 'Gênesis', testamento: 'VT', capitulos: 50 },
+            { id: 'ex', nome: 'Êxodo', testamento: 'VT', capitulos: 40 },
+            { id: 'lv', nome: 'Levítico', testamento: 'VT', capitulos: 27 },
+            { id: 'nm', nome: 'Números', testamento: 'VT', capitulos: 36 },
+            { id: 'dt', nome: 'Deuteronômio', testamento: 'VT', capitulos: 34 },
+            { id: 'js', nome: 'Josué', testamento: 'VT', capitulos: 24 },
+            { id: 'jz', nome: 'Juízes', testamento: 'VT', capitulos: 21 },
+            { id: 'rt', nome: 'Rute', testamento: 'VT', capitulos: 4 },
+            { id: '1sm', nome: '1 Samuel', testamento: 'VT', capitulos: 31 },
+            { id: '2sm', nome: '2 Samuel', testamento: 'VT', capitulos: 24 },
+            { id: '1rs', nome: '1 Reis', testamento: 'VT', capitulos: 22 },
+            { id: '2rs', nome: '2 Reis', testamento: 'VT', capitulos: 25 },
+            { id: '1cr', nome: '1 Crônicas', testamento: 'VT', capitulos: 29 },
+            { id: '2cr', nome: '2 Crônicas', testamento: 'VT', capitulos: 36 },
+            { id: 'ed', nome: 'Esdras', testamento: 'VT', capitulos: 10 },
+            { id: 'ne', nome: 'Neemias', testamento: 'VT', capitulos: 13 },
+            { id: 'et', nome: 'Ester', testamento: 'VT', capitulos: 10 },
+            { id: 'jó', nome: 'Jó', testamento: 'VT', capitulos: 42 },
+            { id: 'sl', nome: 'Salmos', testamento: 'VT', capitulos: 150 },
+            { id: 'pv', nome: 'Provérbios', testamento: 'VT', capitulos: 31 },
+            { id: 'ec', nome: 'Eclesiastes', testamento: 'VT', capitulos: 12 },
+            { id: 'ct', nome: 'Cantares', testamento: 'VT', capitulos: 8 },
+            { id: 'is', nome: 'Isaías', testamento: 'VT', capitulos: 66 },
+            { id: 'jr', nome: 'Jeremias', testamento: 'VT', capitulos: 52 },
+            { id: 'lm', nome: 'Lamentações', testamento: 'VT', capitulos: 5 },
+            { id: 'ez', nome: 'Ezequiel', testamento: 'VT', capitulos: 48 },
+            { id: 'dn', nome: 'Daniel', testamento: 'VT', capitulos: 12 },
+            { id: 'os', nome: 'Oséias', testamento: 'VT', capitulos: 14 },
+            { id: 'jl', nome: 'Joel', testamento: 'VT', capitulos: 3 },
+            { id: 'am', nome: 'Amós', testamento: 'VT', capitulos: 9 },
+            { id: 'ob', nome: 'Obadias', testamento: 'VT', capitulos: 1 },
+            { id: 'jn', nome: 'Jonas', testamento: 'VT', capitulos: 4 },
+            { id: 'mq', nome: 'Miquéias', testamento: 'VT', capitulos: 7 },
+            { id: 'na', nome: 'Naum', testamento: 'VT', capitulos: 3 },
+            { id: 'hc', nome: 'Habacuque', testamento: 'VT', capitulos: 3 },
+            { id: 'sf', nome: 'Sofonias', testamento: 'VT', capitulos: 3 },
+            { id: 'ag', nome: 'Ageu', testamento: 'VT', capitulos: 2 },
+            { id: 'zc', nome: 'Zacarias', testamento: 'VT', capitulos: 14 },
+            { id: 'ml', nome: 'Malaquias', testamento: 'VT', capitulos: 4 },
+            { id: 'mt', nome: 'Mateus', testamento: 'NT', capitulos: 28 },
+            { id: 'mc', nome: 'Marcos', testamento: 'NT', capitulos: 16 },
+            { id: 'lc', nome: 'Lucas', testamento: 'NT', capitulos: 24 },
+            { id: 'jo', nome: 'João', testamento: 'NT', capitulos: 21 },
+            { id: 'atos', nome: 'Atos', testamento: 'NT', capitulos: 28 },
+            { id: 'rm', nome: 'Romanos', testamento: 'NT', capitulos: 16 },
+            { id: '1co', nome: '1 Coríntios', testamento: 'NT', capitulos: 16 },
+            { id: '2co', nome: '2 Coríntios', testamento: 'NT', capitulos: 13 },
+            { id: 'gl', nome: 'Gálatas', testamento: 'NT', capitulos: 6 },
+            { id: 'ef', nome: 'Efésios', testamento: 'NT', capitulos: 6 },
+            { id: 'fp', nome: 'Filipenses', testamento: 'NT', capitulos: 4 },
+            { id: 'cl', nome: 'Colossenses', testamento: 'NT', capitulos: 4 },
+            { id: '1ts', nome: '1 Tessalonicenses', testamento: 'NT', capitulos: 5 },
+            { id: '2ts', nome: '2 Tessalonicenses', testamento: 'NT', capitulos: 3 },
+            { id: '1tm', nome: '1 Timóteo', testamento: 'NT', capitulos: 6 },
+            { id: '2tm', nome: '2 Timóteo', testamento: 'NT', capitulos: 4 },
+            { id: 'tt', nome: 'Tito', testamento: 'NT', capitulos: 3 },
+            { id: 'fm', nome: 'Filemom', testamento: 'NT', capitulos: 1 },
+            { id: 'hb', nome: 'Hebreus', testamento: 'NT', capitulos: 13 },
+            { id: 'tg', nome: 'Tiago', testamento: 'NT', capitulos: 5 },
+            { id: '1pe', nome: '1 Pedro', testamento: 'NT', capitulos: 5 },
+            { id: '2pe', nome: '2 Pedro', testamento: 'NT', capitulos: 3 },
+            { id: '1jo', nome: '1 João', testamento: 'NT', capitulos: 5 },
+            { id: '2jo', nome: '2 João', testamento: 'NT', capitulos: 1 },
+            { id: '3jo', nome: '3 João', testamento: 'NT', capitulos: 1 },
+            { id: 'jd', nome: 'Judas', testamento: 'NT', capitulos: 1 },
+            { id: 'ap', nome: 'Apocalipse', testamento: 'NT', capitulos: 22 }
+        ];
+
+        let capitulosCache = {};
+
+        function mostrarLivros() {
+            const conteudo = document.getElementById('bibliaConteudo');
+            
+            let html = `
+                <div class="search-box">
+                    <input type="text" id="buscaBiblia" placeholder="Buscar livro..." onkeyup="buscarLivros()">
+                </div>
+                <div id="resultadoBusca"></div>
+                
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="mostrarTestamento('VT')">Antigo Testamento</button>
+                    <button class="tab-btn" onclick="mostrarTestamento('NT')">Novo Testamento</button>
+                </div>
+                
+                <div id="livrosVT" class="card">
+                    <div class="book-selector">
+            `;
+            
+            livrosBiblia.filter(l => l.testamento === 'VT').forEach(livro => {
+                html += `<button class="book-btn" onclick="mostrarCapitulos('${livro.id}')">${livro.nome}</button>`;
+            });
+            
+            html += `</div></div><div id="livrosNT" class="card" style="display: none;"><div class="book-selector">`;
+            
+            livrosBiblia.filter(l => l.testamento === 'NT').forEach(livro => {
+                html += `<button class="book-btn" onclick="mostrarCapitulos('${livro.id}')">${livro.nome}</button>`;
+            });
+            
+            html += `</div></div>`;
+            
+            conteudo.innerHTML = html;
+        }
+
+        function mostrarTestamento(testamento) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (testamento === 'VT') {
+                document.querySelector('.tab-btn:first-child').classList.add('active');
+                document.getElementById('livrosVT').style.display = 'block';
+                document.getElementById('livrosNT').style.display = 'none';
+            } else {
+                document.querySelector('.tab-btn:last-child').classList.add('active');
+                document.getElementById('livrosVT').style.display = 'none';
+                document.getElementById('livrosNT').style.display = 'block';
+            }
+        }
+
+        function buscarLivros() {
+            const termo = document.getElementById('buscaBiblia').value.toLowerCase();
+            const resultados = document.getElementById('resultadoBusca');
+            
+            if (termo.length < 2) {
+                resultados.innerHTML = '';
+                return;
+            }
+            
+            const encontrados = livrosBiblia.filter(l => 
+                l.nome.toLowerCase().includes(termo)
+            );
+            
+            if (encontrados.length > 0) {
+                let html = '<div class="card"><div class="card-title">🔍 Resultados</div><div class="book-selector">';
+                encontrados.forEach(livro => {
+                    html += `<button class="book-btn" onclick="mostrarCapitulos('${livro.id}')">${livro.nome}</button>`;
+                });
+                html += '</div></div>';
+                resultados.innerHTML = html;
+            } else {
+                resultados.innerHTML = '';
+            }
+        }
+
+        function mostrarCapitulos(livroId) {
+            const livro = livrosBiblia.find(l => l.id === livroId);
+            if (!livro) return;
+            
+            const conteudo = document.getElementById('bibliaConteudo');
+            let html = `
+                <div class="card">
+                    <div class="card-title">📖 ${livro.nome}</div>
+                    <div class="chapter-navigation">
+                        <button class="chapter-nav-btn" onclick="mostrarLivros()">← Livros</button>
+                        <span class="current-chapter">Selecione o capítulo</span>
+                        <button class="chapter-nav-btn" style="visibility: hidden;">→</button>
+                    </div>
+                    <div class="grid-3">
+            `;
+            
+            for (let i = 1; i <= livro.capitulos; i++) {
+                html += `
+                    <button class="action-btn" onclick="carregarCapitulo('${livro.id}', ${i})">
+                        <span>📖</span>
+                        <small>Capítulo ${i}</small>
+                    </button>
+                `;
+            }
+            
+            html += `</div></div>`;
+            conteudo.innerHTML = html;
+        }
+
+        function carregarCapitulo(livroId, capitulo) {
+            const livro = livrosBiblia.find(l => l.id === livroId);
+            if (!livro) return;
+            
+            const conteudo = document.getElementById('bibliaConteudo');
+            
+            // Dados de exemplo (em produção, você usaria uma API)
+            const versiculosExemplo = [
+                "No princípio, Deus criou os céus e a terra.",
+                "E a terra era sem forma e vazia; e havia trevas sobre a face do abismo; e o Espírito de Deus se movia sobre a face das águas.",
+                "E disse Deus: Haja luz. E houve luz.",
+                "E viu Deus que era boa a luz; e fez Deus separação entre a luz e as trevas.",
+                "E Deus chamou à luz Dia; e às trevas chamou Noite. E foi a tarde e a manhã: o dia primeiro."
+            ];
+            
+            let html = `
+                <div class="card">
+                    <div class="card-title">📖 ${livro.nome} ${capitulo}</div>
+                    <div class="chapter-navigation">
+                        <button class="chapter-nav-btn" onclick="mostrarCapitulos('${livroId}')">← Capítulos</button>
+                        <span class="current-chapter">Capítulo ${capitulo}</span>
+                        <button class="chapter-nav-btn" onclick="carregarCapitulo('${livroId}', ${capitulo + 1})" ${capitulo >= livro.capitulos ? 'disabled' : ''}>Próximo →</button>
+                    </div>
+            `;
+            
+            versiculosExemplo.forEach((texto, index) => {
+                html += `
+                    <div class="bible-verse">
+                        <div class="reference">${capitulo}:${index + 1}</div>
+                        <div class="text">${texto}</div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    <div class="chapter-navigation" style="margin-top: 20px;">
+                        <button class="chapter-nav-btn" onclick="mostrarCapitulos('${livroId}')">← Capítulos</button>
+                        <span class="current-chapter">Capítulo ${capitulo}</span>
+                        <button class="chapter-nav-btn" onclick="carregarCapitulo('${livroId}', ${capitulo + 1})" ${capitulo >= livro.capitulos ? 'disabled' : ''}>Próximo →</button>
+                    </div>
+                </div>
+            `;
+            
+            conteudo.innerHTML = html;
+        }
+
+        function mostrarBusca() {
+            const conteudo = document.getElementById('bibliaConteudo');
+            conteudo.innerHTML = `
+                <div class="card">
+                    <div class="card-title">🔍 Buscar</div>
+                    <div class="search-box">
+                        <input type="text" id="buscaReferencia" placeholder="Ex: João 3:16" onkeypress="buscarReferencia(event)">
+                    </div>
+                    <p class="text-light text-center">Digite o livro e capítulo</p>
+                </div>
+                <button class="action-btn" onclick="mostrarLivros()">📚 Ver livros</button>
+            `;
+        }
+
+        function buscarReferencia(event) {
+            if (event.key === 'Enter') {
+                alert('Funcionalidade em desenvolvimento');
+            }
+        }
+
+        // ========== INICIALIZAÇÃO ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarDataAtual();
+            carregarVersiculoDia();
+            mostrarLivros();
+            atualizarInterfaceUsuario();
+            carregarEventos();
+            carregarAniversariantes();
+            carregarPedidos();
+            
+            // Carregar configurações de notificação
+            carregarConfigNotificacoes();
+            
+            // Iniciar verificações
+            iniciarVerificacoes();
+        });
+
+        function atualizarInterfaceUsuario() {
+            if (window.membroAtual) {
+                const primeiroNome = window.membroAtual.nome.split(' ')[0];
+                document.getElementById('welcomeMessage').textContent = `Olá, ${primeiroNome}!`;
+                document.getElementById('menuNome').textContent = window.membroAtual.nome;
+                document.getElementById('menuEmail').textContent = window.membroAtual.email || 'membro@igreja.com';
+                document.getElementById('menuAvatar').textContent = window.membroAtual.nome[0] || '👤';
+            }
+        }
+
+        // ========== FUNÇÕES DE EVENTOS ==========
+        async function carregarEventos() {
+            try {
+                const eventosRef = collection(window.db, "eventos");
+                const q = query(eventosRef, orderBy("data"));
+                const querySnapshot = await getDocs(q);
+                
+                eventos = [];
+                querySnapshot.forEach((doc) => {
+                    eventos.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                atualizarListaHomeEventos();
+                renderizarCalendarioEventos();
+                renderizarListaEventos();
+                
+            } catch (error) {
+                console.error('Erro ao carregar eventos:', error);
+                eventos = [];
+            }
+        }
+
+        function atualizarListaHomeEventos() {
+            const listaHome = document.getElementById('eventosLista');
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            
+            const proximos = eventos
+                .filter(e => {
+                    const dataEvento = new Date(e.data);
+                    dataEvento.setHours(0, 0, 0, 0);
+                    return dataEvento >= hoje && e.status !== 'cancelado';
+                })
+                .sort((a, b) => new Date(a.data) - new Date(b.data))
+                .slice(0, 3);
+            
+            if (proximos.length === 0) {
+                listaHome.innerHTML = '<p class="text-center text-light">Nenhum evento próximo</p>';
+                return;
+            }
+            
+            let html = '';
+            proximos.forEach(evento => {
+                const data = new Date(evento.data);
+                const meses = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+                
+                html += `
+                    <div class="event-item-home" onclick="verDetalhesEvento('${evento.id}')">
+                        <div class="event-date">
+                            <span class="day">${data.getDate()}</span>
+                            <span class="month">${meses[data.getMonth()]}</span>
+                        </div>
+                        <div class="event-info">
+                            <h4>${evento.titulo}</h4>
+                            <p>${evento.horaInicio || '--:--'} • ${evento.local || 'Igreja'}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            listaHome.innerHTML = html;
+        }
+
+        function renderizarCalendarioEventos() {
+            const calendarioElement = document.getElementById('calendario');
+            const mesAtualElement = document.getElementById('mesAtual');
+            
+            const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                          'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            mesAtualElement.textContent = `${meses[dataAtualEventos.getMonth()]} ${dataAtualEventos.getFullYear()}`;
+            
+            while (calendarioElement.children.length > 7) {
+                calendarioElement.removeChild(calendarioElement.lastChild);
+            }
+            
+            const primeiroDia = new Date(dataAtualEventos.getFullYear(), dataAtualEventos.getMonth(), 1);
+            const ultimoDia = new Date(dataAtualEventos.getFullYear(), dataAtualEventos.getMonth() + 1, 0);
+            const diaInicio = primeiroDia.getDay();
+            const totalDias = ultimoDia.getDate();
+            
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            
+            for (let i = 0; i < diaInicio; i++) {
+                const diaElement = document.createElement('div');
+                diaElement.className = 'calendar-day other-month';
+                calendarioElement.appendChild(diaElement);
+            }
+            
+            for (let dia = 1; dia <= totalDias; dia++) {
+                const dataDia = new Date(dataAtualEventos.getFullYear(), dataAtualEventos.getMonth(), dia);
+                const diaElement = document.createElement('div');
+                
+                diaElement.className = 'calendar-day';
+                if (dataDia.getTime() === hoje.getTime()) {
+                    diaElement.classList.add('today');
+                }
+                
+                diaElement.innerHTML = `<div class="day-number">${dia}</div>`;
+                
+                const eventosDia = eventos.filter(evento => {
+                    if (evento.status === 'cancelado') return false;
+                    const dataEvento = new Date(evento.data);
+                    return dataEvento.getDate() === dia &&
+                           dataEvento.getMonth() === dataAtualEventos.getMonth() &&
+                           dataEvento.getFullYear() === dataAtualEventos.getFullYear();
+                });
+                
+                eventosDia.forEach(evento => {
+                    const eventoElement = document.createElement('div');
+                    eventoElement.className = `event-item ${evento.tipo}`;
+                    eventoElement.textContent = evento.titulo.substring(0, 15) + (evento.titulo.length > 15 ? '...' : '');
+                    eventoElement.onclick = (e) => {
+                        e.stopPropagation();
+                        verDetalhesEvento(evento.id);
+                    };
+                    diaElement.appendChild(eventoElement);
+                });
+                
+                calendarioElement.appendChild(diaElement);
+            }
+        }
+
+        function renderizarListaEventos() {
+            const listaElement = document.getElementById('listaEventos');
+            const tipoFiltro = document.getElementById('filtroTipo')?.value;
+            
+            let eventosFiltrados = eventos;
+            if (tipoFiltro) {
+                eventosFiltrados = eventos.filter(e => e.tipo === tipoFiltro);
+            }
+            
+            if (eventosFiltrados.length === 0) {
+                listaElement.innerHTML = `
+                    <div class="card">
+                        <p class="text-center text-light">Nenhum evento encontrado</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const tiposTraduzidos = {
+                'culto': 'Culto',
+                'escola-dominical': 'Escola Dominical',
+                'celula': 'Célula',
+                'evento-especial': 'Evento Especial',
+                'reuniao': 'Reunião',
+                'outro': 'Outro'
+            };
+            
+            const tipoCores = {
+                'culto': '#3498db',
+                'escola-dominical': '#2ecc71',
+                'celula': '#9b59b6',
+                'evento-especial': '#e74c3c',
+                'reuniao': '#f39c12',
+                'outro': '#95a5a6'
+            };
+            
+            let html = '';
+            
+            eventosFiltrados
+                .sort((a, b) => new Date(a.data) - new Date(b.data))
+                .forEach(evento => {
+                    const data = new Date(evento.data);
+                    const dataFormatada = data.toLocaleDateString('pt-BR');
+                    
+                    html += `
+                        <div class="event-card" style="border-left-color: ${tipoCores[evento.tipo] || '#3498db'}">
+                            <div class="event-header">
+                                <div class="event-title">${evento.titulo}</div>
+                                <span class="event-type-badge" style="background: ${tipoCores[evento.tipo] || '#3498db'}">
+                                    ${tiposTraduzidos[evento.tipo] || 'Evento'}
+                                </span>
+                            </div>
+                            
+                            <div class="event-details">
+                                <div class="detail-item">
+                                    <span>📅</span> ${dataFormatada}
+                                </div>
+                                <div class="detail-item">
+                                    <span>⏰</span> ${evento.horaInicio || '--:--'}h
+                                </div>
+                                <div class="detail-item">
+                                    <span>📍</span> ${evento.local || 'Igreja'}
+                                </div>
+                                <div class="detail-item">
+                                    <span>👤</span> ${evento.responsavel || 'Igreja'}
+                                </div>
+                            </div>
+                            
+                            ${evento.descricao ? `
+                                <div class="event-description">
+                                    ${evento.descricao}
+                                </div>
+                            ` : ''}
+                            
+                            <button class="action-btn" style="margin-top: 10px;" onclick="verDetalhesEvento('${evento.id}')">
+                                Ver detalhes
+                            </button>
+                        </div>
+                    `;
+                });
+            
+            listaElement.innerHTML = html;
+        }
+
+        function filtrarEventos() {
+            renderizarListaEventos();
+        }
+
+        function mudarMes(delta) {
+            dataAtualEventos.setMonth(dataAtualEventos.getMonth() + delta);
+            renderizarCalendarioEventos();
+        }
+
+        function irParaHoje() {
+            dataAtualEventos = new Date();
+            renderizarCalendarioEventos();
+        }
+
+        function mudarVisualizacaoEventos(visualizacao) {
+            visualizacaoEventos = visualizacao;
+            
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (visualizacao === 'calendario') {
+                document.getElementById('calendarioView').style.display = 'block';
+                document.getElementById('listaView').style.display = 'none';
+                document.querySelector('.view-btn[onclick*="calendario"]').classList.add('active');
+                renderizarCalendarioEventos();
+            } else {
+                document.getElementById('calendarioView').style.display = 'none';
+                document.getElementById('listaView').style.display = 'block';
+                document.querySelector('.view-btn[onclick*="lista"]').classList.add('active');
+                renderizarListaEventos();
+            }
+        }
+
+        function verDetalhesEvento(id) {
+            const evento = eventos.find(e => e.id === id);
+            if (!evento) return;
+            
+            const data = new Date(evento.data);
+            const tipos = {
+                'culto': 'Culto',
+                'escola-dominical': 'Escola Dominical',
+                'celula': 'Célula',
+                'evento-especial': 'Evento Especial',
+                'reuniao': 'Reunião',
+                'outro': 'Outro'
+            };
+            
+            alert(`📅 ${evento.titulo}\n\n` +
+                  `Tipo: ${tipos[evento.tipo] || 'Evento'}\n` +
+                  `Data: ${data.toLocaleDateString('pt-BR')}\n` +
+                  `Horário: ${evento.horaInicio || '--:--'}\n` +
+                  `Local: ${evento.local || 'Igreja'}\n` +
+                  `Responsável: ${evento.responsavel || 'Igreja'}`);
+        }
+
+        // ========== FUNÇÕES DE ANIVERSARIANTES ==========
+        async function carregarAniversariantes() {
+            try {
+                const membrosRef = collection(window.db, "membros");
+                const querySnapshot = await getDocs(membrosRef);
+                
+                membros = [];
+                aniversariantes = [];
+                
+                querySnapshot.forEach((doc) => {
+                    const membro = { id: doc.id, ...doc.data() };
+                    membros.push(membro);
+                    
+                    if (membro.dataNascimento) {
+                        aniversariantes.push(membro);
+                    }
+                });
+                
+                atualizarListaHomeAniversariantes();
+                renderizarCalendarioAniversariantes();
+                renderizarListaAniversariantes();
+                
+            } catch (error) {
+                console.error('Erro ao carregar aniversariantes:', error);
+            }
+        }
+
+        function atualizarListaHomeAniversariantes() {
+            const listaHome = document.getElementById('aniversariantesLista');
+            const hoje = new Date();
+            const mesAtual = hoje.getMonth();
+            
+            const aniversariantesMes = aniversariantes.filter(m => {
+                if (!m.dataNascimento) return false;
+                const dataNasc = new Date(m.dataNascimento);
+                return dataNasc.getMonth() === mesAtual;
+            }).slice(0, 3);
+            
+            if (aniversariantesMes.length === 0) {
+                listaHome.innerHTML = '<p class="text-center text-light">Nenhum aniversariante este mês</p>';
+                return;
+            }
+            
+            let html = '';
+            aniversariantesMes.forEach(m => {
+                html += `
+                    <div class="birthday-item">
+                        <div class="birthday-avatar">${m.nome[0]}</div>
+                        <div class="birthday-info">
+                            <h4>${m.nome}</h4>
+                            <p>Aniversariante do mês</p>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            listaHome.innerHTML = html;
+        }
+
+        function calcularIdade(dataNascimento) {
+            if (!dataNascimento) return 0;
+            
+            const hoje = new Date();
+            const nascimento = new Date(dataNascimento);
+            let idade = hoje.getFullYear() - nascimento.getFullYear();
+            
+            const mesAtual = hoje.getMonth();
+            const diaAtual = hoje.getDate();
+            const mesNasc = nascimento.getMonth();
+            const diaNasc = nascimento.getDate();
+            
+            if (mesAtual < mesNasc || (mesAtual === mesNasc && diaAtual < diaNasc)) {
+                idade--;
+            }
+            
+            return idade;
+        }
+
+        function calcularDiasRestantes(dataNascimento) {
+            if (!dataNascimento) return 365;
+            
+            const hoje = new Date();
+            const nascimento = new Date(dataNascimento);
+            const anoAtual = hoje.getFullYear();
+            
+            let proximoAniversario = new Date(anoAtual, nascimento.getMonth(), nascimento.getDate());
+            
+            if (proximoAniversario < hoje) {
+                proximoAniversario.setFullYear(anoAtual + 1);
+            }
+            
+            const diff = proximoAniversario - hoje;
+            return Math.ceil(diff / (1000 * 60 * 60 * 24));
+        }
+
+        function renderizarCalendarioAniversariantes() {
+            const calendarioElement = document.getElementById('aniversariantesCalendario');
+            const mesAtualElement = document.getElementById('mesAtualAniversario');
+            
+            const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                          'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            mesAtualElement.textContent = `${meses[dataAtualAniversarios.getMonth()]} ${dataAtualAniversarios.getFullYear()}`;
+            
+            while (calendarioElement.children.length > 7) {
+                calendarioElement.removeChild(calendarioElement.lastChild);
+            }
+            
+            const primeiroDia = new Date(dataAtualAniversarios.getFullYear(), dataAtualAniversarios.getMonth(), 1);
+            const ultimoDia = new Date(dataAtualAniversarios.getFullYear(), dataAtualAniversarios.getMonth() + 1, 0);
+            const diaInicio = primeiroDia.getDay();
+            const totalDias = ultimoDia.getDate();
+            
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            
+            for (let i = 0; i < diaInicio; i++) {
+                const diaElement = document.createElement('div');
+                diaElement.className = 'calendar-day other-month';
+                calendarioElement.appendChild(diaElement);
+            }
+            
+            for (let dia = 1; dia <= totalDias; dia++) {
+                const dataDia = new Date(dataAtualAniversarios.getFullYear(), dataAtualAniversarios.getMonth(), dia);
+                const diaElement = document.createElement('div');
+                
+                diaElement.className = 'calendar-day';
+                if (dataDia.getTime() === hoje.getTime()) {
+                    diaElement.classList.add('today');
+                }
+                
+                const aniversariantesDia = aniversariantes.filter(m => {
+                    if (!m.dataNascimento) return false;
+                    const dataNasc = new Date(m.dataNascimento);
+                    return dataNasc.getDate() === dia &&
+                           dataNasc.getMonth() === dataAtualAniversarios.getMonth();
+                });
+                
+                diaElement.innerHTML = `<div class="day-number">${dia} ${aniversariantesDia.length > 0 ? '🎂' : ''}</div>`;
+                
+                aniversariantesDia.forEach(m => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'event-item culto';
+                    itemElement.textContent = m.nome.split(' ')[0];
+                    itemElement.onclick = (e) => {
+                        e.stopPropagation();
+                        verDetalhesAniversariante(m);
+                    };
+                    diaElement.appendChild(itemElement);
+                });
+                
+                calendarioElement.appendChild(diaElement);
+            }
+        }
+
+        function renderizarListaAniversariantes() {
+            const listaElement = document.getElementById('listaAniversariantes');
+            
+            if (aniversariantes.length === 0) {
+                listaElement.innerHTML = `
+                    <div class="card">
+                        <p class="text-center text-light">Nenhum aniversariante encontrado</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const hoje = new Date();
+            const diaHoje = hoje.getDate();
+            const mesHoje = hoje.getMonth();
+            
+            let html = '';
+            
+            aniversariantes.forEach(m => {
+                const dataNasc = new Date(m.dataNascimento);
+                const idade = calcularIdade(m.dataNascimento);
+                const diasRestantes = calcularDiasRestantes(m.dataNascimento);
+                const isHoje = dataNasc.getDate() === diaHoje && dataNasc.getMonth() === mesHoje;
+                
+                html += `
+                    <div class="event-card" style="border-left-color: #ff4081; ${isHoje ? 'background: #fff0f5;' : ''}" onclick="verDetalhesAniversariante(${JSON.stringify(m).replace(/"/g, '&quot;')})">
+                        <div class="event-header">
+                            <div class="event-title">${m.nome}</div>
+                            <span class="event-type-badge" style="background: #ff4081">
+                                ${idade} anos
+                            </span>
+                        </div>
+                        
+                        <div class="event-details">
+                            <div class="detail-item">
+                                <span>🎂</span> ${dataNasc.toLocaleDateString('pt-BR', {day: '2-digit', month: 'long'})}
+                            </div>
+                            <div class="detail-item">
+                                <span>⏰</span> ${isHoje ? 'HOJE!' : `${diasRestantes} dias`}
+                            </div>
+                            <div class="detail-item">
+                                <span>📱</span> ${m.telefone || 'Não informado'}
+                            </div>
+                            <div class="detail-item">
+                                <span>📧</span> ${m.email || 'Não informado'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            listaElement.innerHTML = html;
+        }
+
+        function verDetalhesAniversariante(membro) {
+            const dataNasc = new Date(membro.dataNascimento);
+            const idade = calcularIdade(membro.dataNascimento);
+            
+            alert(`🎂 ${membro.nome}\n\n` +
+                  `📅 Nascimento: ${dataNasc.toLocaleDateString('pt-BR')}\n` +
+                  `🎂 Idade: ${idade} anos\n` +
+                  `📱 Telefone: ${membro.telefone || 'Não informado'}\n` +
+                  `📧 Email: ${membro.email || 'Não informado'}`);
+        }
+
+        function mudarMesAniversario(delta) {
+            dataAtualAniversarios.setMonth(dataAtualAniversarios.getMonth() + delta);
+            renderizarCalendarioAniversariantes();
+        }
+
+        function irParaMesAtualAniversario() {
+            dataAtualAniversarios = new Date();
+            renderizarCalendarioAniversariantes();
+        }
+
+        function mudarVisualizacaoAniversariantes(visualizacao) {
+            visualizacaoAniversarios = visualizacao;
+            
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (visualizacao === 'calendario') {
+                document.getElementById('aniversariantesCalendarioView').style.display = 'block';
+                document.getElementById('aniversariantesListView').style.display = 'none';
+                document.querySelector('.view-btn[onclick*="calendario"]').classList.add('active');
+                renderizarCalendarioAniversariantes();
+            } else {
+                document.getElementById('aniversariantesCalendarioView').style.display = 'none';
+                document.getElementById('aniversariantesListView').style.display = 'block';
+                document.querySelector('.view-btn[onclick*="lista"]').classList.add('active');
+                renderizarListaAniversariantes();
+            }
+        }
+
+        // ========== FUNÇÕES AUXILIARES ==========
+        function carregarDataAtual() {
+            const data = new Date();
+            document.getElementById('dataHoje').textContent = 
+                data.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+        }
+
+        function carregarVersiculoDia() {
+            const versiculos = [
+                { texto: 'Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito...', ref: 'João 3:16' },
+                { texto: 'O Senhor é o meu pastor; nada me faltará.', ref: 'Salmos 23:1' },
+                { texto: 'Tudo posso naquele que me fortalece.', ref: 'Filipenses 4:13' }
+            ];
+            
+            const escolhido = versiculos[new Date().getDate() % versiculos.length];
+            document.getElementById('versiculoDia').innerHTML = `
+                <p style="font-style: italic;">"${escolhido.texto}"</p>
+                <p style="color: var(--secondary); margin-top: 10px;">— ${escolhido.ref}</p>
+            `;
+        }
+
+        // ========== PEDIDOS DE ORAÇÃO ==========
+        function carregarPedidos() {
+            const pedidos = [
+                { nome: 'Maria', pedido: 'Pela saúde da minha mãe' },
+                { nome: 'João', pedido: 'Pelo emprego' }
+            ];
+            
+            let html = '';
+            pedidos.forEach(p => {
+                html += `
+                    <div class="bible-verse">
+                        <strong>${p.nome}</strong>
+                        <p class="mt-10">${p.pedido}</p>
+                        <button class="action-btn" style="margin-top: 10px;" onclick="orar(this)">
+                            🙏 Orar
+                        </button>
+                    </div>
+                `;
+            });
+            document.getElementById('pedidosLista').innerHTML = html;
+        }
+
+        function enviarPedido() {
+            const pedido = document.getElementById('novoPedido').value;
+            if (!pedido) return alert('Digite seu pedido');
+            alert('Pedido enviado!');
+            document.getElementById('novoPedido').value = '';
+            carregarPedidos();
+        }
+
+        function orar(btn) {
+            btn.textContent = '🙏 Oração registrada!';
+            btn.disabled = true;
+        }
+
+        function abrirNovoPedido() {
+            document.getElementById('novoPedido').focus();
+        }
+
+        // ========== MENU E NAVEGAÇÃO ==========
+        function abrirMenu() {
+            document.getElementById('menuLateral').classList.add('active');
+            document.getElementById('menuOverlay').classList.add('active');
+        }
+
+        function fecharMenu() {
+            document.getElementById('menuLateral').classList.remove('active');
+            document.getElementById('menuOverlay').classList.remove('active');
+        }
+
+        function mudarTela(tela) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            
+            if (tela === 'notificacoes') {
+                document.getElementById('notificacoesScreen').classList.add('active');
+            } else {
+                document.getElementById(tela + 'Screen').classList.add('active');
+            }
+            
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.screen === tela) item.classList.add('active');
+            });
+            
+            fecharMenu();
+            
+            if (tela === 'biblia') {
+                mostrarLivros();
+            } else if (tela === 'eventos') {
+                renderizarCalendarioEventos();
+            } else if (tela === 'aniversariantes') {
+                renderizarCalendarioAniversariantes();
+            } else if (tela === 'notificacoes') {
+                atualizarSwitches();
+            }
+        }
+
+        function voltarHome() {
+            mudarTela('home');
+        }
+
+        function verMeusDados() {
+            if (!window.membroAtual) return;
+            
+            alert(`👤 Meus Dados\n\n` +
+                  `Nome: ${window.membroAtual.nome}\n` +
+                  `Email: ${window.membroAtual.email || 'Não informado'}\n` +
+                  `Telefone: ${window.membroAtual.telefone || 'Não informado'}`);
+        }
+
+        function sair() {
+            if (confirm('Deseja realmente sair do app?')) {
+                localStorage.removeItem('membroApp');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // ========== EXPOR FUNÇÕES ==========
+        window.mudarTela = mudarTela;
+        window.voltarHome = voltarHome;
+        window.abrirMenu = abrirMenu;
+        window.fecharMenu = fecharMenu;
+        window.verMeusDados = verMeusDados;
+        window.sair = sair;
+        
+        // Notificações
+        window.toggleNotificacoes = toggleNotificacoes;
+        window.toggleSwitch = toggleSwitch;
+        window.salvarConfigNotificacoes = salvarConfigNotificacoes;
+        window.testarNotificacao = testarNotificacao;
+        
+        // Bíblia
+        window.mostrarLivros = mostrarLivros;
+        window.mostrarTestamento = mostrarTestamento;
+        window.mostrarCapitulos = mostrarCapitulos;
+        window.carregarCapitulo = carregarCapitulo;
+        window.mostrarBusca = mostrarBusca;
+        window.buscarLivros = buscarLivros;
+        window.buscarReferencia = buscarReferencia;
+        
+        // Eventos
+        window.carregarEventos = carregarEventos;
+        window.mudarMes = mudarMes;
+        window.irParaHoje = irParaHoje;
+        window.mudarVisualizacaoEventos = mudarVisualizacaoEventos;
+        window.filtrarEventos = filtrarEventos;
+        window.verDetalhesEvento = verDetalhesEvento;
+        
+        // Aniversariantes
+        window.carregarAniversariantes = carregarAniversariantes;
+        window.mudarMesAniversario = mudarMesAniversario;
+        window.irParaMesAtualAniversario = irParaMesAtualAniversario;
+        window.mudarVisualizacaoAniversariantes = mudarVisualizacaoAniversariantes;
+        window.verDetalhesAniversariante = verDetalhesAniversariante;
+        
+        // Pedidos
+        window.enviarPedido = enviarPedido;
+        window.abrirNovoPedido = abrirNovoPedido;
+        window.orar = orar;
+        window.carregarPedidos = carregarPedidos;
+
+                // ========== LANÇAR CONTRIBUIÇÕES ==========
+        
+        // Abrir modal de contribuição
+        window.abrirModalContribuicao = function() {
+            // Preencher data atual
+            const hoje = new Date();
+            const dataFormatada = hoje.toISOString().split('T')[0];
+            document.getElementById('dataContribuicao').value = dataFormatada;
+            
+            // Limpar campos
+            document.getElementById('tipoContribuicao').value = '';
+            document.getElementById('valorContribuicao').value = '';
+            document.getElementById('formaPagamento').value = 'dinheiro';
+            document.getElementById('observacoesContribuicao').value = '';
+            
+            // Mostrar modal
+            document.getElementById('contribuicaoModal').style.display = 'flex';
+        };
+
+        // Fechar modal
+        window.fecharModalContribuicao = function() {
+            document.getElementById('contribuicaoModal').style.display = 'none';
+        };
+
+        // Salvar contribuição - VERSÃO CORRIGIDA
+        window.salvarContribuicao = async function(event) {
+            event.preventDefault();
+            
+            if (!window.membroAtual || !window.membroAtual.id) {
+                alert('Erro: Membro não identificado. Faça login novamente.');
+                return;
+            }
+
+            const tipo = document.getElementById('tipoContribuicao').value;
+            const data = document.getElementById('dataContribuicao').value;
+            const valor = parseFloat(document.getElementById('valorContribuicao').value);
+            const formaPagamento = document.getElementById('formaPagamento').value;
+            const observacoes = document.getElementById('observacoesContribuicao').value;
+
+            // Validações
+            if (!tipo) {
+                alert('Selecione o tipo de contribuição.');
+                return;
+            }
+
+            if (!data) {
+                alert('Selecione a data.');
+                return;
+            }
+
+            if (!valor || valor <= 0) {
+                alert('Digite um valor válido (maior que zero).');
+                return;
+            }
+
+            try {
+                // Mostrar loading no botão
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Salvando...';
+                submitBtn.disabled = true;
+
+                // Converter data string para objeto Date
+                const dataObj = new Date(data);
+                dataObj.setHours(12, 0, 0, 0); // Meio-dia para evitar problemas de fuso
+
+                // Dados da contribuição (SEM Timestamp)
+                const contribuicaoData = {
+                    tipo: tipo,
+                    data: dataObj.toISOString(), // Salvar como string ISO
+                    membroId: window.membroAtual.id,
+                    membroNome: window.membroAtual.nome,
+                    valor: valor,
+                    formaPagamento: formaPagamento,
+                    observacoes: observacoes || '',
+                    status: 'confirmado',
+                    criadoEm: new Date().toISOString(),
+                    origem: 'app_membro'
+                };
+
+                console.log('Salvando contribuição:', contribuicaoData);
+
+                // Salvar no Firebase
+                const docRef = await window.addDoc(window.collection(window.db, "contribuicoes"), contribuicaoData);
+                
+                console.log('Contribuição salva com ID:', docRef.id);
+                alert('✅ Contribuição registrada com sucesso!');
+                fecharModalContribuicao();
+
+            } catch (error) {
+                console.error('Erro detalhado ao salvar:', error);
+                alert('Erro ao registrar contribuição. Verifique o console para mais detalhes.');
+            } finally {
+                // Restaurar botão
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                submitBtn.textContent = 'Salvar';
+                submitBtn.disabled = false;
+            }
+        };
+
+        // Fechar modal ao clicar fora
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('contribuicaoModal');
+            if (modal && modal.style.display === 'flex' && e.target === modal) {
+                fecharModalContribuicao();
+            }
+        });
+
+                // ========== LANÇAR CONTRIBUIÇÕES ==========
+        
+        // Carregar lista de membros para o select
+        async function carregarMembrosParaSelect() {
+            try {
+                console.log('Carregando membros para o select...');
+                
+                const membrosRef = window.collection(window.db, "membros");
+                const querySnapshot = await window.getDocs(membrosRef);
+                
+                const selectMembro = document.getElementById('membroContribuicao');
+                selectMembro.innerHTML = '<option value="">Selecione um membro...</option>';
+                
+                querySnapshot.forEach((doc) => {
+                    const membro = doc.data();
+                    const option = document.createElement('option');
+                    option.value = doc.id;
+                    option.textContent = membro.nome || 'Membro sem nome';
+                    selectMembro.appendChild(option);
+                });
+                
+                console.log('Membros carregados com sucesso');
+            } catch (error) {
+                console.error('Erro ao carregar membros:', error);
+            }
+        }
+
+        // Mostrar/esconder campo de membro baseado no tipo
+        window.toggleCampoMembro = function() {
+            const tipo = document.getElementById('tipoContribuicao').value;
+            const campoMembro = document.getElementById('campoMembroContainer');
+            const membroSelect = document.getElementById('membroContribuicao');
+            
+            if (tipo === 'dizimo') {
+                campoMembro.style.display = 'block';
+                membroSelect.required = true;
+            } else {
+                campoMembro.style.display = 'none';
+                membroSelect.required = false;
+                membroSelect.value = ''; // Limpar seleção
+            }
+        };
+
+        // Abrir modal de contribuição
+        window.abrirModalContribuicao = function() {
+            console.log('Abrindo modal de contribuição');
+            
+            // Verificar se membro está logado
+            if (!window.membroAtual) {
+                console.error('Membro não está logado');
+                alert('Erro: Membro não identificado. Faça login novamente.');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Carregar membros para o select
+            carregarMembrosParaSelect();
+            
+            // Preencher data atual
+            const hoje = new Date();
+            const dataFormatada = hoje.toISOString().split('T')[0];
+            document.getElementById('dataContribuicao').value = dataFormatada;
+            
+            // Limpar campos
+            document.getElementById('tipoContribuicao').value = '';
+            document.getElementById('campoMembroContainer').style.display = 'none';
+            document.getElementById('membroContribuicao').value = '';
+            document.getElementById('valorContribuicao').value = '';
+            document.getElementById('formaPagamento').value = 'dinheiro';
+            document.getElementById('observacoesContribuicao').value = '';
+            
+            // Mostrar modal
+            document.getElementById('contribuicaoModal').style.display = 'flex';
+        };
+
+        // Fechar modal
+        window.fecharModalContribuicao = function() {
+            document.getElementById('contribuicaoModal').style.display = 'none';
+        };
+
+        // Salvar contribuição
+        window.salvarContribuicao = async function(event) {
+            event.preventDefault();
+            
+            console.log('=== INICIANDO SALVAMENTO DE CONTRIBUIÇÃO ===');
+            
+            // 1. Verificar membro
+            if (!window.membroAtual) {
+                console.error('ERRO: window.membroAtual não existe');
+                alert('Erro: Membro não identificado. Faça login novamente.');
+                return;
+            }
+            
+            console.log('Membro atual:', window.membroAtual);
+
+            // 2. Pegar valores do formulário
+            const tipo = document.getElementById('tipoContribuicao').value;
+            const data = document.getElementById('dataContribuicao').value;
+            const valor = document.getElementById('valorContribuicao').value;
+            const formaPagamento = document.getElementById('formaPagamento').value;
+            const observacoes = document.getElementById('observacoesContribuicao').value;
+            
+            // Para dízimo, pegar o membro selecionado
+            let membroId = window.membroAtual.id; // padrão: próprio membro
+            let membroNome = window.membroAtual.nome;
+            
+            if (tipo === 'dizimo') {
+                membroId = document.getElementById('membroContribuicao').value;
+                if (!membroId) {
+                    alert('Para dízimos, selecione o membro que está dizimando.');
+                    return;
+                }
+                
+                // Buscar nome do membro selecionado
+                const selectMembro = document.getElementById('membroContribuicao');
+                const selectedOption = selectMembro.options[selectMembro.selectedIndex];
+                membroNome = selectedOption ? selectedOption.textContent : 'Membro';
+            }
+            
+            console.log('Dados do formulário:', {
+                tipo,
+                membroId,
+                membroNome,
+                data,
+                valor,
+                formaPagamento,
+                observacoes
+            });
+
+            // 3. Validações
+            if (!tipo) {
+                alert('Selecione o tipo de contribuição.');
+                return;
+            }
+
+            if (!data) {
+                alert('Selecione a data.');
+                return;
+            }
+
+            if (!valor) {
+                alert('Digite o valor.');
+                return;
+            }
+
+            const valorNumerico = parseFloat(valor);
+            if (isNaN(valorNumerico) || valorNumerico <= 0) {
+                alert('Digite um valor válido (maior que zero).');
+                return;
+            }
+
+            try {
+                // Mostrar loading no botão
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                submitBtn.textContent = 'Salvando...';
+                submitBtn.disabled = true;
+
+                // Preparar dados
+                const dataObj = new Date(data);
+                dataObj.setHours(12, 0, 0, 0);
+                
+                const contribuicaoData = {
+                    tipo: tipo,
+                    data: dataObj.toISOString(),
+                    membroId: membroId,
+                    membroNome: membroNome,
+                    valor: valorNumerico,
+                    formaPagamento: formaPagamento,
+                    observacoes: observacoes || '',
+                    status: 'confirmado',
+                    criadoEm: new Date().toISOString(),
+                    origem: 'app_membro',
+                    lancadoPor: window.membroAtual.id,
+                    lancadoPorNome: window.membroAtual.nome
+                };
+                
+                console.log('Dados a serem salvos:', contribuicaoData);
+                
+                // Salvar no Firebase
+                const collectionRef = window.collection(window.db, "contribuicoes");
+                const docRef = await window.addDoc(collectionRef, contribuicaoData);
+                
+                console.log('SUCESSO! Documento salvo com ID:', docRef.id);
+                alert('✅ Contribuição registrada com sucesso!');
+                fecharModalContribuicao();
+
+            } catch (error) {
+                console.error('=== ERRO DETALHADO ===');
+                console.error('Mensagem:', error.message);
+                alert(`Erro ao registrar: ${error.message || 'Erro desconhecido'}`);
+            } finally {
+                // Restaurar botão
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.textContent = 'Salvar';
+                    submitBtn.disabled = false;
+                }
+            }
+        };
+
+        
+    </script>
+</body>
+</html>
