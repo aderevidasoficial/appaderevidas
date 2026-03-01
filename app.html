@@ -1,4 +1,4 @@
-<!-- File: app.html -->
+<!-- File: temp\app.html -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -23,7 +23,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, orderBy, where, doc, getDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, orderBy, where, doc, getDoc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyD4PNzTUJ1mA3QgrxJDL8vYuzHMBhrhI04",
@@ -44,6 +44,9 @@
         window.orderBy = orderBy;
         window.where = where;
         window.addDoc = addDoc;
+        window.doc = doc;
+        window.getDoc = getDoc;
+        window.updateDoc = updateDoc;
     </script>
 
     <script>
@@ -1055,7 +1058,7 @@
                 <button onclick="abrirMeusDizimos(); fecharMenu()">
                     <span>💰</span> Meus Dízimos
                 </button>
-                <button onclick="abrirModalContribuicao(); fecharMenu()">
+                <button onclick="abrirModalContribuicao(); fecharMenu()" id="btnMenuContribuicao">
                     <span>➕</span> Lançar Contribuição
                 </button>
                 <button onclick="sair()" style="color: var(--accent); margin-top: 20px;">
@@ -1210,7 +1213,7 @@
             
             <div class="content">
                 <!-- Botão para extrato -->
-                <button class="action-btn" style="margin-bottom: 15px; background: var(--secondary); color: white;" onclick="abrirExtrato()">
+                <button class="action-btn" style="margin-bottom: 15px; background: var(--secondary); color: white;" onclick="abrirExtrato()" id="btnExtrato">
                     <span>📊</span> Ver Extrato Completo
                 </button>
 
@@ -1422,6 +1425,141 @@
         let meusDizimos = [];
         let extratoDados = [];
         let extratoFiltrados = [];
+        window.permissoesMembro = null;
+
+        // ========== VERIFICAR PERMISSÕES DO MEMBRO ==========
+        async function verificarPermissoesApp() {
+            if (!window.membroAtual || !window.membroAtual.id) return;
+            
+            try {
+                console.log('🔍 Verificando permissões para:', window.membroAtual.id);
+                
+                const membroRef = doc(window.db, "membros", window.membroAtual.id);
+                const membroDoc = await getDoc(membroRef);
+                
+                if (membroDoc.exists()) {
+                    const membroData = membroDoc.data();
+                    
+                    // Configuração padrão se não existir
+                    const permissoes = membroData.permissoesApp || {
+                        telasPermitidas: ['home', 'biblia', 'eventos', 'aniversariantes', 'oracao', 'dizimos'],
+                        contribuicaoPermitida: false,
+                        usaApp: true,
+                        ultimoAcesso: new Date().toISOString()
+                    };
+                    
+                    window.permissoesMembro = permissoes;
+                    
+                    console.log('✅ Permissões carregadas:', permissoes);
+                    
+                    // Esconder botões não permitidos
+                    aplicarRestricoesPorPermissao(permissoes);
+                    
+                    // Atualizar último acesso
+                    updateDoc(membroRef, {
+                        'permissoesApp.ultimoAcesso': new Date().toISOString()
+                    }).catch(err => console.log('Erro ao atualizar acesso:', err));
+                }
+            } catch (error) {
+                console.error('❌ Erro ao verificar permissões:', error);
+                // Em caso de erro, permite tudo por segurança
+                window.permissoesMembro = {
+                    telasPermitidas: ['home', 'biblia', 'eventos', 'aniversariantes', 'oracao', 'dizimos', 'dizimos_extrato', 'contribuicao'],
+                    contribuicaoPermitida: true
+                };
+            }
+        }
+
+        // ========== APLICAR RESTRIÇÕES BASEADO NAS PERMISSÕES ==========
+        function aplicarRestricoesPorPermissao(permissoes) {
+            if (!permissoes) return;
+            
+            console.log('🔒 Aplicando restrições...');
+            
+            // Botão de contribuição (no menu lateral)
+            if (!permissoes.contribuicaoPermitida) {
+                const btnContribuicao = document.querySelector('[onclick="abrirModalContribuicao()"]');
+                if (btnContribuicao) {
+                    btnContribuicao.style.display = 'none';
+                    console.log('🚫 Botão de contribuição escondido');
+                }
+                
+                // Também esconder pelo ID
+                const btnMenuContribuicao = document.getElementById('btnMenuContribuicao');
+                if (btnMenuContribuicao) {
+                    btnMenuContribuicao.style.display = 'none';
+                }
+            }
+            
+            // Botão de extrato (na tela de dízimos)
+            if (!permissoes.telasPermitidas || !permissoes.telasPermitidas.includes('dizimos_extrato')) {
+                const btnExtrato = document.getElementById('btnExtrato');
+                if (btnExtrato) {
+                    btnExtrato.style.display = 'none';
+                    console.log('🚫 Botão de extrato escondido');
+                }
+            }
+            
+            // Verificar se pode acessar a tela de dízimos
+            if (permissoes.telasPermitidas && !permissoes.telasPermitidas.includes('dizimos')) {
+                // Esconder item do menu de dízimos
+                const menuItems = document.querySelectorAll('.menu-item');
+                menuItems.forEach(item => {
+                    if (item.textContent.includes('Dízimos') || item.getAttribute('onclick')?.includes('dizimos')) {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                // Esconder botão no menu lateral
+                const btnDizimos = document.querySelector('[onclick="abrirMeusDizimos(); fecharMenu()"]');
+                if (btnDizimos) {
+                    btnDizimos.style.display = 'none';
+                }
+            }
+        }
+
+        // ========== SOBRESCREVER FUNÇÃO DE MUDAR TELA PARA VERIFICAR PERMISSÕES ==========
+        const mudarTelaOriginal = window.mudarTela;
+        window.mudarTela = function(tela) {
+            // Verificar se tem permissão para acessar esta tela
+            if (window.permissoesMembro && window.permissoesMembro.telasPermitidas) {
+                // Mapear telas para IDs de permissão
+                const mapaTelas = {
+                    'home': 'home',
+                    'biblia': 'biblia',
+                    'eventos': 'eventos',
+                    'aniversariantes': 'aniversariantes',
+                    'oracao': 'oracao',
+                    'dizimos': 'dizimos',
+                    'extrato': 'dizimos_extrato'
+                };
+                
+                const permissaoNecessaria = mapaTelas[tela];
+                
+                if (permissaoNecessaria && !window.permissoesMembro.telasPermitidas.includes(permissaoNecessaria)) {
+                    console.log('🚫 Acesso negado à tela:', tela);
+                    mostrarMensagem('Você não tem permissão para acessar esta tela');
+                    
+                    // Se for tela de extrato, volta para dízimos
+                    if (tela === 'extrato') {
+                        if (window.permissoesMembro.telasPermitidas.includes('dizimos')) {
+                            mudarTelaOriginal('dizimos');
+                        } else {
+                            mudarTelaOriginal('home');
+                        }
+                    }
+                    // Se for tela de dízimos mas não tem permissão, volta para home
+                    else if (tela === 'dizimos' && !window.permissoesMembro.telasPermitidas.includes('dizimos')) {
+                        mudarTelaOriginal('home');
+                    }
+                    
+                    return;
+                }
+            }
+            
+            // Chamar função original
+            mudarTelaOriginal(tela);
+        };
 
         // ========== FUNÇÕES DE NOTIFICAÇÃO ==========
         function verificarPrimeiroAcesso() {
@@ -1625,284 +1763,173 @@
         // ========== FUNÇÕES PARA MEUS DÍZIMOS ==========
         
         window.abrirMeusDizimos = function() {
-    mudarTela('dizimos');
-    carregarMeusDizimos();
-};
+            mudarTela('dizimos');
+            carregarMeusDizimos();
+        };
 
         async function carregarMeusDizimos() {
-    if (!window.membroAtual || !window.membroAtual.id) {
-        mostrarMensagem('Erro: Membro não identificado');
-        return;
-    }
-
-    try {
-        const listaElement = document.getElementById('listaDizimos');
-        listaElement.innerHTML = '<div class="text-center" style="padding: 40px;">Carregando seus dízimos...</div>';
-        
-        console.log('🔍 DEBUG - Carregando dízimos para o membro:', window.membroAtual.id);
-        console.log('🔍 DEBUG - Nome do membro:', window.membroAtual.nome);
-
-        const contribuicoesRef = collection(window.db, "contribuicoes");
-        
-        // PRIMEIRO: Buscar TODAS as contribuições do membro (sem filtrar por tipo)
-        console.log('🔍 DEBUG - Buscando TODAS as contribuições do membro...');
-        
-        const qTodos = query(
-            contribuicoesRef, 
-            where("membroId", "==", window.membroAtual.id)
-        );
-        
-        const querySnapshotTodos = await getDocs(qTodos);
-        
-        console.log('🔍 DEBUG - Total de contribuições encontradas (todos os tipos):', querySnapshotTodos.size);
-        
-        // Listar todas as contribuições encontradas para debug
-        querySnapshotTodos.forEach((doc) => {
-            const data = doc.data();
-            console.log('🔍 DEBUG - Contribuição encontrada:', {
-                id: doc.id,
-                tipo: data.tipo,
-                membroId: data.membroId,
-                membroNome: data.membroNome,
-                valor: data.valor,
-                data: data.data
-            });
-        });
-
-        // SEGUNDO: Buscar apenas DÍZIMOS (como antes)
-        console.log('🔍 DEBUG - Buscando apenas DÍZIMOS do membro...');
-        
-        const qDizimos = query(
-            contribuicoesRef, 
-            where("tipo", "==", "dizimo"),
-            where("membroId", "==", window.membroAtual.id)
-        );
-        
-        const querySnapshotDizimos = await getDocs(qDizimos);
-        
-        console.log('🔍 DEBUG - Total de DÍZIMOS encontrados:', querySnapshotDizimos.size);
-        
-        meusDizimos = [];
-        querySnapshotDizimos.forEach((doc) => {
-            const data = doc.data();
-            
-            // FUNÇÃO AUXILIAR PARA CONVERTER DATA DE FORMA ROBUSTA
-            let dataObj = null;
-            
-            // Caso 1: Já é um objeto Date
-            if (data.data instanceof Date) {
-                dataObj = data.data;
+            if (!window.membroAtual || !window.membroAtual.id) {
+                mostrarMensagem('Erro: Membro não identificado');
+                return;
             }
-            // Caso 2: É um Timestamp do Firebase (tem método toDate)
-            else if (data.data && typeof data.data.toDate === 'function') {
-                dataObj = data.data.toDate();
-            }
-            // Caso 3: É uma string ISO
-            else if (typeof data.data === 'string') {
-                dataObj = new Date(data.data);
-            }
-            // Caso 4: É um número (timestamp)
-            else if (typeof data.data === 'number') {
-                dataObj = new Date(data.data);
-            }
-            
-            // Se não conseguiu converter, usa a data atual
-            if (!dataObj || isNaN(dataObj.getTime())) {
-                console.warn('Data inválida para contribuição:', doc.id, data.data);
-                dataObj = new Date();
-            }
-            
-            console.log('🔍 DEBUG - Dízimo processado:', {
-                id: doc.id,
-                data: dataObj.toLocaleDateString('pt-BR'),
-                valor: data.valor,
-                status: data.status
-            });
-            
-            meusDizimos.push({
-                id: doc.id,
-                ...data,
-                dataObj: dataObj
-            });
-        });
 
-        // Ordenar por data (mais recente primeiro)
-        meusDizimos.sort((a, b) => {
-            const dataA = a.dataObj || new Date(0);
-            const dataB = b.dataObj || new Date(0);
-            return dataB - dataA;
-        });
+            try {
+                const listaElement = document.getElementById('listaDizimos');
+                listaElement.innerHTML = '<div class="text-center" style="padding: 40px;">Carregando seus dízimos...</div>';
+                
+                console.log('🔍 DEBUG - Carregando dízimos para o membro:', window.membroAtual.id);
 
-        console.log('🔍 DEBUG - Total de dízimos após processamento:', meusDizimos.length);
+                const contribuicoesRef = collection(window.db, "contribuicoes");
+                
+                const qDizimos = query(
+                    contribuicoesRef, 
+                    where("tipo", "==", "dizimo"),
+                    where("membroId", "==", window.membroAtual.id)
+                );
+                
+                const querySnapshotDizimos = await getDocs(qDizimos);
+                
+                meusDizimos = [];
+                querySnapshotDizimos.forEach((doc) => {
+                    const data = doc.data();
+                    
+                    let dataObj = null;
+                    
+                    if (data.data instanceof Date) {
+                        dataObj = data.data;
+                    } else if (data.data && typeof data.data.toDate === 'function') {
+                        dataObj = data.data.toDate();
+                    } else if (typeof data.data === 'string') {
+                        dataObj = new Date(data.data);
+                    } else if (typeof data.data === 'number') {
+                        dataObj = new Date(data.data);
+                    }
+                    
+                    if (!dataObj || isNaN(dataObj.getTime())) {
+                        console.warn('Data inválida para contribuição:', doc.id, data.data);
+                        dataObj = new Date();
+                    }
+                    
+                    meusDizimos.push({
+                        id: doc.id,
+                        ...data,
+                        dataObj: dataObj
+                    });
+                });
 
-        if (meusDizimos.length === 0) {
-            console.log('🔍 DEBUG - NENHUM dízimo encontrado para o membro:', window.membroAtual.id);
+                meusDizimos.sort((a, b) => {
+                    const dataA = a.dataObj || new Date(0);
+                    const dataB = b.dataObj || new Date(0);
+                    return dataB - dataA;
+                });
+
+                filtrarDizimos();
+
+            } catch (error) {
+                console.error('Erro ao carregar dízimos:', error);
+                mostrarMensagem('Erro ao carregar seus dízimos');
+                
+                const listaElement = document.getElementById('listaDizimos');
+                listaElement.innerHTML = `
+                    <div class="dizimo-empty">
+                        <span>❌</span>
+                        <p>Erro ao carregar seus dízimos</p>
+                        <button class="action-btn" style="margin-top: 15px;" onclick="carregarMeusDizimos()">
+                            Tentar novamente
+                        </button>
+                    </div>
+                `;
+            }
         }
 
-        filtrarDizimos();
-
-    } catch (error) {
-        console.error('🔍 DEBUG - Erro detalhado ao carregar dízimos:', error);
-        console.error('🔍 DEBUG - Stack trace:', error.stack);
-        mostrarMensagem('Erro ao carregar seus dízimos: ' + error.message);
-        
-        const listaElement = document.getElementById('listaDizimos');
-        listaElement.innerHTML = `
-            <div class="dizimo-empty">
-                <span>❌</span>
-                <p>Erro ao carregar seus dízimos</p>
-                <p style="font-size: 12px; color: #e74c3c;">${error.message}</p>
-                <button class="action-btn" style="margin-top: 15px;" onclick="carregarMeusDizimos()">
-                    Tentar novamente
-                </button>
-            </div>
-        `;
-    }
-}
-window.debugDizimos = async function() {
-    if (!window.membroAtual || !window.membroAtual.id) {
-        console.log('❌ Membro não logado');
-        return;
-    }
-    
-    console.log('🔍 DEBUG MANUAL - Verificando dados do membro:');
-    console.log('ID:', window.membroAtual.id);
-    console.log('Nome:', window.membroAtual.nome);
-    
-    try {
-        const contribuicoesRef = collection(window.db, "contribuicoes");
-        
-        // Buscar todas as contribuições
-        const todasContrib = await getDocs(contribuicoesRef);
-        console.log('📊 TOTAL DE CONTRIBUIÇÕES NO BANCO:', todasContrib.size);
-        
-        // Listar todas
-        console.log('📋 LISTA COMPLETA:');
-        todasContrib.forEach((doc) => {
-            const data = doc.data();
-            console.log({
-                id: doc.id,
-                tipo: data.tipo,
-                membroId: data.membroId,
-                membroNome: data.membroNome,
-                valor: data.valor,
-                data: data.data
-            });
-        });
-        
-        // Buscar contribuições deste membro
-        const q = query(
-            contribuicoesRef, 
-            where("membroId", "==", window.membroAtual.id)
-        );
-        
-        const minhasContrib = await getDocs(q);
-        console.log('📊 MINHAS CONTRIBUIÇÕES (todos tipos):', minhasContrib.size);
-        
-        minhasContrib.forEach((doc) => {
-            const data = doc.data();
-            console.log('✅ Minha contrib:', {
-                id: doc.id,
-                tipo: data.tipo,
-                valor: data.valor,
-                data: data.data
-            });
-        });
-        
-    } catch (error) {
-        console.error('❌ Erro no debug:', error);
-    }
-};
-
         window.filtrarDizimos = function() {
-    const filtro = document.getElementById('filtroPeriodoDizimos').value;
-    const hoje = new Date();
-    let dataLimite = null;
+            const filtro = document.getElementById('filtroPeriodoDizimos').value;
+            const hoje = new Date();
+            let dataLimite = null;
 
-    if (filtro === 'ano') {
-        dataLimite = new Date(hoje.getFullYear() - 1, hoje.getMonth(), hoje.getDate());
-    } else if (filtro === 'mes') {
-        dataLimite = new Date(hoje.getFullYear(), hoje.getMonth() - 1, hoje.getDate());
-    } else if (filtro === 'trimestre') {
-        dataLimite = new Date(hoje.getFullYear(), hoje.getMonth() - 3, hoje.getDate());
-    }
+            if (filtro === 'ano') {
+                dataLimite = new Date(hoje.getFullYear() - 1, hoje.getMonth(), hoje.getDate());
+            } else if (filtro === 'mes') {
+                dataLimite = new Date(hoje.getFullYear(), hoje.getMonth() - 1, hoje.getDate());
+            } else if (filtro === 'trimestre') {
+                dataLimite = new Date(hoje.getFullYear(), hoje.getMonth() - 3, hoje.getDate());
+            }
 
-    let dizimosFiltrados = meusDizimos;
-    if (dataLimite) {
-        dizimosFiltrados = meusDizimos.filter(d => {
-            // Usar dataObj que criamos no carregamento
-            return d.dataObj >= dataLimite;
-        });
-    }
+            let dizimosFiltrados = meusDizimos;
+            if (dataLimite) {
+                dizimosFiltrados = meusDizimos.filter(d => {
+                    return d.dataObj >= dataLimite;
+                });
+            }
 
-    const total = dizimosFiltrados.reduce((acc, d) => {
-        const valor = parseFloat(d.valor) || 0;
-        return acc + valor;
-    }, 0);
-    
-    document.getElementById('totalDizimos').textContent = formatarMoeda(total);
-    document.getElementById('totalContribuicoes').textContent = 
-        `${dizimosFiltrados.length} contribuição${dizimosFiltrados.length !== 1 ? 'ões' : ''}`;
+            const total = dizimosFiltrados.reduce((acc, d) => {
+                const valor = parseFloat(d.valor) || 0;
+                return acc + valor;
+            }, 0);
+            
+            document.getElementById('totalDizimos').textContent = formatarMoeda(total);
+            document.getElementById('totalContribuicoes').textContent = 
+                `${dizimosFiltrados.length} contribuição${dizimosFiltrados.length !== 1 ? 'ões' : ''}`;
 
-    renderizarListaDizimos(dizimosFiltrados);
-};
+            renderizarListaDizimos(dizimosFiltrados);
+        };
+
         function renderizarListaDizimos(dizimos) {
-    const listaElement = document.getElementById('listaDizimos');
+            const listaElement = document.getElementById('listaDizimos');
 
-    if (!dizimos || dizimos.length === 0) {
-        listaElement.innerHTML = `
-            <div class="dizimo-empty">
-                <span>💰</span>
-                <p>Você ainda não tem dízimos registrados</p>
-                <button class="action-btn" style="margin-top: 15px;" onclick="abrirModalContribuicao()">
-                    Registrar meu primeiro dízimo
-                </button>
-            </div>
-        `;
-        return;
-    }
-
-    let html = '';
-
-    dizimos.forEach(d => {
-        // Usar dataObj que criamos no carregamento
-        const data = d.dataObj || new Date();
-        
-        const dataFormatada = data.toLocaleDateString('pt-BR', { 
-            day: '2-digit', 
-            month: 'long',
-            year: 'numeric'
-        });
-
-        const statusClass = d.status === 'confirmado' ? 'status-confirmado' : 
-                           d.status === 'pendente' ? 'status-pendente' : 'status-cancelado';
-        
-        const statusTexto = d.status === 'confirmado' ? 'Confirmado' :
-                           d.status === 'pendente' ? 'Pendente' : 'Cancelado';
-
-        const valor = parseFloat(d.valor) || 0;
-
-        html += `
-            <div class="dizimo-item">
-                <div class="dizimo-item-header">
-                    <span class="dizimo-item-data">${dataFormatada}</span>
-                    <span class="dizimo-item-valor">${formatarMoeda(valor)}</span>
-                </div>
-                <div class="dizimo-item-detalhes">
-                    <span>💳 ${formatarFormaPagamento(d.formaPagamento)}</span>
-                    <span class="dizimo-item-status ${statusClass}">${statusTexto}</span>
-                </div>
-                ${d.observacoes ? `
-                    <div style="margin-top: 8px; font-size: 12px; color: var(--text-light);">
-                        📝 ${d.observacoes}
+            if (!dizimos || dizimos.length === 0) {
+                listaElement.innerHTML = `
+                    <div class="dizimo-empty">
+                        <span>💰</span>
+                        <p>Você ainda não tem dízimos registrados</p>
+                        <button class="action-btn" style="margin-top: 15px;" onclick="abrirModalContribuicao()">
+                            Registrar meu primeiro dízimo
+                        </button>
                     </div>
-                ` : ''}
-            </div>
-        `;
-    });
+                `;
+                return;
+            }
 
-    listaElement.innerHTML = html;
-}
+            let html = '';
+
+            dizimos.forEach(d => {
+                const data = d.dataObj || new Date();
+                
+                const dataFormatada = data.toLocaleDateString('pt-BR', { 
+                    day: '2-digit', 
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                const statusClass = d.status === 'confirmado' ? 'status-confirmado' : 
+                                   d.status === 'pendente' ? 'status-pendente' : 'status-cancelado';
+                
+                const statusTexto = d.status === 'confirmado' ? 'Confirmado' :
+                                   d.status === 'pendente' ? 'Pendente' : 'Cancelado';
+
+                const valor = parseFloat(d.valor) || 0;
+
+                html += `
+                    <div class="dizimo-item">
+                        <div class="dizimo-item-header">
+                            <span class="dizimo-item-data">${dataFormatada}</span>
+                            <span class="dizimo-item-valor">${formatarMoeda(valor)}</span>
+                        </div>
+                        <div class="dizimo-item-detalhes">
+                            <span>💳 ${formatarFormaPagamento(d.formaPagamento)}</span>
+                            <span class="dizimo-item-status ${statusClass}">${statusTexto}</span>
+                        </div>
+                        ${d.observacoes ? `
+                            <div style="margin-top: 8px; font-size: 12px; color: var(--text-light);">
+                                📝 ${d.observacoes}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            listaElement.innerHTML = html;
+        }
 
         // ========== FUNÇÕES PARA EXTRATO DE DÍZIMOS ==========
         
@@ -1911,80 +1938,78 @@ window.debugDizimos = async function() {
         };
 
         window.abrirExtrato = function() {
+            // Verificar permissão
+            if (window.permissoesMembro && window.permissoesMembro.telasPermitidas && 
+                !window.permissoesMembro.telasPermitidas.includes('dizimos_extrato')) {
+                mostrarMensagem('Você não tem permissão para acessar o extrato');
+                return;
+            }
+            
             mudarTela('extrato');
             carregarExtrato();
         };
 
         async function carregarExtrato() {
-    if (!window.membroAtual || !window.membroAtual.id) {
-        mostrarMensagem('Erro: Membro não identificado');
-        return;
-    }
-
-    try {
-        mostrarMensagem('Carregando extrato...');
-
-        const contribuicoesRef = collection(window.db, "contribuicoes");
-        
-        const q = query(
-            contribuicoesRef, 
-            where("tipo", "==", "dizimo"),
-            where("membroId", "==", window.membroAtual.id)
-        );
-        
-        const querySnapshot = await getDocs(q);
-        
-        extratoDados = [];
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            
-            // FUNÇÃO AUXILIAR PARA CONVERTER DATA DE FORMA ROBUSTA
-            let dataObj = null;
-            
-            // Caso 1: Já é um objeto Date
-            if (data.data instanceof Date) {
-                dataObj = data.data;
+            if (!window.membroAtual || !window.membroAtual.id) {
+                mostrarMensagem('Erro: Membro não identificado');
+                return;
             }
-            // Caso 2: É um Timestamp do Firebase (tem método toDate)
-            else if (data.data && typeof data.data.toDate === 'function') {
-                dataObj = data.data.toDate();
-            }
-            // Caso 3: É uma string ISO
-            else if (typeof data.data === 'string') {
-                dataObj = new Date(data.data);
-            }
-            // Caso 4: É um número (timestamp)
-            else if (typeof data.data === 'number') {
-                dataObj = new Date(data.data);
-            }
-            
-            // Se não conseguiu converter, usa a data atual
-            if (!dataObj || isNaN(dataObj.getTime())) {
-                console.warn('Data inválida para contribuição:', doc.id, data.data);
-                dataObj = new Date();
-            }
-            
-            extratoDados.push({
-                id: doc.id,
-                ...data,
-                dataObj: dataObj // Salvar o objeto Date
-            });
-        });
 
-        extratoDados.sort((a, b) => b.dataObj - a.dataObj);
+            try {
+                mostrarMensagem('Carregando extrato...');
 
-        preencherSelectAnos();
-        
-        const anoAtual = new Date().getFullYear();
-        document.getElementById('filtroAno').value = anoAtual;
-        
-        filtrarExtrato();
+                const contribuicoesRef = collection(window.db, "contribuicoes");
+                
+                const q = query(
+                    contribuicoesRef, 
+                    where("tipo", "==", "dizimo"),
+                    where("membroId", "==", window.membroAtual.id)
+                );
+                
+                const querySnapshot = await getDocs(q);
+                
+                extratoDados = [];
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    
+                    let dataObj = null;
+                    
+                    if (data.data instanceof Date) {
+                        dataObj = data.data;
+                    } else if (data.data && typeof data.data.toDate === 'function') {
+                        dataObj = data.data.toDate();
+                    } else if (typeof data.data === 'string') {
+                        dataObj = new Date(data.data);
+                    } else if (typeof data.data === 'number') {
+                        dataObj = new Date(data.data);
+                    }
+                    
+                    if (!dataObj || isNaN(dataObj.getTime())) {
+                        console.warn('Data inválida para contribuição:', doc.id, data.data);
+                        dataObj = new Date();
+                    }
+                    
+                    extratoDados.push({
+                        id: doc.id,
+                        ...data,
+                        dataObj: dataObj
+                    });
+                });
 
-    } catch (error) {
-        console.error('Erro ao carregar extrato:', error);
-        mostrarMensagem('Erro ao carregar extrato');
-    }
-}
+                extratoDados.sort((a, b) => b.dataObj - a.dataObj);
+
+                preencherSelectAnos();
+                
+                const anoAtual = new Date().getFullYear();
+                document.getElementById('filtroAno').value = anoAtual;
+                
+                filtrarExtrato();
+
+            } catch (error) {
+                console.error('Erro ao carregar extrato:', error);
+                mostrarMensagem('Erro ao carregar extrato');
+            }
+        }
 
         function preencherSelectAnos() {
             const anos = [...new Set(extratoDados.map(d => d.dataObj.getFullYear()))];
@@ -2559,52 +2584,6 @@ window.debugDizimos = async function() {
                 alert('Funcionalidade em desenvolvimento');
             }
         }
-        // ========== VERIFICAR PERMISSÕES DO MEMBRO ==========
-async function verificarPermissoesApp() {
-    if (!window.membroAtual || !window.membroAtual.id) return;
-    
-    try {
-        const membroRef = doc(window.db, "membros", window.membroAtual.id);
-        const membroDoc = await getDoc(membroRef);
-        
-        if (membroDoc.exists()) {
-            const membroData = membroDoc.data();
-            
-            // Configuração padrão se não existir
-            const permissoes = membroData.permissoesApp || {
-                telasPermitidas: ['home', 'biblia', 'eventos', 'aniversariantes', 'oracao', 'dizimos'],
-                contribuicaoPermitida: false,
-                usaApp: true,
-                ultimoAcesso: new Date().toISOString()
-            };
-            
-            window.permissoesMembro = permissoes;
-            
-            // Esconder botões não permitidos
-            if (!permissoes.contribuicaoPermitida) {
-                const btnContribuicao = document.querySelector('[onclick="abrirModalContribuicao()"]');
-                if (btnContribuicao) {
-                    btnContribuicao.style.display = 'none';
-                }
-            }
-            
-            // Verificar permissão para tela de dízimos/extrato
-            if (!permissoes.telasPermitidas.includes('dizimos_extrato')) {
-                const btnExtrato = document.querySelector('[onclick="abrirExtrato()"]');
-                if (btnExtrato) {
-                    btnExtrato.style.display = 'none';
-                }
-            }
-            
-            // Atualizar último acesso
-            await updateDoc(membroRef, {
-                'permissoesApp.ultimoAcesso': new Date().toISOString()
-            });
-        }
-    } catch (error) {
-        console.error('Erro ao verificar permissões:', error);
-    }
-}
 
         // ========== INICIALIZAÇÃO ==========
         document.addEventListener('DOMContentLoaded', function() {
@@ -2617,7 +2596,9 @@ async function verificarPermissoesApp() {
             carregarPedidos();
             
             verificarPrimeiroAcesso();
-            verificarPermissoesApp();
+            
+            // Verificar permissões após carregar
+            setTimeout(verificarPermissoesApp, 1000);
         });
 
         function atualizarInterfaceUsuario() {
@@ -3137,6 +3118,12 @@ async function verificarPermissoesApp() {
 
         // ========== CONTRIBUIÇÕES ==========
         window.abrirModalContribuicao = function() {
+            // Verificar permissão
+            if (window.permissoesMembro && !window.permissoesMembro.contribuicaoPermitida) {
+                mostrarMensagem('Você não tem permissão para lançar contribuições');
+                return;
+            }
+            
             const hoje = new Date();
             const dataFormatada = hoje.toISOString().split('T')[0];
             document.getElementById('dataContribuicao').value = dataFormatada;
@@ -3157,6 +3144,13 @@ async function verificarPermissoesApp() {
             
             if (!window.membroAtual || !window.membroAtual.id) {
                 alert('Erro: Membro não identificado. Faça login novamente.');
+                return;
+            }
+
+            // Verificar permissão novamente
+            if (window.permissoesMembro && !window.permissoesMembro.contribuicaoPermitida) {
+                alert('Você não tem permissão para lançar contribuições');
+                fecharModalContribuicao();
                 return;
             }
 
