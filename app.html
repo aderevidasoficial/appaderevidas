@@ -1,4 +1,4 @@
-<!-- File: temp/app.html (MODIFICADO) -->
+<!-- File: app.html -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -16,6 +16,9 @@
     
     <!-- iOS Icons -->
     <link rel="apple-touch-icon" href="https://i.ibb.co/1G3ctD9b/logo-igreja.png">
+    
+    <!-- Bibliotecas para PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <!-- Firebase SDK -->
     <script type="module">
@@ -788,6 +791,214 @@
             opacity: 0.5;
         }
 
+        /* Estilos para Extrato de Dízimos */
+        .extrato-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .extrato-periodo {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .extrato-total {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .extrato-acoes {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .extrato-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .extrato-btn-pdf {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .extrato-btn-excel {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+        }
+
+        .extrato-btn-voltar {
+            background: var(--light);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .extrato-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .extrato-resumo-mensal {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .resumo-mensal-titulo {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .resumo-mensal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+            gap: 8px;
+        }
+
+        .resumo-mensal-item {
+            text-align: center;
+            padding: 10px 5px;
+            background: var(--light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .resumo-mensal-item:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .resumo-mensal-item.active {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .resumo-mensal-mes {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .resumo-mensal-valor {
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .extrato-lista {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .extrato-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .extrato-item:last-child {
+            border-bottom: none;
+        }
+
+        .extrato-item-info {
+            flex: 1;
+        }
+
+        .extrato-item-data {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .extrato-item-descricao {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .extrato-item-valor {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--success);
+            margin-left: 15px;
+        }
+
+        .extrato-item-status {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 10px;
+        }
+
+        .extrato-filtros {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .extrato-filtros-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .extrato-filtro-group {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .extrato-filtro-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+
+        .extrato-filtro-group select,
+        .extrato-filtro-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .extrato-filtro-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
         /* Modal */
         .modal {
             display: none;
@@ -841,7 +1052,6 @@
                 <button onclick="verMeusDados(); fecharMenu()">
                     <span>👤</span> Meus Dados
                 </button>
-                <!-- NOVA OPÇÃO: Meus Dízimos -->
                 <button onclick="abrirMeusDizimos(); fecharMenu()">
                     <span>💰</span> Meus Dízimos
                 </button>
@@ -990,7 +1200,7 @@
             </div>
         </div>
 
-        <!-- NOVA TELA: Meus Dízimos -->
+        <!-- Tela Meus Dízimos -->
         <div id="dizimosScreen" class="screen">
             <div class="app-header">
                 <button onclick="voltarHome()">←</button>
@@ -999,6 +1209,11 @@
             </div>
             
             <div class="content">
+                <!-- Botão para extrato -->
+                <button class="action-btn" style="margin-bottom: 15px; background: var(--secondary); color: white;" onclick="abrirExtrato()">
+                    <span>📊</span> Ver Extrato Completo
+                </button>
+
                 <!-- Resumo dos dízimos -->
                 <div class="dizimo-resumo" id="dizimoResumo">
                     <div class="total-label">Total de Dízimos</div>
@@ -1018,6 +1233,103 @@
 
                 <!-- Lista de dízimos -->
                 <div id="listaDizimos"></div>
+            </div>
+        </div>
+
+        <!-- Tela de Extrato de Dízimos -->
+        <div id="extratoScreen" class="screen">
+            <div class="app-header">
+                <button onclick="voltarParaDizimos()">←</button>
+                <h1>📊 Extrato de Dízimos</h1>
+                <button onclick="carregarExtrato()">↻</button>
+            </div>
+            
+            <div class="content">
+                <!-- Cabeçalho do Extrato -->
+                <div class="extrato-header">
+                    <div class="extrato-periodo" id="extratoPeriodo">Carregando...</div>
+                    <div class="extrato-total" id="extratoTotal">R$ 0,00</div>
+                    <div class="extrato-periodo" id="extratoQuantidade">0 contribuições</div>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="extrato-acoes">
+                    <button class="extrato-btn extrato-btn-pdf" onclick="baixarExtratoPDF()">
+                        📄 Baixar PDF
+                    </button>
+                    <button class="extrato-btn extrato-btn-excel" onclick="exportarExtratoExcel()">
+                        📊 Exportar Excel
+                    </button>
+                </div>
+
+                <!-- Filtros -->
+                <div class="extrato-filtros">
+                    <div class="extrato-filtros-row">
+                        <div class="extrato-filtro-group">
+                            <label>Ano</label>
+                            <select id="filtroAno" onchange="filtrarExtrato()">
+                                <option value="2026">2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                            </select>
+                        </div>
+                        <div class="extrato-filtro-group">
+                            <label>Mês</label>
+                            <select id="filtroMes" onchange="filtrarExtrato()">
+                                <option value="0">Todos os meses</option>
+                                <option value="1">Janeiro</option>
+                                <option value="2">Fevereiro</option>
+                                <option value="3">Março</option>
+                                <option value="4">Abril</option>
+                                <option value="5">Maio</option>
+                                <option value="6">Junho</option>
+                                <option value="7">Julho</option>
+                                <option value="8">Agosto</option>
+                                <option value="9">Setembro</option>
+                                <option value="10">Outubro</option>
+                                <option value="11">Novembro</option>
+                                <option value="12">Dezembro</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="extrato-filtros-row">
+                        <div class="extrato-filtro-group">
+                            <label>Data Inicial</label>
+                            <input type="date" id="filtroDataInicio" onchange="filtrarExtrato()">
+                        </div>
+                        <div class="extrato-filtro-group">
+                            <label>Data Final</label>
+                            <input type="date" id="filtroDataFim" onchange="filtrarExtrato()">
+                        </div>
+                    </div>
+                    <div class="extrato-filtro-actions">
+                        <button class="action-btn" style="width: auto; padding: 10px 20px;" onclick="limparFiltrosExtrato()">
+                            🗑️ Limpar Filtros
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Resumo Mensal -->
+                <div class="extrato-resumo-mensal">
+                    <div class="resumo-mensal-titulo">
+                        <span>📅</span> Resumo por Mês
+                    </div>
+                    <div class="resumo-mensal-grid" id="resumoMensal">
+                        <!-- Será preenchido via JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Lista de Contribuições -->
+                <div class="extrato-lista">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <h3 style="font-size: 16px; color: var(--text);">Histórico de Contribuições</h3>
+                        <span style="font-size: 12px; color: var(--text-light);" id="extratoCount">0 itens</span>
+                    </div>
+                    <div id="extratoLista">
+                        <!-- Será preenchido via JavaScript -->
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1107,9 +1419,11 @@
         let membros = [];
         let aniversariantes = [];
         let notificacoesAtivas = false;
-        let meusDizimos = []; // Array para armazenar os dízimos do membro logado
+        let meusDizimos = [];
+        let extratoDados = [];
+        let extratoFiltrados = [];
 
-        // Verificar primeiro acesso
+        // ========== FUNÇÕES DE NOTIFICAÇÃO ==========
         function verificarPrimeiroAcesso() {
             const jaPediu = localStorage.getItem('jaPediuNotificacao');
             
@@ -1124,7 +1438,6 @@
             }
         }
 
-        // Solicitar permissão
         window.solicitarNotificacoes = async function() {
             document.getElementById('notificationPermissionModal').style.display = 'none';
             
@@ -1138,7 +1451,6 @@
                     
                     mostrarMensagem('✅ Notificações ativadas!');
                     
-                    // TESTE: Enviar notificação via Service Worker
                     registration.showNotification('🔔 AdereVidas', {
                         body: 'Notificações ativadas com sucesso!',
                         icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
@@ -1160,14 +1472,12 @@
             }
         };
 
-        // Negar permissão
         window.negarNotificacoes = function() {
             document.getElementById('notificationPermissionModal').style.display = 'none';
             localStorage.setItem('jaPediuNotificacao', 'true');
             mostrarMensagem('Você pode ativar depois');
         };
 
-        // Iniciar verificações
         function iniciarVerificacoes() {
             console.log('🔔 Sistema de notificações iniciado');
             
@@ -1181,7 +1491,6 @@
             agendarVersiculo();
         }
 
-        // Verificar eventos
         async function verificarEventos() {
             if (!notificacoesAtivas || typeof eventos === 'undefined' || eventos.length === 0) return;
             
@@ -1219,7 +1528,6 @@
             });
         }
 
-        // Verificar aniversários
         async function verificarAniversarios() {
             if (!notificacoesAtivas || typeof aniversariantes === 'undefined' || aniversariantes.length === 0) return;
             
@@ -1255,7 +1563,6 @@
             }
         }
 
-        // Agendar versículo
         function agendarVersiculo() {
             const versiculos = [
                 { texto: 'Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito...', ref: 'João 3:16' },
@@ -1283,7 +1590,6 @@
             }, 60000);
         }
 
-        // Mostrar mensagem
         function mostrarMensagem(texto) {
             const msgDiv = document.createElement('div');
             msgDiv.style.cssText = `
@@ -1318,62 +1624,126 @@
 
         // ========== FUNÇÕES PARA MEUS DÍZIMOS ==========
         
-        // Abrir tela de Meus Dízimos
-window.abrirMeusDizimos = function() {
+        window.abrirMeusDizimos = function() {
     mudarTela('dizimos');
     carregarMeusDizimos();
 };
 
-// Carregar dízimos do membro logado
-async function carregarMeusDizimos() {
+        async function carregarMeusDizimos() {
     if (!window.membroAtual || !window.membroAtual.id) {
         mostrarMensagem('Erro: Membro não identificado');
         return;
     }
 
     try {
-        // Mostrar loading
         const listaElement = document.getElementById('listaDizimos');
         listaElement.innerHTML = '<div class="text-center" style="padding: 40px;">Carregando seus dízimos...</div>';
         
-        console.log('Carregando dízimos para o membro:', window.membroAtual.id);
+        console.log('🔍 DEBUG - Carregando dízimos para o membro:', window.membroAtual.id);
+        console.log('🔍 DEBUG - Nome do membro:', window.membroAtual.nome);
 
         const contribuicoesRef = collection(window.db, "contribuicoes");
         
-        // Buscar apenas dízimos do membro logado
-        // Primeiro, buscar todos os dízimos do membro sem orderBy para evitar índice composto
-        const q = query(
+        // PRIMEIRO: Buscar TODAS as contribuições do membro (sem filtrar por tipo)
+        console.log('🔍 DEBUG - Buscando TODAS as contribuições do membro...');
+        
+        const qTodos = query(
+            contribuicoesRef, 
+            where("membroId", "==", window.membroAtual.id)
+        );
+        
+        const querySnapshotTodos = await getDocs(qTodos);
+        
+        console.log('🔍 DEBUG - Total de contribuições encontradas (todos os tipos):', querySnapshotTodos.size);
+        
+        // Listar todas as contribuições encontradas para debug
+        querySnapshotTodos.forEach((doc) => {
+            const data = doc.data();
+            console.log('🔍 DEBUG - Contribuição encontrada:', {
+                id: doc.id,
+                tipo: data.tipo,
+                membroId: data.membroId,
+                membroNome: data.membroNome,
+                valor: data.valor,
+                data: data.data
+            });
+        });
+
+        // SEGUNDO: Buscar apenas DÍZIMOS (como antes)
+        console.log('🔍 DEBUG - Buscando apenas DÍZIMOS do membro...');
+        
+        const qDizimos = query(
             contribuicoesRef, 
             where("tipo", "==", "dizimo"),
             where("membroId", "==", window.membroAtual.id)
         );
         
-        const querySnapshot = await getDocs(q);
+        const querySnapshotDizimos = await getDocs(qDizimos);
+        
+        console.log('🔍 DEBUG - Total de DÍZIMOS encontrados:', querySnapshotDizimos.size);
         
         meusDizimos = [];
-        querySnapshot.forEach((doc) => {
+        querySnapshotDizimos.forEach((doc) => {
             const data = doc.data();
-            console.log('Dízimo encontrado:', data);
+            
+            // FUNÇÃO AUXILIAR PARA CONVERTER DATA DE FORMA ROBUSTA
+            let dataObj = null;
+            
+            // Caso 1: Já é um objeto Date
+            if (data.data instanceof Date) {
+                dataObj = data.data;
+            }
+            // Caso 2: É um Timestamp do Firebase (tem método toDate)
+            else if (data.data && typeof data.data.toDate === 'function') {
+                dataObj = data.data.toDate();
+            }
+            // Caso 3: É uma string ISO
+            else if (typeof data.data === 'string') {
+                dataObj = new Date(data.data);
+            }
+            // Caso 4: É um número (timestamp)
+            else if (typeof data.data === 'number') {
+                dataObj = new Date(data.data);
+            }
+            
+            // Se não conseguiu converter, usa a data atual
+            if (!dataObj || isNaN(dataObj.getTime())) {
+                console.warn('Data inválida para contribuição:', doc.id, data.data);
+                dataObj = new Date();
+            }
+            
+            console.log('🔍 DEBUG - Dízimo processado:', {
+                id: doc.id,
+                data: dataObj.toLocaleDateString('pt-BR'),
+                valor: data.valor,
+                status: data.status
+            });
+            
             meusDizimos.push({
                 id: doc.id,
-                ...data
+                ...data,
+                dataObj: dataObj
             });
         });
 
-        // Ordenar por data manualmente (mais recente primeiro)
+        // Ordenar por data (mais recente primeiro)
         meusDizimos.sort((a, b) => {
-            const dataA = a.data ? (a.data.toDate ? a.data.toDate() : new Date(a.data)) : new Date(0);
-            const dataB = b.data ? (b.data.toDate ? b.data.toDate() : new Date(b.data)) : new Date(0);
+            const dataA = a.dataObj || new Date(0);
+            const dataB = b.dataObj || new Date(0);
             return dataB - dataA;
         });
 
-        console.log('Total de dízimos carregados:', meusDizimos.length);
+        console.log('🔍 DEBUG - Total de dízimos após processamento:', meusDizimos.length);
 
-        // Aplicar filtro padrão (todos)
+        if (meusDizimos.length === 0) {
+            console.log('🔍 DEBUG - NENHUM dízimo encontrado para o membro:', window.membroAtual.id);
+        }
+
         filtrarDizimos();
 
     } catch (error) {
-        console.error('Erro detalhado ao carregar dízimos:', error);
+        console.error('🔍 DEBUG - Erro detalhado ao carregar dízimos:', error);
+        console.error('🔍 DEBUG - Stack trace:', error.stack);
         mostrarMensagem('Erro ao carregar seus dízimos: ' + error.message);
         
         const listaElement = document.getElementById('listaDizimos');
@@ -1381,6 +1751,7 @@ async function carregarMeusDizimos() {
             <div class="dizimo-empty">
                 <span>❌</span>
                 <p>Erro ao carregar seus dízimos</p>
+                <p style="font-size: 12px; color: #e74c3c;">${error.message}</p>
                 <button class="action-btn" style="margin-top: 15px;" onclick="carregarMeusDizimos()">
                     Tentar novamente
                 </button>
@@ -1388,14 +1759,66 @@ async function carregarMeusDizimos() {
         `;
     }
 }
+window.debugDizimos = async function() {
+    if (!window.membroAtual || !window.membroAtual.id) {
+        console.log('❌ Membro não logado');
+        return;
+    }
+    
+    console.log('🔍 DEBUG MANUAL - Verificando dados do membro:');
+    console.log('ID:', window.membroAtual.id);
+    console.log('Nome:', window.membroAtual.nome);
+    
+    try {
+        const contribuicoesRef = collection(window.db, "contribuicoes");
+        
+        // Buscar todas as contribuições
+        const todasContrib = await getDocs(contribuicoesRef);
+        console.log('📊 TOTAL DE CONTRIBUIÇÕES NO BANCO:', todasContrib.size);
+        
+        // Listar todas
+        console.log('📋 LISTA COMPLETA:');
+        todasContrib.forEach((doc) => {
+            const data = doc.data();
+            console.log({
+                id: doc.id,
+                tipo: data.tipo,
+                membroId: data.membroId,
+                membroNome: data.membroNome,
+                valor: data.valor,
+                data: data.data
+            });
+        });
+        
+        // Buscar contribuições deste membro
+        const q = query(
+            contribuicoesRef, 
+            where("membroId", "==", window.membroAtual.id)
+        );
+        
+        const minhasContrib = await getDocs(q);
+        console.log('📊 MINHAS CONTRIBUIÇÕES (todos tipos):', minhasContrib.size);
+        
+        minhasContrib.forEach((doc) => {
+            const data = doc.data();
+            console.log('✅ Minha contrib:', {
+                id: doc.id,
+                tipo: data.tipo,
+                valor: data.valor,
+                data: data.data
+            });
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro no debug:', error);
+    }
+};
 
-// Filtrar dízimos por período
-window.filtrarDizimos = function() {
+        window.filtrarDizimos = function() {
     const filtro = document.getElementById('filtroPeriodoDizimos').value;
     const hoje = new Date();
     let dataLimite = null;
 
-    // Definir data limite baseada no filtro
     if (filtro === 'ano') {
         dataLimite = new Date(hoje.getFullYear() - 1, hoje.getMonth(), hoje.getDate());
     } else if (filtro === 'mes') {
@@ -1404,45 +1827,26 @@ window.filtrarDizimos = function() {
         dataLimite = new Date(hoje.getFullYear(), hoje.getMonth() - 3, hoje.getDate());
     }
 
-    // Filtrar os dízimos
     let dizimosFiltrados = meusDizimos;
     if (dataLimite) {
         dizimosFiltrados = meusDizimos.filter(d => {
-            if (!d.data) return false;
-            
-            // Converter data para comparação
-            let dataDizimo;
-            if (d.data && typeof d.data.toDate === 'function') {
-                // É um Timestamp do Firebase
-                dataDizimo = d.data.toDate();
-            } else if (d.data) {
-                // É uma string ou Date
-                dataDizimo = new Date(d.data);
-            } else {
-                return false;
-            }
-            
-            return dataDizimo >= dataLimite;
+            // Usar dataObj que criamos no carregamento
+            return d.dataObj >= dataLimite;
         });
     }
 
-    // Calcular total
     const total = dizimosFiltrados.reduce((acc, d) => {
         const valor = parseFloat(d.valor) || 0;
         return acc + valor;
     }, 0);
     
-    // Atualizar resumo
     document.getElementById('totalDizimos').textContent = formatarMoeda(total);
     document.getElementById('totalContribuicoes').textContent = 
         `${dizimosFiltrados.length} contribuição${dizimosFiltrados.length !== 1 ? 'ões' : ''}`;
 
-    // Renderizar lista
     renderizarListaDizimos(dizimosFiltrados);
 };
-
-// Renderizar lista de dízimos
-function renderizarListaDizimos(dizimos) {
+        function renderizarListaDizimos(dizimos) {
     const listaElement = document.getElementById('listaDizimos');
 
     if (!dizimos || dizimos.length === 0) {
@@ -1461,20 +1865,8 @@ function renderizarListaDizimos(dizimos) {
     let html = '';
 
     dizimos.forEach(d => {
-        // Tratar data de forma segura
-        let data;
-        if (d.data && typeof d.data.toDate === 'function') {
-            data = d.data.toDate();
-        } else if (d.data) {
-            data = new Date(d.data);
-        } else {
-            data = new Date(); // fallback
-        }
-        
-        // Verificar se a data é válida
-        if (isNaN(data.getTime())) {
-            data = new Date(); // fallback
-        }
+        // Usar dataObj que criamos no carregamento
+        const data = d.dataObj || new Date();
         
         const dataFormatada = data.toLocaleDateString('pt-BR', { 
             day: '2-digit', 
@@ -1488,7 +1880,6 @@ function renderizarListaDizimos(dizimos) {
         const statusTexto = d.status === 'confirmado' ? 'Confirmado' :
                            d.status === 'pendente' ? 'Pendente' : 'Cancelado';
 
-        // Formatar valor de forma segura
         const valor = parseFloat(d.valor) || 0;
 
         html += `
@@ -1513,26 +1904,426 @@ function renderizarListaDizimos(dizimos) {
     listaElement.innerHTML = html;
 }
 
-// Formatar forma de pagamento
-function formatarFormaPagamento(forma) {
-    const formas = {
-        'dinheiro': 'Dinheiro',
-        'pix': 'PIX',
-        'cartao': 'Cartão',
-        'transferencia': 'Transferência',
-        'cheque': 'Cheque'
-    };
-    return formas[forma] || forma || 'Não informado';
+        // ========== FUNÇÕES PARA EXTRATO DE DÍZIMOS ==========
+        
+        window.voltarParaDizimos = function() {
+            mudarTela('dizimos');
+        };
+
+        window.abrirExtrato = function() {
+            mudarTela('extrato');
+            carregarExtrato();
+        };
+
+        async function carregarExtrato() {
+    if (!window.membroAtual || !window.membroAtual.id) {
+        mostrarMensagem('Erro: Membro não identificado');
+        return;
+    }
+
+    try {
+        mostrarMensagem('Carregando extrato...');
+
+        const contribuicoesRef = collection(window.db, "contribuicoes");
+        
+        const q = query(
+            contribuicoesRef, 
+            where("tipo", "==", "dizimo"),
+            where("membroId", "==", window.membroAtual.id)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        
+        extratoDados = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            
+            // FUNÇÃO AUXILIAR PARA CONVERTER DATA DE FORMA ROBUSTA
+            let dataObj = null;
+            
+            // Caso 1: Já é um objeto Date
+            if (data.data instanceof Date) {
+                dataObj = data.data;
+            }
+            // Caso 2: É um Timestamp do Firebase (tem método toDate)
+            else if (data.data && typeof data.data.toDate === 'function') {
+                dataObj = data.data.toDate();
+            }
+            // Caso 3: É uma string ISO
+            else if (typeof data.data === 'string') {
+                dataObj = new Date(data.data);
+            }
+            // Caso 4: É um número (timestamp)
+            else if (typeof data.data === 'number') {
+                dataObj = new Date(data.data);
+            }
+            
+            // Se não conseguiu converter, usa a data atual
+            if (!dataObj || isNaN(dataObj.getTime())) {
+                console.warn('Data inválida para contribuição:', doc.id, data.data);
+                dataObj = new Date();
+            }
+            
+            extratoDados.push({
+                id: doc.id,
+                ...data,
+                dataObj: dataObj // Salvar o objeto Date
+            });
+        });
+
+        extratoDados.sort((a, b) => b.dataObj - a.dataObj);
+
+        preencherSelectAnos();
+        
+        const anoAtual = new Date().getFullYear();
+        document.getElementById('filtroAno').value = anoAtual;
+        
+        filtrarExtrato();
+
+    } catch (error) {
+        console.error('Erro ao carregar extrato:', error);
+        mostrarMensagem('Erro ao carregar extrato');
+    }
 }
 
-// Formatar moeda
-function formatarMoeda(valor) {
-    if (isNaN(valor)) valor = 0;
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-    }).format(valor);
-}
+        function preencherSelectAnos() {
+            const anos = [...new Set(extratoDados.map(d => d.dataObj.getFullYear()))];
+            anos.sort((a, b) => b - a);
+            
+            const selectAno = document.getElementById('filtroAno');
+            selectAno.innerHTML = '';
+            
+            anos.forEach(ano => {
+                const option = document.createElement('option');
+                option.value = ano;
+                option.textContent = ano;
+                selectAno.appendChild(option);
+            });
+            
+            if (anos.length === 0) {
+                const anoAtual = new Date().getFullYear();
+                const option = document.createElement('option');
+                option.value = anoAtual;
+                option.textContent = anoAtual;
+                selectAno.appendChild(option);
+            }
+        }
+
+        window.filtrarExtrato = function() {
+            const ano = parseInt(document.getElementById('filtroAno').value);
+            const mes = parseInt(document.getElementById('filtroMes').value);
+            const dataInicio = document.getElementById('filtroDataInicio').value;
+            const dataFim = document.getElementById('filtroDataFim').value;
+            
+            extratoFiltrados = extratoDados.filter(d => {
+                if (ano && d.dataObj.getFullYear() !== ano) return false;
+                
+                if (mes && mes > 0 && (d.dataObj.getMonth() + 1) !== mes) return false;
+                
+                if (dataInicio) {
+                    const dataInicioObj = new Date(dataInicio);
+                    dataInicioObj.setHours(0, 0, 0, 0);
+                    if (d.dataObj < dataInicioObj) return false;
+                }
+                
+                if (dataFim) {
+                    const dataFimObj = new Date(dataFim);
+                    dataFimObj.setHours(23, 59, 59, 999);
+                    if (d.dataObj > dataFimObj) return false;
+                }
+                
+                return true;
+            });
+
+            atualizarExtrato();
+        };
+
+        window.limparFiltrosExtrato = function() {
+            document.getElementById('filtroMes').value = '0';
+            document.getElementById('filtroDataInicio').value = '';
+            document.getElementById('filtroDataFim').value = '';
+            filtrarExtrato();
+        };
+
+        function atualizarExtrato() {
+            const total = extratoFiltrados.reduce((acc, d) => acc + (parseFloat(d.valor) || 0), 0);
+            
+            const ano = document.getElementById('filtroAno').value;
+            const mes = parseInt(document.getElementById('filtroMes').value);
+            
+            let periodoTexto = `Ano ${ano}`;
+            if (mes > 0) {
+                const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                periodoTexto = `${meses[mes-1]} de ${ano}`;
+            }
+            
+            document.getElementById('extratoPeriodo').textContent = periodoTexto;
+            document.getElementById('extratoTotal').textContent = formatarMoeda(total);
+            document.getElementById('extratoQuantidade').textContent = 
+                `${extratoFiltrados.length} contribuição${extratoFiltrados.length !== 1 ? 'ões' : ''}`;
+            document.getElementById('extratoCount').textContent = 
+                `${extratoFiltrados.length} itens`;
+
+            atualizarResumoMensal();
+            atualizarListaExtrato();
+        }
+
+        function atualizarResumoMensal() {
+            const ano = parseInt(document.getElementById('filtroAno').value);
+            const mesSelecionado = parseInt(document.getElementById('filtroMes').value);
+            
+            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 
+                          'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            
+            let html = '';
+            
+            for (let i = 0; i < 12; i++) {
+                const totalMes = extratoDados
+                    .filter(d => d.dataObj.getFullYear() === ano && d.dataObj.getMonth() === i)
+                    .reduce((acc, d) => acc + (parseFloat(d.valor) || 0), 0);
+                
+                const isActive = (mesSelecionado === (i + 1));
+                
+                html += `
+                    <div class="resumo-mensal-item ${isActive ? 'active' : ''}" 
+                         onclick="selecionarMes(${i + 1})">
+                        <div class="resumo-mensal-mes">${meses[i]}</div>
+                        <div class="resumo-mensal-valor">${formatarMoeda(totalMes)}</div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('resumoMensal').innerHTML = html;
+        }
+
+        window.selecionarMes = function(mes) {
+            document.getElementById('filtroMes').value = mes;
+            document.getElementById('filtroDataInicio').value = '';
+            document.getElementById('filtroDataFim').value = '';
+            filtrarExtrato();
+        };
+
+        function atualizarListaExtrato() {
+            const listaElement = document.getElementById('extratoLista');
+
+            if (extratoFiltrados.length === 0) {
+                listaElement.innerHTML = `
+                    <div class="dizimo-empty">
+                        <span>📊</span>
+                        <p>Nenhuma contribuição encontrada para o período selecionado</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+
+            extratoFiltrados.forEach(d => {
+                const dataFormatada = d.dataObj.toLocaleDateString('pt-BR', { 
+                    day: '2-digit', 
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                const statusClass = d.status === 'confirmado' ? 'status-confirmado' : 
+                                   d.status === 'pendente' ? 'status-pendente' : 'status-cancelado';
+                
+                const statusTexto = d.status === 'confirmado' ? 'Confirmado' :
+                                   d.status === 'pendente' ? 'Pendente' : 'Cancelado';
+
+                html += `
+                    <div class="extrato-item">
+                        <div class="extrato-item-info">
+                            <div class="extrato-item-data">${dataFormatada}</div>
+                            <div class="extrato-item-descricao">
+                                Dízimo - ${formatarFormaPagamento(d.formaPagamento)}
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <span class="extrato-item-valor">${formatarMoeda(d.valor)}</span>
+                            <span class="extrato-item-status ${statusClass}">${statusTexto}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            listaElement.innerHTML = html;
+        }
+
+        window.baixarExtratoPDF = function() {
+            if (extratoFiltrados.length === 0) {
+                mostrarMensagem('Não há dados para gerar o PDF');
+                return;
+            }
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                const membroNome = window.membroAtual.nome;
+                const ano = document.getElementById('filtroAno').value;
+                const mes = parseInt(document.getElementById('filtroMes').value);
+                const dataGeracao = new Date().toLocaleDateString('pt-BR');
+                
+                let periodoTexto = `Ano ${ano}`;
+                if (mes > 0) {
+                    const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                                  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                    periodoTexto = `${meses[mes-1]} de ${ano}`;
+                }
+
+                const total = extratoFiltrados.reduce((acc, d) => acc + (parseFloat(d.valor) || 0), 0);
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(18);
+                doc.setTextColor(44, 62, 80);
+                doc.text('EXTRATO DE DÍZIMOS', 105, 20, { align: 'center' });
+                
+                doc.setFontSize(12);
+                doc.setTextColor(127, 140, 141);
+                doc.text(`Membro: ${membroNome}`, 20, 35);
+                doc.text(`Período: ${periodoTexto}`, 20, 42);
+                doc.text(`Gerado em: ${dataGeracao}`, 20, 49);
+
+                doc.setDrawColor(200, 200, 200);
+                doc.line(20, 55, 190, 55);
+
+                doc.setFontSize(14);
+                doc.setTextColor(44, 62, 80);
+                doc.text('RESUMO', 20, 65);
+                
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Total de Contribuições: ${extratoFiltrados.length}`, 25, 75);
+                doc.text(`Valor Total: ${formatarMoeda(total)}`, 25, 82);
+
+                doc.setFontSize(14);
+                doc.setTextColor(44, 62, 80);
+                doc.text('DETALHAMENTO', 20, 100);
+
+                let y = 110;
+                doc.setFontSize(10);
+                doc.setTextColor(100, 100, 100);
+                
+                doc.setFont('helvetica', 'bold');
+                doc.text('Data', 20, y);
+                doc.text('Valor', 80, y);
+                doc.text('Forma Pag.', 120, y);
+                doc.text('Status', 160, y);
+                
+                y += 5;
+                doc.setDrawColor(200, 200, 200);
+                doc.line(20, y, 190, y);
+                y += 5;
+                
+                doc.setFont('helvetica', 'normal');
+                
+                extratoFiltrados.slice(0, 20).forEach((d, index) => {
+                    if (y > 250) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                    
+                    const dataFormatada = d.dataObj.toLocaleDateString('pt-BR');
+                    
+                    doc.text(dataFormatada, 20, y);
+                    doc.text(formatarMoeda(d.valor), 80, y);
+                    doc.text(formatarFormaPagamento(d.formaPagamento).substring(0, 10), 120, y);
+                    
+                    const status = d.status === 'confirmado' ? 'Confirmado' : 
+                                  d.status === 'pendente' ? 'Pendente' : 'Cancelado';
+                    doc.text(status, 160, y);
+                    
+                    y += 7;
+                });
+
+                if (extratoFiltrados.length > 20) {
+                    doc.text(`... e mais ${extratoFiltrados.length - 20} contribuições`, 20, y + 5);
+                }
+
+                doc.setFontSize(8);
+                doc.setTextColor(150, 150, 150);
+                doc.text('Documento gerado pelo Sistema AdereVidas', 105, 280, { align: 'center' });
+                doc.text('Este é um extrato informativo, não possui valor fiscal.', 105, 285, { align: 'center' });
+
+                const nomeArquivo = `extrato_dizimos_${membroNome.replace(/[^a-zA-Z0-9]/g, '_')}_${ano}.pdf`;
+                doc.save(nomeArquivo);
+                
+                mostrarMensagem('PDF gerado com sucesso!');
+
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+                mostrarMensagem('Erro ao gerar PDF');
+            }
+        };
+
+        window.exportarExtratoExcel = function() {
+            if (extratoFiltrados.length === 0) {
+                mostrarMensagem('Não há dados para exportar');
+                return;
+            }
+
+            try {
+                let csvContent = "data:text/csv;charset=utf-8,";
+                
+                csvContent += "Data;Valor;Forma de Pagamento;Status;Observações\n";
+                
+                extratoFiltrados.forEach(d => {
+                    const dataFormatada = d.dataObj.toLocaleDateString('pt-BR');
+                    
+                    const row = [
+                        dataFormatada,
+                        d.valor,
+                        formatarFormaPagamento(d.formaPagamento),
+                        d.status === 'confirmado' ? 'Confirmado' : 
+                        d.status === 'pendente' ? 'Pendente' : 'Cancelado',
+                        d.observacoes || ''
+                    ];
+                    
+                    csvContent += row.join(";") + "\n";
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                
+                const membroNome = window.membroAtual.nome.replace(/[^a-zA-Z0-9]/g, '_');
+                const ano = document.getElementById('filtroAno').value;
+                link.setAttribute("download", `extrato_dizimos_${membroNome}_${ano}.csv`);
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                mostrarMensagem('Arquivo Excel exportado com sucesso!');
+
+            } catch (error) {
+                console.error('Erro ao exportar Excel:', error);
+                mostrarMensagem('Erro ao exportar Excel');
+            }
+        };
+
+        // ========== FUNÇÕES AUXILIARES ==========
+        
+        function formatarFormaPagamento(forma) {
+            const formas = {
+                'dinheiro': 'Dinheiro',
+                'pix': 'PIX',
+                'cartao': 'Cartão',
+                'transferencia': 'Transferência',
+                'cheque': 'Cheque'
+            };
+            return formas[forma] || forma || 'Não informado';
+        }
+
+        function formatarMoeda(valor) {
+            if (isNaN(valor)) valor = 0;
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor);
+        }
 
         // ========== BÍBLIA ==========
         const livrosBiblia = [
@@ -1779,7 +2570,6 @@ function formatarMoeda(valor) {
             carregarAniversariantes();
             carregarPedidos();
             
-            // Verificar permissão de notificações
             verificarPrimeiroAcesso();
         });
 
@@ -2358,7 +3148,6 @@ function formatarMoeda(valor) {
                 alert('✅ Contribuição registrada com sucesso!');
                 fecharModalContribuicao();
 
-                // Se estiver na tela de dízimos, recarregar
                 if (document.getElementById('dizimosScreen').classList.contains('active')) {
                     carregarMeusDizimos();
                 }
@@ -2373,7 +3162,6 @@ function formatarMoeda(valor) {
             }
         };
 
-        // Fechar modal ao clicar fora
         document.addEventListener('click', function(e) {
             const modal = document.getElementById('contribuicaoModal');
             if (modal && modal.style.display === 'flex' && e.target === modal) {
@@ -2389,7 +3177,6 @@ function formatarMoeda(valor) {
         window.verMeusDados = verMeusDados;
         window.sair = sair;
         
-        // Bíblia
         window.mostrarLivros = mostrarLivros;
         window.mostrarTestamento = mostrarTestamento;
         window.mostrarCapitulos = mostrarCapitulos;
@@ -2398,17 +3185,14 @@ function formatarMoeda(valor) {
         window.buscarLivros = buscarLivros;
         window.buscarReferencia = buscarReferencia;
         
-        // Eventos
         window.carregarEventos = carregarEventos;
         window.filtrarEventos = filtrarEventos;
         window.verDetalhesEvento = verDetalhesEvento;
         
-        // Aniversariantes
         window.carregarAniversariantes = carregarAniversariantes;
         window.filtrarAniversariantesPorMes = filtrarAniversariantesPorMes;
         window.verDetalhesAniversariante = verDetalhesAniversariante;
         
-        // Pedidos
         window.enviarPedido = enviarPedido;
         window.abrirNovoPedido = abrirNovoPedido;
         window.orar = orar;
