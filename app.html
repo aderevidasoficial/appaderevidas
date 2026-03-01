@@ -980,243 +980,214 @@
         let eventos = [];
         let membros = [];
         let aniversariantes = [];
-        let notificacoesAtivas = false; // true se o usuário permitiu
-        
-        // ========== SISTEMA DE NOTIFICAÇÕES SIMPLIFICADO ==========
-        
-        // Verificar se já pediu permissão antes
-        function verificarPrimeiroAcesso() {
-            const jaPediuNotificacao = localStorage.getItem('jaPediuNotificacao');
-            
-            if (!jaPediuNotificacao && Notification.permission === 'default') {
-                // Mostrar modal após 2 segundos
-                setTimeout(() => {
-                    document.getElementById('notificationPermissionModal').style.display = 'flex';
-                }, 2000);
-            } else if (Notification.permission === 'granted') {
-                notificacoesAtivas = true;
-                iniciarNotificacoes();
-            }
-        }
+        let notificacoesAtivas = false;
 
-        // Solicitar permissão
-        window.solicitarNotificacoes = function() {
-            document.getElementById('notificationPermissionModal').style.display = 'none';
-            
-            Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    notificacoesAtivas = true;
-                    localStorage.setItem('jaPediuNotificacao', 'true');
-                    
-                    // Testar notificação
-                    testarNotificacao();
-                    
-                    // Iniciar sistema de notificações
-                    iniciarNotificacoes();
-                    
-                    mostrarMensagem('✅ Notificações ativadas com sucesso!');
-                } else {
-                    localStorage.setItem('jaPediuNotificacao', 'true');
-                    mostrarMensagem('❌ Você não receberá notificações do app');
-                }
-            });
-        };
+// Verificar primeiro acesso
+function verificarPrimeiroAcesso() {
+    const jaPediu = localStorage.getItem('jaPediuNotificacao');
+    
+    if (!jaPediu && ('Notification' in window)) {
+        setTimeout(() => {
+            document.getElementById('notificationPermissionModal').style.display = 'flex';
+        }, 3000);
+    } else if (Notification.permission === 'granted') {
+        console.log('✅ Notificações já permitidas');
+        notificacoesAtivas = true;
+        iniciarVerificacoes();
+    }
+}
 
-        // Negar permissão
-        window.negarNotificacoes = function() {
-            document.getElementById('notificationPermissionModal').style.display = 'none';
+// Solicitar permissão
+window.solicitarNotificacoes = async function() {
+    document.getElementById('notificationPermissionModal').style.display = 'none';
+    
+    try {
+        const registration = await navigator.serviceWorker.ready;
+        const permission = await Notification.requestPermission();
+        
+        if (permission === 'granted') {
+            notificacoesAtivas = true;
             localStorage.setItem('jaPediuNotificacao', 'true');
-            mostrarMensagem('Você pode ativar as notificações depois nas configurações do navegador');
-        };
+            
+            mostrarMensagem('✅ Notificações ativadas!');
+            
+            // TESTE: Enviar notificação via Service Worker
+            registration.showNotification('🔔 AdereVidas', {
+                body: 'Notificações ativadas com sucesso!',
+                icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                vibrate: [200, 100, 200],
+                tag: 'teste',
+                requireInteraction: false
+            });
+            
+            iniciarVerificacoes();
+            
+        } else {
+            localStorage.setItem('jaPediuNotificacao', 'true');
+            mostrarMensagem('❌ Notificações desativadas');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        mostrarMensagem('Erro ao ativar notificações');
+    }
+};
 
-        // Testar notificação
-        function testarNotificacao() {
-            if (Notification.permission === 'granted') {
-                const notification = new Notification('🔔 AdereVidas', {
-                    body: 'Notificações ativadas! Você receberá lembretes de eventos e aniversários.',
+// Negar permissão
+window.negarNotificacoes = function() {
+    document.getElementById('notificationPermissionModal').style.display = 'none';
+    localStorage.setItem('jaPediuNotificacao', 'true');
+    mostrarMensagem('Você pode ativar depois');
+};
+
+// Iniciar verificações
+function iniciarVerificacoes() {
+    console.log('🔔 Sistema de notificações iniciado');
+    
+    setInterval(() => {
+        if (notificacoesAtivas) {
+            verificarEventos();
+            verificarAniversarios();
+        }
+    }, 30000);
+    
+    agendarVersiculo();
+}
+
+// Verificar eventos
+async function verificarEventos() {
+    if (!notificacoesAtivas || typeof eventos === 'undefined' || eventos.length === 0) return;
+    
+    const agora = new Date();
+    const registration = await navigator.serviceWorker.ready;
+    
+    eventos.forEach(evento => {
+        if (evento.status === 'cancelado' || !evento.horaInicio) return;
+        
+        const dataEvento = new Date(evento.data);
+        const [hora, minuto] = evento.horaInicio.split(':').map(Number);
+        dataEvento.setHours(hora, minuto, 0);
+        
+        const diffMs = dataEvento - agora;
+        const diffHoras = Math.round(diffMs / (1000 * 60 * 60));
+        
+        if (diffHoras === 6 || diffHoras === 2 || diffHoras === 0.5) {
+            const horasTexto = diffHoras === 0.5 ? '30 minutos' : `${diffHoras} horas`;
+            const jaNotificou = localStorage.getItem(`notif-evento-${evento.id}-${diffHoras}`);
+            
+            if (!jaNotificou) {
+                registration.showNotification(`⏰ Faltam ${horasTexto}!`, {
+                    body: `${evento.titulo} - Hoje às ${evento.horaInicio}`,
                     icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
                     badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
-                    vibrate: [200, 100, 200]
+                    vibrate: [200, 100, 200],
+                    tag: `evento-${evento.id}`,
+                    data: { screen: 'eventos' },
+                    requireInteraction: true
                 });
                 
-                setTimeout(() => notification.close(), 5000);
+                localStorage.setItem(`notif-evento-${evento.id}-${diffHoras}`, 'true');
             }
         }
+    });
+}
 
-        // Iniciar verificações de notificações
-        function iniciarNotificacoes() {
-            console.log('🔔 Sistema de notificações iniciado');
+// Verificar aniversários
+async function verificarAniversarios() {
+    if (!notificacoesAtivas || typeof aniversariantes === 'undefined' || aniversariantes.length === 0) return;
+    
+    const agora = new Date();
+    if (agora.getHours() === 7 && agora.getMinutes() < 5) {
+        const hoje = new Date();
+        const dia = hoje.getDate();
+        const mes = hoje.getMonth();
+        const registration = await navigator.serviceWorker.ready;
+        
+        aniversariantes.forEach(m => {
+            if (!m.dataNascimento) return;
             
-            // Verificar eventos a cada minuto
-            setInterval(() => {
-                if (!notificacoesAtivas) return;
-                verificarEventos();
-                verificarAniversarios();
-            }, 60000); // 1 minuto
-            
-            // Versículo do dia às 7h
-            agendarVersiculo();
-        }
-
-        // Verificar eventos próximos
-        function verificarEventos() {
-            const agora = new Date();
-            
-            eventos.forEach(evento => {
-                if (evento.status === 'cancelado' || !evento.horaInicio) return;
+            const dataNasc = new Date(m.dataNascimento);
+            if (dataNasc.getDate() === dia && dataNasc.getMonth() === mes) {
+                const jaNotificou = localStorage.getItem(`notif-aniversario-${m.id}-${hoje.toDateString()}`);
                 
-                const dataEvento = new Date(evento.data);
-                const [hora, minuto] = evento.horaInicio.split(':').map(Number);
-                dataEvento.setHours(hora, minuto, 0);
-                
-                const diffMs = dataEvento - agora;
-                const diffHoras = Math.round(diffMs / (1000 * 60 * 60));
-                
-                // Notificar 6h e 2h antes
-                if (diffHoras === 6 || diffHoras === 2) {
-                    const jaNotificou = localStorage.getItem(`notif-evento-${evento.id}-${diffHoras}h`);
-                    if (!jaNotificou) {
-                        notificarEvento(evento, diffHoras);
-                        localStorage.setItem(`notif-evento-${evento.id}-${diffHoras}h`, 'true');
-                    }
-                }
-            });
-        }
-
-        // Notificar evento
-        function notificarEvento(evento, horasAntes) {
-            if (!notificacoesAtivas) return;
-            
-            const titulo = horasAntes === 6 ? '⏰ Faltam 6 horas!' : '⚠️ Faltam 2 horas!';
-            
-            new Notification(titulo, {
-                body: `${evento.titulo} - Hoje às ${evento.horaInicio}`,
-                icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
-                badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
-                vibrate: [200, 100, 200],
-                requireInteraction: true,
-                tag: `evento-${evento.id}`
-            });
-        }
-
-        // Verificar aniversários
-        function verificarAniversarios() {
-            const agora = new Date();
-            const hora = agora.getHours();
-            
-            // Só verificar entre 7h e 8h da manhã
-            if (hora === 7 && agora.getMinutes() < 5) {
-                const hoje = new Date();
-                const dia = hoje.getDate();
-                const mes = hoje.getMonth();
-                
-                aniversariantes.forEach(m => {
-                    if (!m.dataNascimento) return;
+                if (!jaNotificou) {
+                    registration.showNotification('🎂 Feliz Aniversário!', {
+                        body: `${m.nome} está fazendo aniversário hoje! 🎉`,
+                        icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                        badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                        vibrate: [200, 100, 200, 100, 200],
+                        tag: `aniversario-${m.id}`,
+                        data: { screen: 'aniversariantes' },
+                        requireInteraction: true
+                    });
                     
-                    const dataNasc = new Date(m.dataNascimento);
-                    if (dataNasc.getDate() === dia && dataNasc.getMonth() === mes) {
-                        const jaNotificou = localStorage.getItem(`notif-aniversario-${m.id}-${hoje.toDateString()}`);
-                        if (!jaNotificou) {
-                            notificarAniversario(m);
-                            localStorage.setItem(`notif-aniversario-${m.id}-${hoje.toDateString()}`, 'true');
-                        }
-                    }
-                });
+                    localStorage.setItem(`notif-aniversario-${m.id}-${hoje.toDateString()}`, 'true');
+                }
             }
-        }
+        });
+    }
+}
 
-        // Notificar aniversário
-        function notificarAniversario(membro) {
-            if (!notificacoesAtivas) return;
+// Agendar versículo
+function agendarVersiculo() {
+    const versiculos = [
+        { texto: 'Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito...', ref: 'João 3:16' },
+        { texto: 'O Senhor é o meu pastor; nada me faltará.', ref: 'Salmos 23:1' },
+        { texto: 'Tudo posso naquele que me fortalece.', ref: 'Filipenses 4:13' }
+    ];
+    
+    setInterval(async () => {
+        if (!notificacoesAtivas) return;
+        
+        const agora = new Date();
+        if (agora.getHours() === 7 && agora.getMinutes() < 5) {
+            const escolhido = versiculos[new Date().getDate() % versiculos.length];
+            const registration = await navigator.serviceWorker.ready;
             
-            new Notification('🎂 Feliz Aniversário!', {
-                body: `${membro.nome} está fazendo aniversário hoje! 🎉`,
+            registration.showNotification('📖 Versículo do Dia', {
+                body: `${escolhido.texto} — ${escolhido.ref}`,
                 icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
                 badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
                 vibrate: [200, 100, 200],
-                requireInteraction: true,
-                tag: `aniversario-${membro.id}`
+                tag: 'versiculo-diario',
+                data: { screen: 'biblia' }
             });
         }
+    }, 60000);
+}
 
-        // Agendar versículo do dia
-        function agendarVersiculo() {
-            const agora = new Date();
-            const hora = agora.getHours();
-            
-            const versiculos = [
-                { texto: 'Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito...', ref: 'João 3:16' },
-                { texto: 'O Senhor é o meu pastor; nada me faltará.', ref: 'Salmos 23:1' },
-                { texto: 'Tudo posso naquele que me fortalece.', ref: 'Filipenses 4:13' },
-                { texto: 'Alegrai-vos sempre no Senhor; outra vez digo: alegrai-vos.', ref: 'Filipenses 4:4' },
-                { texto: 'Em paz me deito e logo adormeço, porque só tu, Senhor, me fazes viver em segurança.', ref: 'Salmos 4:8' }
-            ];
-            
-            if (hora >= 7) {
-                // Se já passou das 7, agenda para amanhã
-                const amanha = new Date(agora);
-                amanha.setDate(amanha.getDate() + 1);
-                amanha.setHours(7, 0, 0, 0);
-                
-                const tempoAteAmanha = amanha - agora;
-                setTimeout(() => {
-                    setInterval(() => {
-                        if (notificacoesAtivas) {
-                            const escolhido = versiculos[new Date().getDate() % versiculos.length];
-                            new Notification('📖 Versículo do Dia', {
-                                body: `${escolhido.texto} — ${escolhido.ref}`,
-                                icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
-                                badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
-                                vibrate: [200, 100, 200],
-                                tag: 'versiculo-diario'
-                            });
-                        }
-                    }, 24 * 60 * 60 * 1000);
-                }, tempoAteAmanha);
-            } else {
-                // Ainda hoje
-                const hoje7h = new Date(agora);
-                hoje7h.setHours(7, 0, 0, 0);
-                
-                const tempoAte7h = hoje7h - agora;
-                setTimeout(() => {
-                    setInterval(() => {
-                        if (notificacoesAtivas) {
-                            const escolhido = versiculos[new Date().getDate() % versiculos.length];
-                            new Notification('📖 Versículo do Dia', {
-                                body: `${escolhido.texto} — ${escolhido.ref}`,
-                                icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
-                                badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
-                                vibrate: [200, 100, 200],
-                                tag: 'versiculo-diario'
-                            });
-                        }
-                    }, 24 * 60 * 60 * 1000);
-                }, tempoAte7h);
-            }
-        }
+// Mostrar mensagem
+function mostrarMensagem(texto) {
+    const msgDiv = document.createElement('div');
+    msgDiv.style.cssText = `
+        position: fixed;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #2ecc71;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 30px;
+        font-size: 14px;
+        z-index: 10000;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        animation: slideUp 0.3s;
+    `;
+    msgDiv.textContent = texto;
+    document.body.appendChild(msgDiv);
+    
+    setTimeout(() => msgDiv.remove(), 3000);
+}
 
-        // Mostrar mensagem temporária
-        function mostrarMensagem(texto) {
-            const msgDiv = document.createElement('div');
-            msgDiv.style.cssText = `
-                position: fixed;
-                bottom: 100px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: var(--success);
-                color: white;
-                padding: 10px 20px;
-                border-radius: 20px;
-                font-size: 14px;
-                z-index: 1000;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            `;
-            msgDiv.textContent = texto;
-            document.body.appendChild(msgDiv);
-            
-            setTimeout(() => msgDiv.remove(), 2000);
-        }
+// Adicionar CSS da animação
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideUp {
+        from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+        to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+`;
+document.head.appendChild(style);
 
         // ========== BÍBLIA ==========
         const livrosBiblia = [

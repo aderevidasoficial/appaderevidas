@@ -13,41 +13,64 @@
   "dir": "ltr",
   "categories": ["religion", "social", "lifestyle"],
   "prefer_related_applications": false,
-  "related_applications": [],
   
   "icons": [
     {
-      "src": "/android/launchericon-48x48.png",
-      "sizes": "48x48",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/android/launchericon-72x72.png",
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
       "sizes": "72x72",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/android/launchericon-96x96.png",
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
       "sizes": "96x96",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/android/launchericon-144x144.png",
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
       "sizes": "144x144",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/android/launchericon-192x192.png",
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
+      "sizes": "167x167",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/android/launchericon-512x512.png",
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -62,7 +85,7 @@
       "url": "app.html?screen=eventos",
       "icons": [
         {
-          "src": "/android/launchericon-192x192.png",
+          "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
           "sizes": "192x192"
         }
       ]
@@ -74,7 +97,7 @@
       "url": "app.html?screen=biblia",
       "icons": [
         {
-          "src": "/android/launchericon-192x192.png",
+          "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
           "sizes": "192x192"
         }
       ]
@@ -86,19 +109,7 @@
       "url": "app.html?screen=aniversariantes",
       "icons": [
         {
-          "src": "/android/launchericon-192x192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Oração",
-      "short_name": "Oração",
-      "description": "Pedidos de oração",
-      "url": "app.html?screen=oracao",
-      "icons": [
-        {
-          "src": "/android/launchericon-192x192.png",
+          "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
           "sizes": "192x192"
         }
       ]
@@ -107,18 +118,11 @@
 
   "screenshots": [
     {
-      "src": "/screenshots/home.png",
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "platform": "wide",
-      "label": "Tela inicial do app com eventos e versículo do dia"
-    },
-    {
-      "src": "/screenshots/calendar.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "platform": "wide",
-      "label": "Calendário de eventos da igreja"
+      "label": "Tela inicial do app"
     }
   ],
 
