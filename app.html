@@ -1164,103 +1164,69 @@
         </div>
 
         <!-- Tela Eventos -->
-        <div id="eventosScreen" class="screen">
-            <div class="app-header">
-                <button onclick="voltarHome()">←</button>
-                <h1>📅 Eventos</h1>
-                <button onclick="carregarEventos()">↻</button>
-            </div>
-            
-            <div class="content">
-                <div class="view-toggle">
-                    <button class="view-btn active" onclick="mudarVisualizacaoEventos('calendario')">Calendário</button>
-                    <button class="view-btn" onclick="mudarVisualizacaoEventos('lista')">Lista</button>
-                </div>
-
-                <!-- Visualização Calendário -->
-                <div id="calendarioView">
-                    <div class="calendar-header">
-                        <div class="calendar-nav">
-                            <button onclick="mudarMes(-1)">←</button>
-                            <span class="calendar-title" id="mesAtual">Janeiro 2026</span>
-                            <button onclick="mudarMes(1)">→</button>
-                        </div>
-                        <button class="view-btn" style="padding: 5px 10px;" onclick="irParaHoje()">Hoje</button>
-                    </div>
-                    
-                    <div class="calendar-grid" id="calendario">
-                        <div class="calendar-day-header">DOM</div>
-                        <div class="calendar-day-header">SEG</div>
-                        <div class="calendar-day-header">TER</div>
-                        <div class="calendar-day-header">QUA</div>
-                        <div class="calendar-day-header">QUI</div>
-                        <div class="calendar-day-header">SEX</div>
-                        <div class="calendar-day-header">SÁB</div>
-                    </div>
-                </div>
-
-                <!-- Visualização Lista -->
-                <div id="listaView" style="display: none;">
-                    <div class="filter-container">
-                        <div class="filter-row">
-                            <select id="filtroTipo" class="filter-select" onchange="filtrarEventos()">
-                                <option value="">Todos os tipos</option>
-                                <option value="culto">Cultos</option>
-                                <option value="escola-dominical">Escola Dominical</option>
-                                <option value="celula">Células</option>
-                                <option value="evento-especial">Eventos Especiais</option>
-                                <option value="reuniao">Reuniões</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div id="listaEventos"></div>
-                </div>
+<div id="eventosScreen" class="screen">
+    <div class="app-header">
+        <button onclick="voltarHome()">←</button>
+        <h1>📅 Eventos</h1>
+        <button onclick="carregarEventos()">↻</button>
+    </div>
+    
+    <div class="content">
+        <div class="filter-container">
+            <div class="filter-row">
+                <select id="filtroTipo" class="filter-select" onchange="filtrarEventos()">
+                    <option value="">Todos os tipos</option>
+                    <option value="culto">Cultos</option>
+                    <option value="escola-dominical">Escola Dominical</option>
+                    <option value="celula">Células</option>
+                    <option value="evento-especial">Eventos Especiais</option>
+                    <option value="reuniao">Reuniões</option>
+                </select>
             </div>
         </div>
-
+        
+        <div id="listaEventos"></div>
+    </div>
+</div>
         <!-- Tela Aniversariantes -->
         <div id="aniversariantesScreen" class="screen">
-            <div class="app-header">
-                <button onclick="voltarHome()">←</button>
-                <h1>🎂 Aniversariantes</h1>
-                <button onclick="carregarAniversariantes()">↻</button>
+    <div class="app-header">
+        <button onclick="voltarHome()">←</button>
+        <h1>🎂 Aniversariantes</h1>
+        <button onclick="carregarAniversariantes()">↻</button>
+    </div>
+    
+    <div class="content">
+        <div class="filter-container">
+            <div class="filter-row">
+                <select id="filtroMesAniversario" class="filter-select" onchange="filtrarAniversariantesPorMes()">
+                    <option value="">Todos os meses</option>
+                    <option value="0">Janeiro</option>
+                    <option value="1">Fevereiro</option>
+                    <option value="2">Março</option>
+                    <option value="3">Abril</option>
+                    <option value="4">Maio</option>
+                    <option value="5">Junho</option>
+                    <option value="6">Julho</option>
+                    <option value="7">Agosto</option>
+                    <option value="8">Setembro</option>
+                    <option value="9">Outubro</option>
+                    <option value="10">Novembro</option>
+                    <option value="11">Dezembro</option>
+                </select>
             </div>
-            
-            <div class="content">
-                <div class="view-toggle">
-                    <button class="view-btn active" onclick="mudarVisualizacaoAniversariantes('calendario')">Calendário</button>
-                    <button class="view-btn" onclick="mudarVisualizacaoAniversariantes('lista')">Lista</button>
-                </div>
-
-                <!-- Visualização Calendário -->
-                <div id="aniversariantesCalendarioView">
-                    <div class="calendar-header">
-                        <div class="calendar-nav">
-                            <button onclick="mudarMesAniversario(-1)">←</button>
-                            <span class="calendar-title" id="mesAtualAniversario">Janeiro 2026</span>
-                            <button onclick="mudarMesAniversario(1)">→</button>
-                        </div>
-                        <button class="view-btn" style="padding: 5px 10px;" onclick="irParaMesAtualAniversario()">Hoje</button>
-                    </div>
-                    
-                    <div class="calendar-grid" id="aniversariantesCalendario">
-                        <div class="calendar-day-header">DOM</div>
-                        <div class="calendar-day-header">SEG</div>
-                        <div class="calendar-day-header">TER</div>
-                        <div class="calendar-day-header">QUA</div>
-                        <div class="calendar-day-header">QUI</div>
-                        <div class="calendar-day-header">SEX</div>
-                        <div class="calendar-day-header">SÁB</div>
-                    </div>
-                </div>
-
-                <!-- Visualização Lista -->
-                <div id="aniversariantesListView" style="display: none;">
-                    <div id="listaAniversariantes"></div>
-                </div>
+            <div class="filter-row" style="margin-top: 10px;">
+                <select id="filtroOrdenacao" class="filter-select" onchange="filtrarAniversariantesPorMes()">
+                    <option value="proximos">Próximos aniversários</option>
+                    <option value="nome">Ordem alfabética</option>
+                    <option value="idade">Idade</option>
+                </select>
             </div>
         </div>
+        
+        <div id="listaAniversariantes"></div>
+    </div>
+</div>
 
         <!-- Tela Pedidos de Oração -->
         <div id="oracaoScreen" class="screen">
@@ -1386,10 +1352,7 @@
         let eventos = [];
         let membros = [];
         let aniversariantes = [];
-        let dataAtualEventos = new Date();
-        let dataAtualAniversarios = new Date();
-        let visualizacaoEventos = 'calendario';
-        let visualizacaoAniversarios = 'calendario';
+    
         
         // ========== SISTEMA DE NOTIFICAÇÕES ==========
         let notificacoesAtivas = {
@@ -1397,6 +1360,24 @@
             aniversarios: false,
             versiculo: false
         };
+
+        // ========== FUNÇÃO DE CORREÇÃO DE FUSO HORÁRIO ==========
+        function criarDataSemFuso(dataString) {
+            if (!dataString) return null;
+            
+            // Se for string ISO (YYYY-MM-DD)
+            if (typeof dataString === 'string' && dataString.includes('-')) {
+                const partes = dataString.split('T')[0].split('-');
+                if (partes.length === 3) {
+                    // Criar data com horário meio-dia para evitar problemas de fuso
+                    const data = new Date(partes[0], partes[1] - 1, partes[2], 12, 0, 0);
+                    return data;
+                }
+            }
+            
+            // Fallback
+            return new Date(dataString);
+        }
 
         // Carregar configurações salvas
         function carregarConfigNotificacoes() {
@@ -1640,7 +1621,7 @@
                     
                     aniversariantes.forEach(m => {
                         if (!m.dataNascimento) return;
-                        const dataNasc = new Date(m.dataNascimento);
+                        const dataNasc = criarDataSemFuso(m.dataNascimento);
                         
                         if (dataNasc.getDate() === dia && dataNasc.getMonth() === mes) {
                             const jaNotificou = localStorage.getItem(`notif-aniversario-${m.id}-${hoje.toDateString()}`);
@@ -2259,6 +2240,8 @@
                     }
                 });
                 
+                console.log('Total de aniversariantes carregados:', aniversariantes.length);
+                
                 atualizarListaHomeAniversariantes();
                 renderizarCalendarioAniversariantes();
                 renderizarListaAniversariantes();
@@ -2273,9 +2256,10 @@
             const hoje = new Date();
             const mesAtual = hoje.getMonth();
             
+            // Filtrar aniversariantes do mês atual usando a função criarDataSemFuso
             const aniversariantesMes = aniversariantes.filter(m => {
                 if (!m.dataNascimento) return false;
-                const dataNasc = new Date(m.dataNascimento);
+                const dataNasc = criarDataSemFuso(m.dataNascimento);
                 return dataNasc.getMonth() === mesAtual;
             }).slice(0, 3);
             
@@ -2287,7 +2271,7 @@
             let html = '';
             aniversariantesMes.forEach(m => {
                 html += `
-                    <div class="birthday-item">
+                    <div class="birthday-item" onclick="verDetalhesAniversariante('${m.id}')">
                         <div class="birthday-avatar">${m.nome[0]}</div>
                         <div class="birthday-info">
                             <h4>${m.nome}</h4>
@@ -2304,7 +2288,7 @@
             if (!dataNascimento) return 0;
             
             const hoje = new Date();
-            const nascimento = new Date(dataNascimento);
+            const nascimento = criarDataSemFuso(dataNascimento);
             let idade = hoje.getFullYear() - nascimento.getFullYear();
             
             const mesAtual = hoje.getMonth();
@@ -2323,10 +2307,10 @@
             if (!dataNascimento) return 365;
             
             const hoje = new Date();
-            const nascimento = new Date(dataNascimento);
+            const nascimento = criarDataSemFuso(dataNascimento);
             const anoAtual = hoje.getFullYear();
             
-            let proximoAniversario = new Date(anoAtual, nascimento.getMonth(), nascimento.getDate());
+            let proximoAniversario = new Date(anoAtual, nascimento.getMonth(), nascimento.getDate(), 12, 0, 0);
             
             if (proximoAniversario < hoje) {
                 proximoAniversario.setFullYear(anoAtual + 1);
@@ -2371,9 +2355,10 @@
                     diaElement.classList.add('today');
                 }
                 
+                // Filtrar aniversariantes do dia usando a função criarDataSemFuso
                 const aniversariantesDia = aniversariantes.filter(m => {
                     if (!m.dataNascimento) return false;
-                    const dataNasc = new Date(m.dataNascimento);
+                    const dataNasc = criarDataSemFuso(m.dataNascimento);
                     return dataNasc.getDate() === dia &&
                            dataNasc.getMonth() === dataAtualAniversarios.getMonth();
                 });
@@ -2386,7 +2371,7 @@
                     itemElement.textContent = m.nome.split(' ')[0];
                     itemElement.onclick = (e) => {
                         e.stopPropagation();
-                        verDetalhesAniversariante(m);
+                        verDetalhesAniversariante(m.id);
                     };
                     diaElement.appendChild(itemElement);
                 });
@@ -2411,16 +2396,26 @@
             const diaHoje = hoje.getDate();
             const mesHoje = hoje.getMonth();
             
+            // Ordenar aniversariantes por data (próximos primeiro)
+            const aniversariantesOrdenados = [...aniversariantes].sort((a, b) => {
+                const diasA = calcularDiasRestantes(a.dataNascimento);
+                const diasB = calcularDiasRestantes(b.dataNascimento);
+                return diasA - diasB;
+            });
+            
             let html = '';
             
-            aniversariantes.forEach(m => {
-                const dataNasc = new Date(m.dataNascimento);
+            aniversariantesOrdenados.forEach(m => {
+                const dataNasc = criarDataSemFuso(m.dataNascimento);
                 const idade = calcularIdade(m.dataNascimento);
                 const diasRestantes = calcularDiasRestantes(m.dataNascimento);
                 const isHoje = dataNasc.getDate() === diaHoje && dataNasc.getMonth() === mesHoje;
                 
+                // Formatar a data de nascimento
+                const dataFormatada = dataNasc.toLocaleDateString('pt-BR', {day: '2-digit', month: 'long'});
+                
                 html += `
-                    <div class="event-card" style="border-left-color: #ff4081; ${isHoje ? 'background: #fff0f5;' : ''}" onclick="verDetalhesAniversariante(${JSON.stringify(m).replace(/"/g, '&quot;')})">
+                    <div class="event-card" style="border-left-color: #ff4081; ${isHoje ? 'background: #fff0f5;' : ''}" onclick="verDetalhesAniversariante('${m.id}')">
                         <div class="event-header">
                             <div class="event-title">${m.nome}</div>
                             <span class="event-type-badge" style="background: #ff4081">
@@ -2430,10 +2425,10 @@
                         
                         <div class="event-details">
                             <div class="detail-item">
-                                <span>🎂</span> ${dataNasc.toLocaleDateString('pt-BR', {day: '2-digit', month: 'long'})}
+                                <span>🎂</span> ${dataFormatada}
                             </div>
                             <div class="detail-item">
-                                <span>⏰</span> ${isHoje ? 'HOJE!' : `${diasRestantes} dias`}
+                                <span>⏰</span> ${isHoje ? 'HOJE!' : `Em ${diasRestantes} dias`}
                             </div>
                             <div class="detail-item">
                                 <span>📱</span> ${m.telefone || 'Não informado'}
@@ -2449,13 +2444,24 @@
             listaElement.innerHTML = html;
         }
 
-        function verDetalhesAniversariante(membro) {
-            const dataNasc = new Date(membro.dataNascimento);
-            const idade = calcularIdade(membro.dataNascimento);
+        function verDetalhesAniversariante(id) {
+            const membro = aniversariantes.find(m => m.id === id);
+            if (!membro) return;
             
-            alert(`🎂 ${membro.nome}\n\n` +
+            const dataNasc = criarDataSemFuso(membro.dataNascimento);
+            const idade = calcularIdade(membro.dataNascimento);
+            const hoje = new Date();
+            const isHoje = dataNasc.getDate() === hoje.getDate() && dataNasc.getMonth() === hoje.getMonth();
+            
+            const mensagem = isHoje ? 
+                `🎂 HOJE É O GRANDE DIA! 🎂\n\n` :
+                `🎂 Aniversariante\n\n`;
+            
+            alert(mensagem +
+                  `Nome: ${membro.nome}\n` +
                   `📅 Nascimento: ${dataNasc.toLocaleDateString('pt-BR')}\n` +
                   `🎂 Idade: ${idade} anos\n` +
+                  `${isHoje ? '🎉 FELIZ ANIVERSÁRIO! 🎉\n' : ''}` +
                   `📱 Telefone: ${membro.telefone || 'Não informado'}\n` +
                   `📧 Email: ${membro.email || 'Não informado'}`);
         }
@@ -2470,7 +2476,7 @@
             renderizarCalendarioAniversariantes();
         }
 
-        function mudarVisualizacaoAniversariantes(visualizacao) {
+        function mudarVisualizacaoAniversarios(visualizacao) {
             visualizacaoAniversarios = visualizacao;
             
             document.querySelectorAll('.view-btn').forEach(btn => {
@@ -2588,6 +2594,308 @@
             }
         }
 
+        window.filtrarAniversariantesPorMes = function() {
+    renderizarListaAniversariantes();
+};
+
+async function carregarAniversariantes() {
+    try {
+        const membrosRef = collection(window.db, "membros");
+        const querySnapshot = await getDocs(membrosRef);
+        
+        membros = [];
+        aniversariantes = [];
+        
+        querySnapshot.forEach((doc) => {
+            const membro = { id: doc.id, ...doc.data() };
+            membros.push(membro);
+            
+            if (membro.dataNascimento) {
+                aniversariantes.push(membro);
+            }
+        });
+        
+        console.log('Total de aniversariantes carregados:', aniversariantes.length);
+        
+        atualizarListaHomeAniversariantes();
+        renderizarListaAniversariantes();
+        
+    } catch (error) {
+        console.error('Erro ao carregar aniversariantes:', error);
+    }
+}
+
+function renderizarListaAniversariantes() {
+    const listaElement = document.getElementById('listaAniversariantes');
+    
+    if (aniversariantes.length === 0) {
+        listaElement.innerHTML = `
+            <div class="card">
+                <p class="text-center text-light">Nenhum aniversariante encontrado</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const mesFiltro = document.getElementById('filtroMesAniversario')?.value;
+    const ordenacao = document.getElementById('filtroOrdenacao')?.value || 'proximos';
+    const hoje = new Date();
+    const diaHoje = hoje.getDate();
+    const mesHoje = hoje.getMonth();
+    
+    // Filtrar por mês se selecionado
+    let aniversariantesFiltrados = aniversariantes;
+    if (mesFiltro !== '') {
+        const mesSelecionado = parseInt(mesFiltro);
+        aniversariantesFiltrados = aniversariantesFiltrados.filter(m => {
+            const dataNasc = criarDataSemFuso(m.dataNascimento);
+            return dataNasc.getMonth() === mesSelecionado;
+        });
+    }
+    
+    // Ordenar conforme seleção
+    if (ordenacao === 'proximos') {
+        aniversariantesFiltrados.sort((a, b) => {
+            const diasA = calcularDiasRestantes(a.dataNascimento);
+            const diasB = calcularDiasRestantes(b.dataNascimento);
+            return diasA - diasB;
+        });
+    } else if (ordenacao === 'nome') {
+        aniversariantesFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
+    } else if (ordenacao === 'idade') {
+        aniversariantesFiltrados.sort((a, b) => {
+            const idadeA = calcularIdade(a.dataNascimento);
+            const idadeB = calcularIdade(b.dataNascimento);
+            return idadeB - idadeA; // Maior idade primeiro
+        });
+    }
+    
+    let html = '';
+    
+    aniversariantesFiltrados.forEach(m => {
+        const dataNasc = criarDataSemFuso(m.dataNascimento);
+        const idade = calcularIdade(m.dataNascimento);
+        const diasRestantes = calcularDiasRestantes(m.dataNascimento);
+        const isHoje = dataNasc.getDate() === diaHoje && dataNasc.getMonth() === mesHoje;
+        
+        // Formatar a data de nascimento
+        const dataFormatada = dataNasc.toLocaleDateString('pt-BR', {day: '2-digit', month: 'long'});
+        
+        // Cor do badge baseado nos dias restantes
+        let badgeColor = '#3498db';
+        let badgeText = 'Próximo';
+        
+        if (isHoje) {
+            badgeColor = '#ff4081';
+            badgeText = 'HOJE!';
+        } else if (diasRestantes <= 7) {
+            badgeColor = '#ff9800';
+            badgeText = `${diasRestantes} dias`;
+        }
+        
+        html += `
+            <div class="event-card" style="border-left-color: ${badgeColor}; ${isHoje ? 'background: #fff0f5;' : ''}" onclick="verDetalhesAniversariante('${m.id}')">
+                <div class="event-header">
+                    <div class="event-title">${m.nome}</div>
+                    <span class="event-type-badge" style="background: ${badgeColor}">
+                        ${badgeText}
+                    </span>
+                </div>
+                
+                <div class="event-details">
+                    <div class="detail-item">
+                        <span>🎂</span> ${dataFormatada} • ${idade} anos
+                    </div>
+                    <div class="detail-item">
+                        <span>📱</span> ${m.telefone || 'Não informado'}
+                    </div>
+                    <div class="detail-item">
+                        <span>📧</span> ${m.email || 'Não informado'}
+                    </div>
+                    ${m.cidade ? `<div class="detail-item"><span>📍</span> ${m.cidade}</div>` : ''}
+                </div>
+            </div>
+        `;
+    });
+    
+    listaElement.innerHTML = html;
+}
+
+function verDetalhesAniversariante(id) {
+    const membro = aniversariantes.find(m => m.id === id);
+    if (!membro) return;
+    
+    const dataNasc = criarDataSemFuso(membro.dataNascimento);
+    const idade = calcularIdade(membro.dataNascimento);
+    const hoje = new Date();
+    const isHoje = dataNasc.getDate() === hoje.getDate() && dataNasc.getMonth() === hoje.getMonth();
+    
+    const mensagem = isHoje ? 
+        `🎂 HOJE É O GRANDE DIA! 🎂\n\n` :
+        `🎂 Aniversariante\n\n`;
+    
+    alert(mensagem +
+          `Nome: ${membro.nome}\n` +
+          `📅 Nascimento: ${dataNasc.toLocaleDateString('pt-BR')}\n` +
+          `🎂 Idade: ${idade} anos\n` +
+          `${isHoje ? '🎉 FELIZ ANIVERSÁRIO! 🎉\n' : ''}` +
+          `📱 Telefone: ${membro.telefone || 'Não informado'}\n` +
+          `📧 Email: ${membro.email || 'Não informado'}`);
+}
+
+// ========== FUNÇÕES DE EVENTOS (APENAS LISTA) ==========
+async function carregarEventos() {
+    try {
+        const eventosRef = collection(window.db, "eventos");
+        const q = query(eventosRef, orderBy("data"));
+        const querySnapshot = await getDocs(q);
+        
+        eventos = [];
+        querySnapshot.forEach((doc) => {
+            eventos.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+        
+        atualizarListaHomeEventos();
+        renderizarListaEventos();
+        
+    } catch (error) {
+        console.error('Erro ao carregar eventos:', error);
+        eventos = [];
+    }
+}
+
+function renderizarListaEventos() {
+    const listaElement = document.getElementById('listaEventos');
+    const tipoFiltro = document.getElementById('filtroTipo')?.value;
+    
+    let eventosFiltrados = eventos;
+    if (tipoFiltro) {
+        eventosFiltrados = eventos.filter(e => e.tipo === tipoFiltro);
+    }
+    
+    if (eventosFiltrados.length === 0) {
+        listaElement.innerHTML = `
+            <div class="card">
+                <p class="text-center text-light">Nenhum evento encontrado</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const tiposTraduzidos = {
+        'culto': 'Culto',
+        'escola-dominical': 'Escola Dominical',
+        'celula': 'Célula',
+        'evento-especial': 'Evento Especial',
+        'reuniao': 'Reunião',
+        'outro': 'Outro'
+    };
+    
+    const tipoCores = {
+        'culto': '#3498db',
+        'escola-dominical': '#2ecc71',
+        'celula': '#9b59b6',
+        'evento-especial': '#e74c3c',
+        'reuniao': '#f39c12',
+        'outro': '#95a5a6'
+    };
+    
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    
+    // Filtrar apenas eventos futuros
+    eventosFiltrados = eventosFiltrados
+        .filter(e => {
+            const dataEvento = new Date(e.data);
+            dataEvento.setHours(0, 0, 0, 0);
+            return dataEvento >= hoje && e.status !== 'cancelado';
+        })
+        .sort((a, b) => new Date(a.data) - new Date(b.data));
+    
+    if (eventosFiltrados.length === 0) {
+        listaElement.innerHTML = `
+            <div class="card">
+                <p class="text-center text-light">Nenhum evento futuro encontrado</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    
+    eventosFiltrados.forEach(evento => {
+        const data = new Date(evento.data);
+        const dataFormatada = data.toLocaleDateString('pt-BR', { 
+            day: '2-digit', 
+            month: 'long',
+            year: 'numeric'
+        });
+        
+        html += `
+            <div class="event-card" style="border-left-color: ${tipoCores[evento.tipo] || '#3498db'}" onclick="verDetalhesEvento('${evento.id}')">
+                <div class="event-header">
+                    <div class="event-title">${evento.titulo}</div>
+                    <span class="event-type-badge" style="background: ${tipoCores[evento.tipo] || '#3498db'}">
+                        ${tiposTraduzidos[evento.tipo] || 'Evento'}
+                    </span>
+                </div>
+                
+                <div class="event-details">
+                    <div class="detail-item">
+                        <span>📅</span> ${dataFormatada}
+                    </div>
+                    <div class="detail-item">
+                        <span>⏰</span> ${evento.horaInicio || '--:--'}h
+                    </div>
+                    <div class="detail-item">
+                        <span>📍</span> ${evento.local || 'Igreja'}
+                    </div>
+                    <div class="detail-item">
+                        <span>👤</span> ${evento.responsavel || 'Igreja'}
+                    </div>
+                </div>
+                
+                ${evento.descricao ? `
+                    <div class="event-description">
+                        ${evento.descricao}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    });
+    
+    listaElement.innerHTML = html;
+}
+
+function filtrarEventos() {
+    renderizarListaEventos();
+}
+
+function verDetalhesEvento(id) {
+    const evento = eventos.find(e => e.id === id);
+    if (!evento) return;
+    
+    const data = new Date(evento.data);
+    const tipos = {
+        'culto': 'Culto',
+        'escola-dominical': 'Escola Dominical',
+        'celula': 'Célula',
+        'evento-especial': 'Evento Especial',
+        'reuniao': 'Reunião',
+        'outro': 'Outro'
+    };
+    
+    alert(`📅 ${evento.titulo}\n\n` +
+          `Tipo: ${tipos[evento.tipo] || 'Evento'}\n` +
+          `Data: ${data.toLocaleDateString('pt-BR')}\n` +
+          `Horário: ${evento.horaInicio || '--:--'}\n` +
+          `Local: ${evento.local || 'Igreja'}\n` +
+          `Responsável: ${evento.responsavel || 'Igreja'}`);
+}
+
         function voltarHome() {
             mudarTela('home');
         }
@@ -2643,7 +2951,7 @@
         window.carregarAniversariantes = carregarAniversariantes;
         window.mudarMesAniversario = mudarMesAniversario;
         window.irParaMesAtualAniversario = irParaMesAtualAniversario;
-        window.mudarVisualizacaoAniversariantes = mudarVisualizacaoAniversariantes;
+        window.mudarVisualizacaoAniversarios = mudarVisualizacaoAniversarios;
         window.verDetalhesAniversariante = verDetalhesAniversariante;
         
         // Pedidos
