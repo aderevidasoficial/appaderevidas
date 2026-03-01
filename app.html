@@ -2559,6 +2559,52 @@ window.debugDizimos = async function() {
                 alert('Funcionalidade em desenvolvimento');
             }
         }
+        // ========== VERIFICAR PERMISSÕES DO MEMBRO ==========
+async function verificarPermissoesApp() {
+    if (!window.membroAtual || !window.membroAtual.id) return;
+    
+    try {
+        const membroRef = doc(window.db, "membros", window.membroAtual.id);
+        const membroDoc = await getDoc(membroRef);
+        
+        if (membroDoc.exists()) {
+            const membroData = membroDoc.data();
+            
+            // Configuração padrão se não existir
+            const permissoes = membroData.permissoesApp || {
+                telasPermitidas: ['home', 'biblia', 'eventos', 'aniversariantes', 'oracao', 'dizimos'],
+                contribuicaoPermitida: false,
+                usaApp: true,
+                ultimoAcesso: new Date().toISOString()
+            };
+            
+            window.permissoesMembro = permissoes;
+            
+            // Esconder botões não permitidos
+            if (!permissoes.contribuicaoPermitida) {
+                const btnContribuicao = document.querySelector('[onclick="abrirModalContribuicao()"]');
+                if (btnContribuicao) {
+                    btnContribuicao.style.display = 'none';
+                }
+            }
+            
+            // Verificar permissão para tela de dízimos/extrato
+            if (!permissoes.telasPermitidas.includes('dizimos_extrato')) {
+                const btnExtrato = document.querySelector('[onclick="abrirExtrato()"]');
+                if (btnExtrato) {
+                    btnExtrato.style.display = 'none';
+                }
+            }
+            
+            // Atualizar último acesso
+            await updateDoc(membroRef, {
+                'permissoesApp.ultimoAcesso': new Date().toISOString()
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao verificar permissões:', error);
+    }
+}
 
         // ========== INICIALIZAÇÃO ==========
         document.addEventListener('DOMContentLoaded', function() {
@@ -2571,6 +2617,7 @@ window.debugDizimos = async function() {
             carregarPedidos();
             
             verificarPrimeiroAcesso();
+            verificarPermissoesApp();
         });
 
         function atualizarInterfaceUsuario() {
