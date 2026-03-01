@@ -23,10 +23,10 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-        
-         const firebaseConfig = {
+    import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    
+    const firebaseConfig = {
         apiKey: "AIzaSyD4PNzTUJ1mA3QgrxJDL8vYuzHMBhrhI04",
         authDomain: "aderevidas-da996.firebaseapp.com",
         projectId: "aderevidas-da996",
@@ -35,11 +35,12 @@
         appId: "1:671945975313:web:b7d3a1b4e78c5d5a8fb3b0"
     };
 
+    // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const storage = getStorage(app);
     
-    // Disponibilizar globalmente
+    // Disponibilizar globalmente para as funções onclick
     window.db = db;
     window.storage = storage;
     window.collection = collection;
@@ -47,6 +48,9 @@
     window.query = query;
     window.where = where;
     window.getDocs = getDocs;
+    
+    console.log("Firebase inicializado com sucesso!");
+
     </script>
     
     <style>
@@ -347,6 +351,28 @@
                 margin: 0 auto;
             }
         }
+
+        /* Loading mais simples e rápido */
+.btn-submit:disabled {
+    opacity: 0.8;
+    background: linear-gradient(135deg, #2980b9, #2c3e50);
+    cursor: wait;
+}
+
+.btn-submit .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.6s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
     </style>
 </head>
 <body>
@@ -410,8 +436,10 @@
                         
                         <div class="form-group">
                             <label class="required">Data Nascimento</label>
-                            <input type="date" id="dataNascimento" required>
-                        </div>
+    <input type="text" id="dataNascimento" placeholder="DD/MM/AAAA" 
+           maxlength="10" onkeyup="formatarData(this)" required>
+</div>
+
                     </div>
                     
                     <div class="form-row">
@@ -517,13 +545,15 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Data Conversão</label>
-                            <input type="date" id="dataConversao">
-                        </div>
+    <input type="text" id="dataConversao" placeholder="DD/MM/AAAA" 
+           maxlength="10" onkeyup="formatarData(this)">
+</div>
                         
                         <div class="form-group">
                             <label>Data Batismo</label>
-                            <input type="date" id="dataBatismo">
-                        </div>
+    <input type="text" id="dataBatismo" placeholder="DD/MM/AAAA" 
+           maxlength="10" onkeyup="formatarData(this)">
+</div>
                     </div>
                     
                     <div class="form-group">
@@ -727,150 +757,201 @@
 
         // Enviar solicitação
         window.enviarSolicitacao = async function() {
-            // Validar campos obrigatórios
-            const nome = document.getElementById('nome').value.trim();
-            const dataNascimento = document.getElementById('dataNascimento').value;
-            const cpf = document.getElementById('cpf').value.replace(/\D/g, '');
-            const email = document.getElementById('email').value.trim();
-            const telefone = document.getElementById('telefone').value;
-            const termos = document.getElementById('termos').checked;
+    // Validação rápida primeiro (sem esperar nada)
+    const nome = document.getElementById('nome').value.trim();
+    const cpf = document.getElementById('cpf').value.replace(/\D/g, '');
+    const email = document.getElementById('email').value.trim();
+    
+    if (!nome || !cpf || !email) {
+        mostrarMensagem('Preencha todos os campos obrigatórios', 'error');
+        return;
+    }
 
-            if (!nome) {
-                mostrarMensagem('Por favor, preencha seu nome completo', 'error');
-                return;
-            }
-
-            if (!dataNascimento) {
-                mostrarMensagem('Por favor, informe sua data de nascimento', 'error');
-                return;
-            }
-
-            if (!cpf || !validarCPF(cpf)) {
-                mostrarMensagem('CPF inválido', 'error');
-                return;
-            }
-
-            if (!email || !validarEmail(email)) {
-                mostrarMensagem('Email inválido', 'error');
-                return;
-            }
-
-            if (!telefone || telefone.replace(/\D/g, '').length < 10) {
-                mostrarMensagem('Telefone inválido', 'error');
-                return;
-            }
-
-            if (!termos) {
-                mostrarMensagem('Você deve aceitar os termos para continuar', 'error');
-                return;
-            }
-
-            // Desabilitar botão
-            const btn = document.getElementById('btnEnviar');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="loading-spinner" style="display: inline-block; width: 20px; height: 20px; margin-right: 10px;"></span> Enviando...';
-
-            try {
-                // Verificar se já existe solicitação pendente com este CPF ou email
-                const solicitacoesRef = collection(window.db, "solicitacoes_cadastro");
-                
-                // Verificar CPF
-                const qCpf = query(solicitacoesRef, where("cpf", "==", cpf));
-                const cpfSnapshot = await getDocs(qCpf);
-                
-                if (!cpfSnapshot.empty) {
-                    const solicitacaoExistente = cpfSnapshot.docs[0].data();
-                    if (solicitacaoExistente.status === 'pendente') {
-                        mostrarMensagem('Já existe uma solicitação pendente com este CPF. Aguarde a análise.', 'info');
-                        btn.disabled = false;
-                        btn.innerHTML = 'Enviar Solicitação de Cadastro';
-                        return;
-                    }
-                }
-                
-                // Verificar email
-                const qEmail = query(solicitacoesRef, where("email", "==", email));
-                const emailSnapshot = await getDocs(qEmail);
-                
-                if (!emailSnapshot.empty) {
-                    const solicitacaoExistente = emailSnapshot.docs[0].data();
-                    if (solicitacaoExistente.status === 'pendente') {
-                        mostrarMensagem('Já existe uma solicitação pendente com este email. Aguarde a análise.', 'info');
-                        btn.disabled = false;
-                        btn.innerHTML = 'Enviar Solicitação de Cadastro';
-                        return;
-                    }
-                }
-
-                // Verificar se já é membro
-                const membrosRef = collection(window.db, "membros");
-                const qMembroCpf = query(membrosRef, where("cpf", "==", cpf));
-                const membroCpfSnapshot = await getDocs(qMembroCpf);
-                
-                if (!membroCpfSnapshot.empty) {
-                    mostrarMensagem('Você já é membro da igreja! Faça login com seu CPF e data de nascimento.', 'info');
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 3000);
-                    return;
-                }
-
-                // Preparar dados da solicitação
-                const dadosSolicitacao = {
-                    nome: nome,
-                    apelido: document.getElementById('apelido').value.trim(),
-                    dataNascimento: dataNascimento,
-                    cpf: cpf,
-                    estadoCivil: document.getElementById('estadoCivil').value,
-                    email: email,
-                    telefone: telefone.replace(/\D/g, ''),
-                    profissao: document.getElementById('profissao').value.trim(),
-                    endereco: document.getElementById('endereco').value.trim(),
-                    bairro: document.getElementById('bairro').value.trim(),
-                    cidade: document.getElementById('cidade').value.trim(),
-                    estado: document.getElementById('estado').value,
-                    cep: document.getElementById('cep').value.replace(/\D/g, ''),
-                    dataConversao: document.getElementById('dataConversao').value,
-                    dataBatismo: document.getElementById('dataBatismo').value,
-                    ministerio: document.getElementById('ministerio').value,
-                    observacoes: document.getElementById('observacoes').value.trim(),
-                    foto: fotoBase64 || null,
-                    status: 'pendente',
-                    dataSolicitacao: new Date().toISOString(),
-                    origem: 'cadastro_externo'
-                };
-
-                // Salvar no Firebase
-                const docRef = await addDoc(collection(window.db, "solicitacoes_cadastro"), dadosSolicitacao);
-                
-                console.log('Solicitação enviada com ID:', docRef.id);
-                
-                // Mostrar mensagem de sucesso
-                mostrarMensagem('✅ Solicitação enviada com sucesso! Aguarde a análise da secretaria.', 'success');
-                
-                // Limpar formulário
-                document.getElementById('cadastroForm').reset();
-                removerFoto();
-                
-                // Redirecionar após 3 segundos
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 3000);
-
-            } catch (error) {
-                console.error('Erro ao enviar solicitação:', error);
-                mostrarMensagem('Erro ao enviar solicitação: ' + error.message, 'error');
-                btn.disabled = false;
-                btn.innerHTML = 'Enviar Solicitação de Cadastro';
-            }
+    // Desabilitar botão IMEDIATAMENTE
+    const btn = document.getElementById('btnEnviar');
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Enviando...';
+    
+    try {
+        // 1. FAZER TODAS AS VERIFICAÇÕES EM PARALELO (mais rápido)
+        const [cpfExiste, emailExiste, membroExiste] = await Promise.all([
+            verificarExistencia('cpf', cpf),
+            verificarExistencia('email', email),
+            verificarMembroExistente(cpf)
+        ]);
+        
+        // 2. Verificar resultados
+        if (cpfExiste) {
+            mostrarMensagem('Já existe solicitação pendente com este CPF', 'info');
+            btn.disabled = false;
+            btn.innerHTML = 'Enviar Solicitação de Cadastro';
+            return;
+        }
+        
+        if (emailExiste) {
+            mostrarMensagem('Já existe solicitação pendente com este email', 'info');
+            btn.disabled = false;
+            btn.innerHTML = 'Enviar Solicitação de Cadastro';
+            return;
+        }
+        
+        if (membroExiste) {
+            mostrarMensagem('Você já é membro da igreja!', 'info');
+            setTimeout(() => window.location.href = 'index.html', 2000);
+            return;
+        }
+        
+        // 3. Coletar dados (operação rápida local)
+        const dadosSolicitacao = {
+            nome: nome,
+            apelido: document.getElementById('apelido').value.trim() || '',
+            dataNascimento: converterDataParaISO(document.getElementById('dataNascimento').value),
+            cpf: cpf,
+            estadoCivil: document.getElementById('estadoCivil').value || '',
+            email: email,
+            telefone: document.getElementById('telefone').value.replace(/\D/g, ''),
+            profissao: document.getElementById('profissao').value.trim() || '',
+            endereco: document.getElementById('endereco').value.trim() || '',
+            bairro: document.getElementById('bairro').value.trim() || '',
+            cidade: document.getElementById('cidade').value.trim() || '',
+            estado: document.getElementById('estado').value || '',
+            cep: document.getElementById('cep').value.replace(/\D/g, '') || '',
+            dataConversao: converterDataParaISO(document.getElementById('dataConversao').value),
+            dataBatismo: converterDataParaISO(document.getElementById('dataBatismo').value),
+            ministerio: document.getElementById('ministerio').value || '',
+            observacoes: document.getElementById('observacoes').value.trim() || '',
+            foto: fotoBase64 || null,
+            status: 'pendente',
+            dataSolicitacao: new Date().toISOString(),
+            origem: 'cadastro_externo'
         };
 
+        // 4. Salvar (única operação no Firebase)
+        await addDoc(collection(window.db, "solicitacoes_cadastro"), dadosSolicitacao);
+        
+        // 5. Sucesso - resposta rápida
+        mostrarMensagem('✅ Solicitação enviada!', 'success');
+        
+        // Limpar formulário em background (não bloqueia)
+        setTimeout(() => {
+            document.getElementById('cadastroForm').reset();
+            removerFoto();
+            window.location.href = 'index.html';
+        }, 100);
+
+    } catch (error) {
+        console.error('Erro:', error);
+        mostrarMensagem('Erro ao enviar: ' + error.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = 'Enviar Solicitação de Cadastro';
+    }
+};
+
+// Funções auxiliares otimizadas
+async function verificarExistencia(campo, valor) {
+    try {
+        const q = query(
+            collection(window.db, "solicitacoes_cadastro"), 
+            where(campo, "==", valor),
+            where("status", "==", "pendente")
+        );
+        const snapshot = await getDocs(q);
+        return !snapshot.empty;
+    } catch (e) {
+        console.log(`Erro verificar ${campo}:`, e);
+        return false; // Assume que não existe em caso de erro
+    }
+}
+
+async function verificarMembroExistente(cpf) {
+    try {
+        const q = query(
+            collection(window.db, "membros"), 
+            where("cpf", "==", cpf)
+        );
+        const snapshot = await getDocs(q);
+        return !snapshot.empty;
+    } catch (e) {
+        return false;
+    }
+}
         // Prevenir envio do form com Enter
         document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
             }
         });
+        function isOnline() {
+    return navigator.onLine;
+}
+
+// Mostrar aviso se estiver offline
+document.addEventListener('offline', () => {
+    mostrarMensagem('Você está offline. Verifique sua conexão.', 'error');
+});
+
+// Máscara para campo de data (DD/MM/AAAA)
+function formatarData(input) {
+    let value = input.value.replace(/\D/g, ''); // Remove tudo que não é dígito
+    
+    // Limita a 8 dígitos (DDMMAAAA)
+    if (value.length > 8) {
+        value = value.slice(0, 8);
+    }
+    
+    // Aplica a máscara
+    if (value.length > 4) {
+        value = value.replace(/^(\d{2})(\d{2})(\d{0,4})$/, '$1/$2/$3');
+    } else if (value.length > 2) {
+        value = value.replace(/^(\d{2})(\d{0,2})$/, '$1/$2');
+    }
+    
+    input.value = value;
+}
+
+// Função para validar data (opcional - pode usar depois)
+function validarData(dataStr) {
+    if (!dataStr) return true; // Campo opcional
+    
+    // Remove as barras e verifica se tem 8 dígitos
+    const numeros = dataStr.replace(/\D/g, '');
+    if (numeros.length !== 8) return false;
+    
+    const dia = parseInt(numeros.substring(0, 2));
+    const mes = parseInt(numeros.substring(2, 4));
+    const ano = parseInt(numeros.substring(4, 8));
+    
+    // Validação básica
+    if (dia < 1 || dia > 31) return false;
+    if (mes < 1 || mes > 12) return false;
+    if (ano < 1900 || ano > 2100) return false;
+    
+    // Validação específica por mês
+    const ultimoDia = new Date(ano, mes, 0).getDate();
+    if (dia > ultimoDia) return false;
+    
+    return true;
+}
+
+// Função para converter data brasileira para ISO (YYYY-MM-DD)
+function converterDataParaISO(dataStr) {
+    if (!dataStr) return '';
+    const partes = dataStr.split('/');
+    if (partes.length === 3) {
+        return `${partes[2]}-${partes[1]}-${partes[0]}`;
+    }
+    return dataStr;
+}
+
+// Função para converter ISO para data brasileira (DD/MM/AAAA)
+function converterISOParaDataBR(dataISO) {
+    if (!dataISO) return '';
+    if (dataISO.includes('-')) {
+        const partes = dataISO.split('-');
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+    return dataISO;
+}
     </script>
 </body>
 </html>
