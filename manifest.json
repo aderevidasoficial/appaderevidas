@@ -1,129 +1,184 @@
 {
-  "name": "AdereVidas",
+  "name": "AdereVidas - App da Igreja",
   "short_name": "AdereVidas",
   "description": "App oficial da Igreja AdereVidas. Acompanhe eventos, leia a Bíblia, faça pedidos de oração e gerencie suas contribuições.",
-  "start_url": "app.html",
+  "start_url": "/app.html",
   "display": "standalone",
-  "display_override": ["standalone", "window-controls-overlay"],
+  "display_override": ["standalone", "window-controls-overlay", "fullscreen"],
   "background_color": "#2c3e50",
   "theme_color": "#3498db",
   "orientation": "portrait",
   "scope": "/",
   "lang": "pt-BR",
   "dir": "ltr",
-  "categories": ["religion", "social", "lifestyle"],
+  "categories": ["religion", "social", "lifestyle", "utilities"],
   "prefer_related_applications": false,
-  "related_applications": [],
   
   "icons": [
     {
-      "src": "/android/launchericon-48x48.png",
-      "sizes": "48x48",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/android/launchericon-72x72.png",
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
       "sizes": "72x72",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/android/launchericon-96x96.png",
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
       "sizes": "96x96",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/android/launchericon-144x144.png",
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
       "sizes": "144x144",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/android/launchericon-192x192.png",
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/android/launchericon-512x512.png",
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
 
-  "shortcuts": [
-    {
-      "name": "Eventos",
-      "short_name": "Eventos",
-      "description": "Ver eventos da igreja",
-      "url": "app.html?screen=eventos",
-      "icons": [
-        {
-          "src": "/android/launchericon-192x192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Bíblia",
-      "short_name": "Bíblia",
-      "description": "Ler a Bíblia",
-      "url": "app.html?screen=biblia",
-      "icons": [
-        {
-          "src": "/android/launchericon-192x192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Aniversariantes",
-      "short_name": "Aniversários",
-      "description": "Ver aniversariantes",
-      "url": "app.html?screen=aniversariantes",
-      "icons": [
-        {
-          "src": "/android/launchericon-192x192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Oração",
-      "short_name": "Oração",
-      "description": "Pedidos de oração",
-      "url": "app.html?screen=oracao",
-      "icons": [
-        {
-          "src": "/android/launchericon-192x192.png",
-          "sizes": "192x192"
-        }
-      ]
-    }
-  ],
-
   "screenshots": [
     {
-      "src": "/screenshots/home.png",
+      "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "platform": "wide",
       "label": "Tela inicial do app com eventos e versículo do dia"
-    },
-    {
-      "src": "/screenshots/calendar.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "platform": "wide",
-      "label": "Calendário de eventos da igreja"
     }
   ],
 
+  "shortcuts": [
+    {
+      "name": "📅 Eventos",
+      "short_name": "Eventos",
+      "description": "Ver eventos da igreja",
+      "url": "/app.html?screen=eventos",
+      "icons": [
+        {
+          "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "📖 Bíblia",
+      "short_name": "Bíblia",
+      "description": "Ler a Bíblia",
+      "url": "/app.html?screen=biblia",
+      "icons": [
+        {
+          "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "🎂 Aniversariantes",
+      "short_name": "Aniversários",
+      "description": "Ver aniversariantes",
+      "url": "/app.html?screen=aniversariantes",
+      "icons": [
+        {
+          "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "🙏 Oração",
+      "short_name": "Oração",
+      "description": "Pedidos de oração",
+      "url": "/app.html?screen=oracao",
+      "icons": [
+        {
+          "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "💰 Dízimos",
+      "short_name": "Dízimos",
+      "description": "Meus dízimos",
+      "url": "/app.html?screen=dizimos",
+      "icons": [
+        {
+          "src": "https://i.ibb.co/1G3ctD9b/logo-igreja.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+
+  "related_applications": [],
+  
   "handle_links": "preferred",
+  
   "launch_handler": {
     "client_mode": ["navigate-existing", "auto"]
-  }
+  },
+
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+
+  "protocol_handlers": [
+    {
+      "protocol": "web+aderevidas",
+      "url": "/app.html?action=%s"
+    }
+  ],
+
+  "share_target": {
+    "action": "/compartilhar.html",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+
+  "note_taking": {
+    "new_note_url": "/app.html?screen=oracao&action=new"
+  },
+
+  "file_handlers": [
+    {
+      "action": "/importar.html",
+      "accept": {
+        "text/csv": [".csv"],
+        "application/json": [".json"]
+      }
+    }
+  ]
 }

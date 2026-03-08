@@ -3238,6 +3238,119 @@
         window.abrirNovoPedido = abrirNovoPedido;
         window.orar = orar;
         window.carregarPedidos = carregarPedidos;
+
+      
+// ========== FUNÇÃO PARA RECEBER NOTIFICAÇÕES DO SERVICE WORKER ==========
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', event => {
+        console.log('📨 Mensagem recebida do SW:', event.data);
+        
+        if (event.data && event.data.type === 'NOTIFICATION_CLICKED') {
+            // Navegar para a tela correta quando clicar na notificação
+            if (event.data.screen) {
+                mudarTela(event.data.screen);
+            }
+        }
+    });
+}
+
+// ========== FUNÇÃO PARA SOLICITAR PERMISSÃO DE NOTIFICAÇÃO ==========
+window.solicitarNotificacoes = async function() {
+    document.getElementById('notificationPermissionModal').style.display = 'none';
+    
+    try {
+        if (!('Notification' in window)) {
+            alert('Seu navegador não suporta notificações');
+            return;
+        }
+        
+        const permission = await Notification.requestPermission();
+        
+        if (permission === 'granted') {
+            localStorage.setItem('jaPediuNotificacao', 'true');
+            localStorage.setItem('notificacoesPermitidas', 'true');
+            
+            // Registrar para push notifications (se disponível)
+            if ('PushManager' in window) {
+                const registration = await navigator.serviceWorker.ready;
+                console.log('✅ Service Worker pronto para push');
+            }
+            
+            mostrarMensagem('✅ Notificações ativadas!');
+            
+            // Enviar notificação de teste
+            setTimeout(() => {
+                if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({
+                        type: 'SEND_NOTIFICATION',
+                        notification: {
+                            titulo: '🔔 Notificações Ativadas!',
+                            mensagem: 'Agora você receberá lembretes de eventos e aniversários.',
+                            screen: 'home'
+                        }
+                    });
+                }
+            }, 1000);
+            
+        } else {
+            localStorage.setItem('jaPediuNotificacao', 'true');
+            mostrarMensagem('❌ Notificações desativadas');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        mostrarMensagem('Erro ao ativar notificações');
+    }
+};
+
+// ========== FUNÇÃO PARA VERIFICAR PERMISSÃO AO ABRIR O APP ==========
+function verificarPermissaoNotificacao() {
+    const jaPediu = localStorage.getItem('jaPediuNotificacao');
+    const permitidas = localStorage.getItem('notificacoesPermitidas');
+    
+    if (!jaPediu && 'Notification' in window) {
+        // Mostrar modal após 3 segundos
+        setTimeout(() => {
+            document.getElementById('notificationPermissionModal').style.display = 'flex';
+        }, 3000);
+    } else if (permitidas === 'true' && Notification.permission === 'granted') {
+        console.log('✅ Notificações já ativas');
+        iniciarVerificacoes();
+    }
+}
+
+// ========== FUNÇÃO PARA ENVIAR NOTIFICAÇÃO DE TESTE ==========
+window.enviarNotificacaoTeste = function() {
+    if (Notification.permission !== 'granted') {
+        alert('Permissão de notificação não concedida');
+        return;
+    }
+    
+    if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+            type: 'SEND_NOTIFICATION',
+            notification: {
+                titulo: '🔔 Notificação de Teste',
+                mensagem: 'Esta é uma notificação de teste do AdereVidas!',
+                screen: 'home',
+                link: '/app.html'
+            }
+        });
+        
+        mostrarMensagem('✅ Notificação de teste enviada!');
+    } else {
+        // Fallback para Notification API
+        new Notification('🔔 AdereVidas', {
+            body: 'Notificação de teste!',
+            icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png'
+        });
+    }
+};
+
+// Chamar verificação ao carregar
+document.addEventListener('DOMContentLoaded', function() {
+    verificarPermissaoNotificacao();
+});
+
     </script>
 </body>
 </html>
