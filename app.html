@@ -52,16 +52,25 @@
     <script>
         // REGISTRO DO SERVICE WORKER
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(function(registration) {
-                        console.log('✅ Service Worker registrado!');
-                    })
-                    .catch(function(error) {
-                        console.log('❌ Erro ao registrar Service Worker:', error);
-                    });
-            });
-        }
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('/service-worker.js');
+      console.log('✅ Service Worker registrado:', registration);
+      
+      // Verificar se já tem permissão
+      if (Notification.permission === 'granted') {
+        console.log('✅ Notificações permitidas');
+      } else if (Notification.permission !== 'denied') {
+        // Perguntar permissão
+        const permission = await Notification.requestPermission();
+        console.log('Permissão:', permission);
+      }
+      
+    } catch (error) {
+      console.error('❌ Erro no registro:', error);
+    }
+  });
+}
         
         // Detectar instalação
         let deferredPrompt;
