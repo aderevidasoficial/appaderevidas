@@ -498,3 +498,59 @@ self.addEventListener('fetch', event => {
 });
 
 console.log('✅ Service Worker configurado completamente!');
+// ========== MENSAGENS DO CLIENTE (ADICIONAR NO FINAL) ==========
+self.addEventListener('message', event => {
+  console.log('📨 Mensagem recebida no SW:', event.data);
+  
+  const { data, source } = event;
+  
+  if (!data || !data.type) return;
+  
+  switch (data.type) {
+    case 'SEND_NOTIFICATION':
+      // Enviar notificação para este dispositivo
+      const notificacao = data.notification;
+      
+      self.registration.showNotification(
+        notificacao.titulo || 'AdereVidas',
+        {
+          body: notificacao.mensagem || 'Nova mensagem',
+          icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+          badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+          vibrate: [200, 100, 200],
+          data: {
+            url: notificacao.link || '/app.html',
+            screen: notificacao.screen || 'home',
+            id: Date.now(),
+            timestamp: new Date().toISOString()
+          },
+          actions: [
+            {
+              action: 'open',
+              title: '🔍 Abrir'
+            },
+            {
+              action: 'close',
+              title: '❌ Fechar'
+            }
+          ],
+          requireInteraction: true
+        }
+      );
+      break;
+      
+    case 'NOTIFICATION_TEST':
+      self.registration.showNotification('🔔 Teste de Notificação', {
+        body: 'Esta é uma notificação de teste do AdereVidas',
+        icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+        badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+        vibrate: [200, 100, 200],
+        data: {
+          screen: 'home',
+          test: true
+        },
+        requireInteraction: false
+      });
+      break;
+  }
+});
