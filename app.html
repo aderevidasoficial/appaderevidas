@@ -24,7 +24,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, query, orderBy, where, doc, getDoc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        
+         import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
         const firebaseConfig = {
             apiKey: "AIzaSyD4PNzTUJ1mA3QgrxJDL8vYuzHMBhrhI04",
             authDomain: "aderevidas-da996.firebaseapp.com",
@@ -50,6 +50,150 @@
     </script>
 
     <script>
+
+        // Aguardar Firebase inicializar
+    window.addEventListener('load', async () => {
+        try {
+            // Obter messaging
+            const messaging = getMessaging(window.app);
+            
+            // Salvar no window
+            window.messaging = messaging;
+            
+            console.log('✅ Firebase Messaging inicializado');
+            
+            // Verificar permissão
+            if (Notification.permission === 'granted') {
+                await registrarTokenFCM();
+            }
+            
+            // Listener para mensagens em foreground
+            onMessage(messaging, (payload) => {
+                console.log('📨 Mensagem recebida em foreground:', payload);
+                
+                // Mostrar notificação manualmente se necessário
+                if (payload.notification) {
+                    new Notification(payload.notification.title || 'AdereVidas', {
+                        body: payload.notification.body || '',
+                        icon: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                        badge: 'https://i.ibb.co/1G3ctD9b/logo-igreja.png',
+                        vibrate: [200, 100, 200],
+                        data: payload.data
+                    });
+                }
+            });
+            
+        } catch (error) {
+            console.error('❌ Erro ao inicializar messaging:', error);
+        }
+    });
+    
+    // Função para registrar token FCM
+    window.registrarTokenFCM = async function() {
+        try {
+            if (!window.messaging || !window.membroAtual) {
+                console.log('⏳ Aguardando messaging ou membro...');
+                return;
+            }
+            
+            console.log('🔑 Registrando token FCM...');
+            
+            // Gerar token
+            const token = await getToken(window.messaging, {
+                vapidKey: 'BJ7z9XQlL3Xq2xQxQxQxQxQxQxQxQxQxQxQxQxQxQxQxQxQxQxQxQxQxQxQxQxQxQ' // SUA VAPID KEY
+            });
+            
+            if (token) {
+                console.log('✅ Token FCM gerado:', token);
+                
+                // Salvar token no membro
+                const membroRef = doc(window.db, "membros", window.membroAtual.id);
+                await updateDoc(membroRef, {
+                    'permissoesApp.fcmToken': token,
+                    'permissoesApp.ultimoToken': new Date().toISOString()
+                });
+                
+                console.log('✅ Token salvo no Firebase');
+                
+                // Teste: enviar notificação para si mesmo
+                setTimeout(() => {
+                    testarNotificacaoPush();
+                }, 2000);
+                
+                return token;
+            }
+        } catch (error) {
+            console.error('❌ Erro ao registrar token:', error);
+        }
+    };
+    
+    // Função para testar notificação push
+    window.testarNotificacaoPush = async function() {
+        try {
+            const membroRef = doc(window.db, "membros", window.membroAtual.id);
+            const membroDoc = await getDoc(membroRef);
+            const token = membroDoc.data()?.permissoesApp?.fcmToken;
+            
+            if (!token) {
+                console.log('❌ Sem token FCM');
+                return;
+            }
+            
+            console.log('📤 Enviando notificação de teste...');
+            
+            // Esta chamada vai para o servidor (precisa de um backend)
+            // Por enquanto, vamos simular com service worker
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'SEND_LOCAL_NOTIFICATION',
+                    notification: {
+                        titulo: '✅ Notificação Push Ativa!',
+                        mensagem: 'Seu dispositivo está pronto para receber notificações',
+                        link: '/app.html'
+                    }
+                });
+            }
+            
+        } catch (error) {
+            console.error('Erro no teste:', error);
+        }
+    };
+    
+    // Sobrescrever a função de solicitar notificações
+    window.solicitarNotificacoes = async function() {
+        document.getElementById('notificationPermissionModal').style.display = 'none';
+        
+        try {
+            const permission = await Notification.requestPermission();
+            
+            if (permission === 'granted') {
+                localStorage.setItem('jaPediuNotificacao', 'true');
+                localStorage.setItem('notificacoesPermitidas', 'true');
+                
+                mostrarMensagem('✅ Notificações ativadas!');
+                
+                // Registrar token FCM
+                await window.registrarTokenFCM();
+                
+                // Mostrar confirmação
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({
+                        type: 'SEND_LOCAL_NOTIFICATION',
+                        notification: {
+                            titulo: '🔔 Notificações Ativadas!',
+                            mensagem: 'Agora você receberá notificações da igreja.',
+                            link: '/app.html'
+                        }
+                    });
+                }
+            } else {
+                localStorage.setItem('jaPediuNotificacao', 'true');
+                mostrarMensagem('❌ Notificações desativadas');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+        }
+    };
         // REGISTRO DO SERVICE WORKER
         if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
@@ -1091,7 +1235,7 @@
                 </div>
 
                 <div class="card">
-                    <div class="card-title">⚡ Ações Rápidaaas</div>
+                    <div class="card-title">⚡ Ações Rápidas</div>
                     <div class="grid-2">
                         <button class="action-btn" onclick="mudarTela('biblia')">
                             <span>📖</span> <small>Bíblia</small>
